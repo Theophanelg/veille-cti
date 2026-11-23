@@ -62,6 +62,15 @@ def watchlist():
     return words
 
 
+NOISE = re.compile(r"(plugin|theme|add-on|extension) for (wordpress|joomla|drupal)|wordpress (plugin|theme)|joomla (component|extension)|drupal module", re.I)
+
+
+def guess_product(desc):
+    """Déduit le produit de la description NVD quand les CPE ne sont pas encore renseignés."""
+    hits = re.findall(r"\bin (?:the )?([A-Z][\w.\-]*(?: [A-Z(][\w.\-()]*){0,5}?)(?: v?\d[\w.\-]*)? (?:before|through|prior to|versions?|up to|<=|from)\b", desc)
+    return hits[-1].strip() if hits else ""
+
+
 def match_watch(text, words):
     t = text.lower()
     for w in words:
@@ -164,7 +173,12 @@ def build_cve_item(cid, nvd, kev, ep, why, watch):
     desc = next((d["value"] for d in (nvd or {}).get("descriptions", []) if d.get("lang") == "en"), "")
     met = nvd_metrics(nvd) if nvd else None
     prods = nvd_products(nvd) if nvd else []
-    vendor_prod = (f'{kev["vendorProject"]} {kev["product"]}' if kev else (prods[0].title() if prods else (watch or "").title())) or "Produit N/A"
+    if kev:
+        vendor_prod = f'{kev["vendorProject"]} {kev["product"]}'
+    elif prods:
+        vendor_prod = prods[0].title()
+    else:
+        vendor_prod = guess_product(desc) or (watch or "").title() or "Produit N/A"
     name = kev.get("vulnerabilityName") if kev else ""
     score = fr_num(met["score"]) if met else "N/A"
     tags = []
@@ -227,11 +241,13 @@ def main():
         vec = met["vector"]
         if "AV:N" not in vec or "PR:N" not in vec:
             continue
-        text = " ".join(nvd_products(c)) + " " + " ".join(d["value"] for d in c.get("descriptions", []) if d.get("lang") == "en")
-        w = match_watch(text, words)
+        desc = " ".join(d["value"] for d in c.get("descriptions", []) if d.get("lang") == "en")
+        if NOISE.search(desc) and cid not in kev_all:
+            continue  # plugins/thèmes de CMS : trop de bruit, sauf exploitation confirmée
+        w = match_watch(" ".join(nvd_products(c)) + " " + desc, words)
         if not w and cid not in kev_all:
             continue
-        cands[cid] = {"kev": None, "why": f"CVSS {fr_num(met['score'])}, exploitable par le réseau sans authentification, produit surveillé ({w})."}
+        cands[cid] = {"kev": None, "watch": w, "why": f"CVSS {fr_num(met['score'])}, exploitable par le réseau sans authentification, produit surveillé ({w})."}
     for cid in cands:
         if cid in nvd and cands[cid]["kev"] is None and cid in kev_all:
             cands[cid]["why"] += " Déjà au KEV."
@@ -245,7 +261,7 @@ def main():
     ep = epss(list(cands)) if cands else {}
 
     for cid, c in cands.items():
-        it = build_cve_item(cid, nvd.get(cid), c["kev"], ep.get(cid), c["why"], None)
+        it = build_cve_item(cid, nvd.get(cid), c["kev"], ep.get(cid), c["why"], c.get("watch"))
         new.append(it)
         seen.add(f"NVD:{cid}")
         if c["kev"]:
