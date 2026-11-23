@@ -47,62 +47,98 @@ def page(d, tpl):
 
 
 # ---------- fragment HTML statique pour les lecteurs RSS ----------
-def fragment(d):
-    o = [f'<p><b>TLP:CLEAR</b> · {e(d["periode"])}</p>',
-         f'<p><b>Niveau de menace : {NIV[d["niveau"]]}</b> — {e(d["justification"])}</p>',
-         "<h2>L'essentiel (BLUF)</h2><ul>"]
-    o += [f'<li>{PRIO.get(b["p"], "")} <b>{e(b["sujet"])} :</b> {e(b["texte"])}</li>' for b in d["bluf"]]
-    o.append("</ul><h2>Vulnérabilités</h2>")
-    if d.get("alertes"):
-        o.append(f'<p><i>{e(d["alertes"])}</i></p>')
+LVL_EMO = ["🟢", "🟡", "🟠", "🔴"]
+MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+JOURS = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."]
+
+
+def short_title(day, d):
+    y, m, j = map(int, day[:10].split("-"))
+    dt = datetime.date(y, m, j)
+    hm = day[11:15]
+    when = f"{JOURS[dt.weekday()]} {j} {MOIS[m - 1]}" + (f" ({hm[:2]}h{hm[2:]})" if hm else "")
+    sujets = [re.sub(r"\s*\(.*?\)", "", b["sujet"]).split(",")[0].strip() for b in d["bluf"][:3]]
+    return f'{LVL_EMO[d["niveau"]]} {NIV[d["niveau"]]} · {when} — {", ".join(sujets)}'
+
+
+def fragment(d, day=""):
+    """HTML simple et aéré pour les lecteurs RSS (NetNewsWire, Obsidian…) : pas de CSS, balises sémantiques."""
+    lien = f"{BASE}#{day}" if day else BASE
+    o = [f'<p><strong>{LVL_EMO[d["niveau"]]} Niveau {NIV[d["niveau"]]}</strong> — {e(d["justification"])}</p>',
+         f'<p><small>TLP:CLEAR · {e(d["periode"])}<br><a href="{lien}">Ouvrir dans l\'interface →</a></small></p>',
+         "<h2>L'essentiel</h2><ul>"]
+    o += [f'<li>{PRIO.get(b["p"], "")[:2]} <strong>{e(b["sujet"])}</strong> — {e(b["texte"])}</li>' for b in d["bluf"]]
+    o.append("</ul>")
+
+    if d["vulns"]:
+        o.append("<hr><h2>Vulnérabilités</h2>")
+        if d.get("alertes"):
+            o.append(f'<p><em>{e(d["alertes"])}</em></p>')
     for v in d["vulns"]:
         o.append(f'<h3>{PRIO.get(v["prio"], "")} · {e(v["titre"])}</h3>')
-        o.append(f'<p><code>{e(", ".join(v["cves"]))}</code> · CVSS <b>{e(v["cvss"])}</b> ({e(v["cvssv"])}) · '
-                 f'EPSS {e(v["epss"])}{" (p" + e(v["pct"]) + ")" if v.get("pct") else ""} · '
-                 f'KEV {"<b>oui</b>" if v.get("kev") else "non"} · Exploitation : {e(v["exploit"])} · PoC : {e(v["poc"])}</p>')
-        o.append(f'<p><b>Produit :</b> {e(v["produit"])}<br><b>Type :</b> {e(v["type"])}<br><b>Correctif :</b> {e(v["correctif"])}</p>')
+        ids = ", ".join(f'<a href="https://nvd.nist.gov/vuln/detail/{e(c)}">{e(c)}</a>' for c in v["cves"]) or "Pas de CVE"
+        expl = "oui" if str(v.get("exploit", "")).lower().startswith("oui") else e(v.get("exploit", "N/A"))
+        o.append(f'<p>{ids}<br><strong>CVSS</strong> {e(v["cvss"])} · <strong>EPSS</strong> {e(v["epss"])} · '
+                 f'<strong>KEV</strong> {"oui" if v.get("kev") else "non"}<br><strong>Exploitée</strong> : {expl} · '
+                 f'<strong>PoC</strong> : {e(v["poc"])}</p>')
         if v.get("quoi"):
-            for lab, k in [("Quoi ?", "quoi"), ("Comment ?", "comment"), ("Pourquoi c'est important ?", "pourquoi"),
-                           ("Détection", "detection"), ("Remédiation", "remediation")]:
-                o.append(f'<p><b>{lab}</b><br>{e(v.get(k, "N/A"))}</p>')
+            o.append(f'<p><strong>Quoi.</strong> {e(v["quoi"])}</p>')
+            o.append(f'<p><strong>Comment.</strong> {e(v["comment"])}</p>')
+            o.append(f'<p><strong>Pourquoi c\'est important.</strong> {e(v["pourquoi"])}</p>')
+            o.append(f'<blockquote><p><strong>Détecter :</strong> {e(v["detection"])}</p>'
+                     f'<p><strong>Corriger :</strong> {e(v["remediation"])}</p></blockquote>')
         elif v.get("resume"):
             o.append(f'<p>{e(v["resume"])}</p>')
-        if v.get("sources"):
-            o.append(f'<p><small>Sources : {src_html(v["sources"])}</small></p>')
-    o.append("<h2>Menaces &amp; campagnes</h2>")
+        o.append(f'<p><small><strong>Produit :</strong> {e(v["produit"])}<br><strong>Correctif :</strong> {e(v["correctif"])}'
+                 f'{"<br>Sources : " + src_html(v["sources"]) if v.get("sources") else ""}</small></p>')
+
+    if d["menaces"]:
+        o.append("<hr><h2>Menaces &amp; campagnes</h2>")
     for m in d["menaces"]:
         o.append(f'<h3>{e(m["titre"])}</h3>')
         if m.get("comment") or m.get("pourquoi"):
-            for lab, k in [("Quoi ?", "quoi"), ("Comment ?", "comment"), ("Pourquoi c'est important ?", "pourquoi")]:
-                o.append(f'<p><b>{lab}</b><br>{e(m.get(k, "N/A"))}</p>')
+            o.append(f'<p><strong>Quoi.</strong> {e(m["quoi"])}</p>')
+            o.append(f'<p><strong>Comment.</strong> {e(m.get("comment", "N/A"))}</p>')
+            o.append(f'<p><strong>Pourquoi c\'est important.</strong> {e(m.get("pourquoi", "N/A"))}</p>')
         else:
             o.append(f'<p>{e(m["quoi"])}</p>')
+        extra = []
         if m.get("acteur") and m["acteur"] != "N/A":
-            o.append(f'<p><b>Attribution :</b> {e(m["acteur"])} · confiance {CONF.get(m.get("confiance", 0))}</p>')
+            extra.append(f'<strong>Attribution :</strong> {e(m["acteur"])} (confiance {CONF.get(m.get("confiance", 0))})')
         if m.get("ttps"):
-            o.append("<p><b>TTPs :</b> " + ", ".join(f'<a href="{ttp_url(t[0])}">{e(t[0])} {e(t[1])}</a>' for t in m["ttps"]) + "</p>")
-        o.append(f'<p><small>Sources : {src_html(m.get("sources"))}</small></p>')
+            extra.append("<strong>TTPs :</strong> " + ", ".join(f'<a href="{ttp_url(t[0])}">{e(t[0])}</a> {e(t[1])}' for t in m["ttps"]))
+        if m.get("sources"):
+            extra.append("Sources : " + src_html(m["sources"]))
+        if extra:
+            o.append("<p><small>" + "<br>".join(extra) + "</small></p>")
+
     rw = d["ransomware"]
-    o.append("<h2>Ransomware — France</h2><ul>")
-    o += [f'<li><b>{e(r["victime"])}</b> — {e(r["groupe"])} · {e(r["secteur"])} · {e(r["date"])} · '
-          f'<i>{e(r["statut"])}</i>. {e(r.get("note", ""))}</li>' for r in rw.get("victimes", [])] or ["<li>Aucune revendication visant la France.</li>"]
-    o.append("</ul>")
+    o.append("<hr><h2>Ransomware — France</h2>")
+    if rw.get("victimes"):
+        o.append("<ul>" + "".join(f'<li><strong>{e(r["victime"])}</strong> — {e(r["groupe"])}, {e(r["secteur"])}, {e(r["date"])}. '
+                                   f'<em>{e(r["statut"])}</em>{". " + e(r["note"]) if r.get("note") else ""}</li>'
+                                   for r in rw["victimes"]) + "</ul>")
+    else:
+        o.append("<p>Aucune revendication visant la France.</p>")
     if rw.get("tendance"):
         g = ", ".join(f"{x[0]} ({x[1]})" for x in rw.get("groupes", []))
-        o.append(f'<p>{e(rw["tendance"])} {("Groupes les plus actifs : " + e(g) + ".") if g else ""}</p>')
-    o.append("<h2>Fuites de données</h2><ul>")
-    o += [f'<li><b>{e(f["victime"])}</b> ({e(f["pays"])}) — {e(f["volume"])} · {e(f["donnees"])} · <i>{e(f["statut"])}</i>'
-          f'{" · " + src_html([f["source"]]) if f.get("source") else ""}</li>' for f in d["fuites"]]
-    o.append("</ul>")
+        o.append(f'<p><small>{e(rw["tendance"])}{(" Plus actifs : " + e(g) + ".") if g else ""}</small></p>')
+
+    if d["fuites"]:
+        o.append("<hr><h2>Fuites de données</h2><ul>")
+        o += [f'<li><strong>{e(f["victime"])}</strong> ({e(f["pays"])}) — {e(f["volume"])}. {e(f["donnees"])}. '
+              f'<em>{e(f["statut"])}</em>{" · " + src_html([f["source"]]) if f.get("source") else ""}</li>' for f in d["fuites"]]
+        o.append("</ul>")
     if d.get("iocs"):
-        o.append("<h2>IOC notables</h2><ul>")
-        o += [f'<li>{e(i["type"])} : <code>{e(i["valeur"])}</code> — {e(i["contexte"])} ({e(i["source"])})</li>' for i in d["iocs"]]
+        o.append("<hr><h2>IOC</h2><ul>")
+        o += [f'<li><code>{e(i["valeur"])}</code> — {e(i["type"])}, {e(i["contexte"])}</li>' for i in d["iocs"]]
         o.append("</ul>")
     if d.get("regl"):
-        o.append("<h2>Réglementaire &amp; institutionnel</h2><ul>" + "".join(f"<li>{e(r)}</li>" for r in d["regl"]) + "</ul>")
+        o.append("<hr><h2>Réglementaire</h2><ul>" + "".join(f"<li>{e(r)}</li>" for r in d["regl"]) + "</ul>")
     if d.get("lab"):
-        o.append(f'<h2>À creuser</h2><p><b>Concept :</b> {e(d["lab"]["concept"])}</p><p><b>Piste de lab :</b> {e(d["lab"]["piste"])}</p>')
-    o.append(f'<hr><p><small>Sources consultées : {e(d.get("consultees", ""))}. Indisponibles : {e(d.get("indispo", "aucune"))}.</small></p>')
+        o.append(f'<hr><h2>À creuser</h2><p><strong>Concept.</strong> {e(d["lab"]["concept"])}</p>'
+                 f'<blockquote><p><strong>Piste de lab :</strong> {e(d["lab"]["piste"])}</p></blockquote>')
+    o.append(f'<hr><p><small>Sources consultées : {e(d.get("consultees", ""))}.<br>Indisponibles : {e(d.get("indispo", "aucune"))}.</small></p>')
     return "\n".join(o)
 
 
@@ -190,12 +226,12 @@ def main():
         y, m, j = map(int, day[:10].split("-"))
         hm = day[11:15] if len(day) >= 15 else "0635"
         pub = format_datetime(datetime.datetime(y, m, j, int(hm[:2]), int(hm[2:]), tzinfo=PARIS))
-        url = f"{BASE}bulletins/{day}.html"
+        url = f"{BASE}#{day}"
         desc = f'Niveau {NIV[d["niveau"]]} — {d["justification"]}'
-        rss += ["<item>", f"<title>{e('Bulletin CTI — ' + d['date'] + ' · Niveau ' + NIV[d['niveau']])}</title>",
+        rss += ["<item>", f"<title>{e(short_title(day, d))}</title>",
                 f"<link>{url}</link>", f'<guid isPermaLink="true">{url}</guid>', f"<pubDate>{pub}</pubDate>",
                 f"<description>{e(desc)}</description>",
-                "<content:encoded><![CDATA[" + fragment(d).replace("]]>", "]]&gt;") + "]]></content:encoded>", "</item>"]
+                "<content:encoded><![CDATA[" + fragment(d, day).replace("]]>", "]]&gt;") + "]]></content:encoded>", "</item>"]
     rss += ["</channel>", "</rss>", ""]
     (ROOT / "feed.xml").write_text("\n".join(rss), encoding="utf-8")
 
