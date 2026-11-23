@@ -1,0 +1,44 @@
+name: CVE critiques
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/critique.py"
+      - "critique/watchlist.txt"
+      - ".github/workflows/critique.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: critique
+  cancel-in-progress: false
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Récupérer les nouvelles CVE critiques
+        run: python3 scripts/critique.py
+      - name: Publier si quelque chose a changé
+        run: |
+          git config user.name "veille-cti-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # On ne publie que si une alerte a été ajoutée (évite un commit toutes les 20 min)
+          if [ -z "$(git status --porcelain critique/items.json)" ]; then echo "Aucune nouvelle alerte"; exit 0; fi
+          git add critique.xml critique/items.json critique/state.json
+          git commit -m "CVE critiques : mise à jour du flux"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin main && exit 0
+            sleep 10
+          done
+          exit 1

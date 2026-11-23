@@ -1,0 +1,74 @@
+# Produits et éditeurs surveillés (un mot-clé par ligne, insensible à la casse).
+# Une CVE CVSS >= 9, exploitable par le réseau sans authentification, entre dans le flux
+# si l'un de ces mots apparaît dans son éditeur, son produit (CPE) ou sa description.
+# Les ajouts au KEV et les alertes CERT-FR entrent toujours, quelle que soit cette liste.
+microsoft
+windows
+exchange
+sharepoint
+azure
+entra
+cisco
+fortinet
+fortios
+fortigate
+fortiweb
+fortimanager
+palo alto
+pan-os
+globalprotect
+ivanti
+citrix
+netscaler
+vmware
+vcenter
+esxi
+f5
+big-ip
+juniper
+sonicwall
+check point
+watchguard
+zyxel
+sophos
+barracuda
+apache
+tomcat
+struts
+log4j
+nginx
+openssh
+openssl
+php
+react
+next.js
+node.js
+spring
+jenkins
+gitlab
+github
+atlassian
+confluence
+jira
+oracle
+weblogic
+sap
+netweaver
+linux kernel
+veeam
+connectwise
+screenconnect
+moveit
+solarwinds
+beyondtrust
+zimbra
+roundcube
+wordpress core
+drupal
+redis
+elasticsearch
+kubernetes
+docker
+grafana
+synology
+qnap
