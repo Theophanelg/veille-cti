@@ -32,10 +32,20 @@ aside{background:var(--side);border-right:1px solid var(--rule);display:flex;fle
 h1{font-size:24px;line-height:1.1;margin:0 0 12px;font-weight:600;letter-spacing:-.01em}
 #q{width:100%;font:16px Geist,system-ui,sans-serif;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
 #q:focus{outline:2px solid var(--acc);outline-offset:1px}
+.filters[hidden]{display:none}
 .filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .filters button{font:13px Geist,system-ui,sans-serif;padding:6px 10px;min-height:32px;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer}
 .filters button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:10px;background:var(--card);border:1px solid var(--rule);margin-bottom:12px}
+.seg button{font:500 14px Geist,system-ui,sans-serif;min-height:38px;border:0;border-radius:7px;background:none;color:var(--mute);cursor:pointer}
+.seg button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+.seg .n{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--acc);color:#fff;font-size:12px;line-height:18px}
 .list{overflow-y:auto;flex:1;padding:0 10px 20px}
+.kind{font:600 11px Geist,system-ui,sans-serif;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid var(--rule)}
+.kind.KEV{background:var(--l3);color:#fff;border-color:transparent}
+.kind.CERT-FR{background:#1d4ed8;color:#fff;border-color:transparent}
+.tab .cveid{font:500 14px "Geist Mono",monospace;display:block}
+.tab .new{width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;margin-right:6px;vertical-align:middle}
 .week{font-size:13px;color:var(--mute);padding:14px 8px 6px;font-weight:500}
 .tab{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 8px;min-height:56px;border:0;border-radius:8px;background:none;color:var(--ink);font:inherit;cursor:pointer;position:relative}
 .tab:hover{background:var(--card)}
@@ -74,6 +84,10 @@ main{display:none}
 <aside>
 <div class="top">
 <h1>Bulletin CTI</h1>
+<div class="seg" role="tablist" id="mode">
+<button type="button" role="tab" data-m="b" aria-selected="true">Bulletins</button>
+<button type="button" role="tab" data-m="c" aria-selected="false">CVE critiques<span class="n" id="ncrit" hidden></span></button>
+</div>
 <input id="q" type="search" placeholder="Rechercher : CVE, produit, acteur…" autocomplete="off" aria-label="Rechercher dans les bulletins">
 <div class="filters" id="filters">
 <button type="button" data-f="all" aria-pressed="true">Tous</button>
@@ -100,38 +114,96 @@ const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 const $=id=>document.getElementById(id);
 const dt=id=>{const [y,m,d]=id.slice(0,10).split('-').map(Number);return new Date(y,m-1,d)};
 const monday=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
-let filter='all',sel=null;
+let filter='all',sel=null,mode='b',C=[];
+const H=id=>id.replace(/[^A-Za-z0-9-]/g,'-');
+const fmtDay=d=>`${J[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`;
+const cInfo=c=>{
+ const ref=c.id.split(':').pop();
+ const after=(c.title.split(' — ')[1]||'');
+ const prod=after.split(' · ')[0];
+ const cv=(c.title.match(/CVSS ([\d,]+)/)||[])[1];
+ return {ref,prod,cv,d:new Date(c.date)};
+};
+const SRC_CSS=`:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--acc:#ff4f00}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Geist,system-ui,sans-serif}
+.w{max-width:820px;margin:0 auto;padding:28px max(4vw,16px) 48px}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;letter-spacing:-.01em;margin:0 0 10px;font-weight:600}
+.meta{color:var(--mute);font-size:14px;margin-bottom:18px;display:flex;gap:12px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--acc);border-radius:10px;padding:18px 20px}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+blockquote{margin:14px 0;padding:10px 14px;border-left:3px solid var(--rule);background:color-mix(in srgb,var(--bg) 60%,transparent);border-radius:0 8px 8px 0}
+code{font:500 13px "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+small{color:var(--mute);font-size:14px}p{margin:0 0 12px}`;
+const showCrit=c=>{
+ const i=cInfo(c);
+ const doc=`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base target="_blank"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet"><style>${SRC_CSS}</style></head><body><div class="w"><h1>${e(c.title)}</h1><div class="meta"><span>${e(c.kind)}</span><span>Détectée le ${i.d.toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'})}</span><a href="${e(c.link)}">Source officielle →</a></div><div class="card">${c.html}</div></div></body></html>`;
+ $('view').removeAttribute('src');$('view').srcdoc=doc;
+ $('cur').textContent=i.ref;$('open').href=c.link;
+ document.title=i.ref+' — CVE critiques';
+};
 
 const render=()=>{
  const q=$('q').value.trim().toLowerCase();
- const rows=I.filter(it=>(filter==='all'||(filter==='hot'&&it.niveau>=2)||(filter==='p1'&&it.p1>0))&&(!q||it.search.includes(q)));
- let html='',wk='';
- for(const it of rows){
-  const d=dt(it.id),w=monday(d),wl=`Semaine du ${w.getDate()} ${M[w.getMonth()]} ${w.getFullYear()}`;
-  if(wl!==wk){html+=`<div class="week">${wl}</div>`;wk=wl}
-  const hit=q&&it.cves.find(c=>c.toLowerCase().includes(q));
-  html+=`<button type="button" class="tab ${it.id===sel?'on':''}" data-id="${e(it.id)}"><span class="day"><small>${J[d.getDay()]}</small><b>${d.getDate()}</b></span><span class="what"><b>${e(it.edition)}</b><span>${hit?`<span class="hit">${e(hit)}</span> · `:''}${e(it.resume)}</span></span><span class="lvl l${it.niveau}">${L[it.niveau]}</span></button>`;
+ $('filters').hidden=mode!=='b';
+ let html='',grp='';
+ if(mode==='b'){
+  const rows=I.filter(it=>(filter==='all'||(filter==='hot'&&it.niveau>=2)||(filter==='p1'&&it.p1>0))&&(!q||it.search.includes(q)));
+  for(const it of rows){
+   const d=dt(it.id),w=monday(d),wl=`Semaine du ${w.getDate()} ${M[w.getMonth()]} ${w.getFullYear()}`;
+   if(wl!==grp){html+=`<div class="week">${wl}</div>`;grp=wl}
+   const hit=q&&it.cves.find(c=>c.toLowerCase().includes(q));
+   html+=`<button type="button" class="tab ${it.id===sel?'on':''}" data-id="${e(it.id)}"><span class="day"><small>${J[d.getDay()]}</small><b>${d.getDate()}</b></span><span class="what"><b>${e(it.edition)}</b><span>${hit?`<span class="hit">${e(hit)}</span> · `:''}${e(it.resume)}</span></span><span class="lvl l${it.niveau}">${L[it.niveau]}</span></button>`;
+  }
+  $('list').innerHTML=html||'<div class="empty">Aucun bulletin ne correspond.</div>';
+ }else{
+  const rows=C.filter(c=>!q||(c.title+' '+c.html).toLowerCase().includes(q));
+  const day=86400000,now=Date.now();
+  for(const c of rows){
+   const i=cInfo(c),gl=fmtDay(i.d);
+   if(gl!==grp){html+=`<div class="week">${gl}</div>`;grp=gl}
+   const hh=i.d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+   html+=`<button type="button" class="tab ${c.id===sel?'on':''}" data-c="${e(c.id)}"><span class="day"><small>${hh}</small><b style="font-size:15px">${i.cv?e(i.cv):'—'}</b></span><span class="what"><span class="cveid">${now-i.d<day?'<i class="new" aria-label="moins de 24 h"></i>':''}${e(i.ref)}</span><span>${e(i.prod)}</span></span><span class="kind ${e(c.kind)}">${e(c.kind)}</span></button>`;
+  }
+  $('list').innerHTML=html||`<div class="empty">${C.length?'Aucune alerte ne correspond.':'Chargement des alertes…'}</div>`;
  }
- $('list').innerHTML=html||'<div class="empty">Aucun bulletin ne correspond.</div>';
 };
 const open=(id,push)=>{
  const it=I.find(x=>x.id===id)||I[0]; if(!it)return;
  sel=it.id;
  const url=`bulletins/${it.id}.html`;
+ $('view').removeAttribute('srcdoc');
  if($('view').getAttribute('src')!==url)$('view').setAttribute('src',url);
  $('cur').textContent=it.date;$('open').href=url;
  document.title='Bulletin CTI — '+it.date;
  if(push&&location.hash!=='#'+it.id)history.replaceState(null,'','#'+it.id);
  render();
 };
-$('list').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;open(b.dataset.id,true);$('app').classList.add('reading')});
+const openC=(id,push)=>{
+ const c=C.find(x=>x.id===id); if(!c)return;
+ sel=c.id; showCrit(c);
+ if(push)history.replaceState(null,'','#c-'+H(c.id));
+ render();
+};
+const setMode=m=>{mode=m;for(const b of $('mode').children)b.setAttribute('aria-selected',b.dataset.m===m);$('q').placeholder=m==='b'?'Rechercher : CVE, produit, acteur…':'Rechercher : CVE, éditeur, produit…';render()};
+$('mode').addEventListener('click',ev=>{const b=ev.target.closest('button');if(b)setMode(b.dataset.m)});
+$('list').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;if(b.dataset.c)openC(b.dataset.c,true);else open(b.dataset.id,true);$('app').classList.add('reading')});
 $('back').addEventListener('click',()=>$('app').classList.remove('reading'));
 $('q').addEventListener('input',render);
 $('filters').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;filter=b.dataset.f;for(const x of $('filters').children)x.setAttribute('aria-pressed',x===b);render()});
-window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(id&&I.some(x=>x.id===id)){open(id,false);$('app').classList.add('reading')}});
-const h=location.hash.slice(1);
-open(I.some(x=>x.id===h)?h:(I[0]||{}).id,false);
-if(h&&I.some(x=>x.id===h))$('app').classList.add('reading');
+const route=()=>{
+ const h=location.hash.slice(1);
+ if(h.startsWith('c-')){const c=C.find(x=>'c-'+H(x.id)===h);if(c){setMode('c');openC(c.id,false);$('app').classList.add('reading');return true}}
+ else if(h&&I.some(x=>x.id===h)){setMode('b');open(h,false);$('app').classList.add('reading');return true}
+ return false;
+};
+window.addEventListener('hashchange',route);
+fetch('critique/items.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(d=>{
+ C=Array.isArray(d)?d:[];
+ const recent=C.filter(c=>Date.now()-new Date(c.date)<86400000).length;
+ if(recent){$('ncrit').textContent=recent;$('ncrit').hidden=false}
+ if(location.hash.startsWith('#c-'))route();else render();
+}).catch(()=>{C=[];render()});
+if(!route())open((I[0]||{}).id,false);
 }
 </script>
 </body>
