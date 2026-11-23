@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Construit le site veille-cti à partir des fichiers data/AAAA-MM-JJ.json.
 
+Fichiers acceptés : data/AAAA-MM-JJ.json ou data/AAAA-MM-JJ-HHMM.json (édition supplémentaire).
 Pour chaque bulletin : bulletins/<date>.html (page complète), bulletins/<date>.md (note Obsidian).
 Puis régénère feed.xml (30 derniers bulletins, contenu complet) et index.html (archive).
 Usage : python3 scripts/build.py
@@ -109,7 +110,7 @@ def fragment(d):
 def markdown(d, day):
     cves = sorted({c for v in d["vulns"] for c in v["cves"]})
     q = lambda s: str(s).replace('"', "'")
-    o = ["---", f"date: {day}", f'titre: "Bulletin CTI — {q(d["date"])}"', f"niveau: {NIV[d['niveau']]}",
+    o = ["---", f"date: {day[:10]}", f'titre: "Bulletin CTI — {q(d["date"])}"', f"niveau: {NIV[d['niveau']]}",
          "tlp: CLEAR", "tags: [veille-cti, bulletin]", "cves: [" + ", ".join(cves) + "]",
          f"lien: {BASE}bulletins/{day}.html", "---", "",
          f"# Bulletin CTI — {d['date']}", "",
@@ -169,7 +170,7 @@ def markdown(d, day):
 def main():
     tpl = (ROOT / "template.html").read_text(encoding="utf-8")
     items = []
-    for f in sorted((ROOT / "data").glob("????-??-??.json")):
+    for f in sorted((ROOT / "data").glob("????-??-??*.json")):
         day = f.stem
         d = json.loads(f.read_text(encoding="utf-8"))
         validate(d)
@@ -186,8 +187,9 @@ def main():
            "<description>Bulletin de veille cybersécurité quotidien : vulnérabilités exploitées, menaces, ransomware, fuites de données.</description>",
            "<language>fr-fr</language>", f"<lastBuildDate>{now}</lastBuildDate>"]
     for day, d in items[:30]:
-        y, m, j = map(int, day.split("-"))
-        pub = format_datetime(datetime.datetime(y, m, j, 6, 35, tzinfo=PARIS))
+        y, m, j = map(int, day[:10].split("-"))
+        hm = day[11:15] if len(day) >= 15 else "0635"
+        pub = format_datetime(datetime.datetime(y, m, j, int(hm[:2]), int(hm[2:]), tzinfo=PARIS))
         url = f"{BASE}bulletins/{day}.html"
         desc = f'Niveau {NIV[d["niveau"]]} — {d["justification"]}'
         rss += ["<item>", f"<title>{e('Bulletin CTI — ' + d['date'] + ' · Niveau ' + NIV[d['niveau']])}</title>",
