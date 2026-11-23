@@ -1,0 +1,595 @@
+{
+ "date": "Lundi 23 novembre 2026",
+ "periode": "ven. 20/11 07:00 → lun. 23/11 07:00 (heure de Paris)",
+ "niveau": 2,
+ "justification": "4 ajouts KEV dont un vCenter exploité par un acteur étatique présumé, échéance fédérale fixée à aujourd'hui, et un CHU français revendiqué.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "VMware vCenter (CVE-2026-123890)",
+   "texte": "contournement d'authentification exploité depuis septembre par UNC5221 (Golden SAML, vol de bases AD) ; patcher (VMSA-2026-0009) et chasser les comptes admin SSO créés."
+  },
+  {
+   "p": 1,
+   "sujet": "3 autres ajouts KEV du 20/11",
+   "texte": "Apache Roller (RCE pré-auth), Cisco Expressway (RCE root) et SAP NetWeaver EP (injection JNDI), échéance CISA au 23/11 ; vérifier l'exposition Internet aujourd'hui."
+  },
+  {
+   "p": 2,
+   "sujet": "F5 BIG-IP",
+   "texte": "5 débordements de pile critiques (CVSS 3.1 9,8) dans TMM, sans authentification et sans atténuation ; appliquer les hotfix."
+  },
+  {
+   "p": 2,
+   "sujet": "CHU de Bordeaux",
+   "texte": "revendiqué par Scarlettgroup le 22/11 (revendication non vérifiée) ; anticiper le phishing ciblant patients et personnel."
+  },
+  {
+   "p": 2,
+   "sujet": "Microsoft Entra Connect Health",
+   "texte": "fuite de métadonnées de tenants (emails d'admins) ; s'attendre à du spear-phishing ciblé et imposer une MFA résistante au phishing."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-123890"
+   ],
+   "titre": "Contournement d'authentification VMware vCenter, exploité par UNC5221",
+   "produit": "VMware vCenter Server 7.0, 8.0 < U3m, 9.0 < 9.0.2.0200, 9.1 < 9.1.1.0200 ; VCF 5.x < 5.2.5",
+   "type": "Contournement d'authentification (CWE-288)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,035",
+   "pct": "89,5",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui, UNC5221 depuis sept. 2026",
+   "correctif": "VMSA-2026-0009",
+   "quoi": "Contournement d'authentification critique dans VMware Directory Service (vmdird) de vCenter Server. VCF, Telco Cloud et SDDC Manager sont aussi touchés.",
+   "comment": "Un attaquant non authentifié ayant un accès réseau obtient une session administrator@vsphere.local. Via l'interface RPC vmdirdbcp, il exécute des commandes et récupère la base d'annuaire data.mdb.",
+   "pourquoi": "Exploitée en 0-day depuis début septembre (Mandiant/GTIG). BONESAW crée un compte admin SSO et vole les clés de signature SAML ; SAWSNAKE forge des jetons (Golden SAML : jetons forgés qui contournent la MFA), puis l'attaquant atteint ESXi et les bases AD des VM.",
+   "detection": "Comptes ajoutés au domaine SSO vsphere.local ; accès inhabituels à vmdird ou copie de data.mdb ; connexions SAML sans émission côté IdP ; webshells et backdoors SLIMSAVAGE, CAGEMATCH, BEARBONES, LAZYBONES.",
+   "remediation": "VMSA-2026-0009 (8.0 U3m, 9.0.2.0200, 9.1.1.0200, VCF 5.2.5). Pas de contournement : restreindre l'accès réseau à vCenter. Si compromis : rotation des certificats et clés SSO. Échéance KEV : 23/11.",
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-123890"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-129448"
+   ],
+   "titre": "RCE pré-authentification Apache Roller, exploitée activement",
+   "produit": "Apache Roller 4.0.0 → 6.1.4",
+   "type": "Désérialisation XML-RPC → RCE (CWE-502)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,055",
+   "pct": "92,9",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV + Apache)",
+   "correctif": "6.1.6+",
+   "quoi": "Désérialisation de données non fiables dans Apache Roller, un moteur de blog Java.",
+   "comment": "L'endpoint XML-RPC désérialise les types d'extension vendor avant d'authentifier l'appelant : une requête HTTP non authentifiée suffit pour exécuter du code.",
+   "pourquoi": "Apache et la CISA confirment l'exploitation. Les instances Roller sont exposées sur Internet par nature, et désactiver XML-RPC dans l'interface d'admin ne protège pas.",
+   "detection": "POST vers /roller-services/xmlrpc avec balises d'extension sérialisées ; processus enfants (sh, bash, curl, wget) lancés par la JVM Tomcat.",
+   "remediation": "Passer en 6.1.6+. Sinon enabledForExtensions=false dans WEB-INF/web.xml (ou retirer le mapping /roller-services/xmlrpc), puis redémarrer. Échéance KEV : 23/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-129448"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-76466"
+   ],
+   "titre": "Identifiants codés en dur Cisco Expressway menant à une RCE root, exploités",
+   "produit": "Cisco Expressway Core/Edge jusqu'à X15.5.3",
+   "type": "Identifiants codés en dur → RCE root (CWE-798)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,022",
+   "pct": "82,9",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV)",
+   "correctif": "Avis Cisco",
+   "quoi": "Identifiants codés en dur dans Cisco Expressway Core et Edge ; toutes les branches jusqu'à X15.5.3 selon la NVD.",
+   "comment": "Cookies persistants et certificat client mal validé quand TLS Verify Mode est actif pour le clustering : l'attaquant atteint le service de base de données, appelle des commandes RPC et exécute des commandes OS en root.",
+   "pourquoi": "Expressway Edge est placé en DMZ pour la visioconférence, donc exposé à Internet. Avis du 21/10 ; l'ajout au KEV le 20/11 confirme l'exploitation.",
+   "detection": "Connexions au service de base de données du cluster depuis des IP hors cluster ; nouveaux comptes, tâches ou binaires sur l'appliance. Pas de règle publique identifiée.",
+   "remediation": "Version corrigée de l'avis Cisco ; filtrer les ports de clustering aux seuls pairs. Échéance KEV : 23/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-76466"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2025-42884"
+   ],
+   "titre": "Injection JNDI SAP NetWeaver Enterprise Portal, nouvellement exploitée",
+   "produit": "SAP NetWeaver EP-BASIS / EP-RUNTIME 7.50",
+   "type": "Injection JNDI (CWE-943)",
+   "cvss": "6,5",
+   "cvssv": "3.1",
+   "epss": "0,007",
+   "pct": "54,6",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 20/11)",
+   "correctif": "Correctif SAP nov. 2025",
+   "quoi": "Injection de propriétés JNDI dans SAP NetWeaver Enterprise Portal. Corrigée en novembre 2025 : l'élément nouveau est l'entrée au KEV le 20/11/2026.",
+   "comment": "Un attaquant non authentifié injecte des propriétés JNDI ou une URL de lookup (JNDI : API Java de résolution de noms et d'annuaires) ; le serveur interroge un fournisseur choisi par l'attaquant.",
+   "pourquoi": "Impact déclaré limité (lecture et modification d'informations serveur), mais exploitée sur des portails souvent exposés : P1 malgré un CVSS moyen.",
+   "detection": "Paramètres contenant ldap://, rmi:// ou dns:// dans les logs HTTP/ICM ; connexions LDAP ou RMI sortantes depuis le serveur SAP.",
+   "remediation": "Note SAP de novembre 2025 (numéro N/A dans les sources) ; bloquer LDAP et RMI sortants. Échéance KEV : 23/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2025-42884"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-121805",
+    "CVE-2026-120292",
+    "CVE-2026-120285",
+    "CVE-2026-116953",
+    "CVE-2026-123637"
+   ],
+   "titre": "F5 BIG-IP : 5 débordements de pile dans TMM",
+   "produit": "F5 BIG-IP 17.1 / 17.5 / 21.1 et BIG-IP Next (K8s, CNF)",
+   "type": "Débordement de pile TMM via iRules ou politique APM → DoS / RCE",
+   "cvss": "9,8",
+   "cvssv": "3.1 · 9,3 en 4.0",
+   "epss": "0,007–0,008",
+   "pct": "55–57",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "Hotfix F5 K000163937 à K000163946",
+   "resume": "iRules concernées : PEM::subscriber, MR::message, PSC::ip_address, GENERICMESSAGE::route."
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-126822"
+   ],
+   "titre": "F5 BIG-IP APM en SAML SP : integer underflow",
+   "produit": "F5 BIG-IP APM configuré en SAML SP",
+   "type": "Integer underflow TMM → DoS",
+   "cvss": "7,5",
+   "cvssv": "3.1 · 8,7 en 4.0",
+   "epss": "0,005",
+   "pct": "42,6",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non",
+   "correctif": "Hotfix ingénierie K000163942"
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-132825"
+   ],
+   "titre": "« Ruby2Shell » : heap overflow d'un octet dans Ruby",
+   "produit": "Ruby < 3.3.14, 3.4 < 3.4.13, 4.0 < 4.0.10",
+   "type": "Heap overflow lors de la conversion de casse (CWE-122)",
+   "cvss": "7,4",
+   "cvssv": "3.1",
+   "epss": "0,020",
+   "pct": "81,0",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non",
+   "correctif": "3.3.14 / 3.4.13 / 4.0.10"
+  },
+  {
+   "prio": 3,
+   "cves": [
+    "CVE-2026-23871"
+   ],
+   "titre": "WhatsApp Android : fuite d'adresse IP",
+   "produit": "WhatsApp et WhatsApp Business Android 2.20.198.3 → < 2.26.17.4",
+   "type": "Validation d'URL incomplète → fuite d'IP (CWE-918)",
+   "cvss": "3,5",
+   "cvssv": "3.1",
+   "epss": "0,005",
+   "pct": "42,3",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Possible (Meta : campagne d'arnaques)",
+   "correctif": "2.26.17.4"
+  }
+ ],
+ "alertes": "Aucune nouvelle alerte CERT-FR dans la fenêtre. CERTFR-2026-ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX), publiées le 18/11, restent ouvertes. Le 20/11 : 10 avis (AVI-1589 à 1598), dont VMware, GitLab et les noyaux Linux Ubuntu, Debian, SUSE et Red Hat.",
+ "menaces": [
+  {
+   "titre": "UNC5221 : de BeyondTrust à vCenter puis ESXi",
+   "quoi": "Campagne d'espionnage passant de BeyondTrust Remote Support à vCenter, puis aux hôtes ESXi. Cibles et secteurs non précisés.",
+   "comment": "Accès initial par CVE-2026-102764 (BeyondTrust RS ≤ 26.2.3, CVSS 9,8, EPSS 0,579, KEV depuis le 16/10), puis mouvement latéral vers Linux, CVE-2026-123890 et Golden SAML. Nouveau : le lien entre les deux 0-days.",
+   "pourquoi": "Un vCenter compromis donne le contrôle de toute la virtualisation, contrôleurs de domaine compris.",
+   "acteur": "Armory Castle, alias UNC5221, étatique chinois présumé (Mandiant, « suspected »)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1136",
+     "Create Account"
+    ],
+    [
+     "T1552.004",
+     "Private Keys"
+    ],
+    [
+     "T1606.002",
+     "SAML Tokens"
+    ],
+    [
+     "T1003.003",
+     "NTDS"
+    ],
+    [
+     "T1505.003",
+     "Web Shell"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "Des agents IA Cairn trouvent et exploitent un 0-day MONAI Label",
+   "quoi": "Environ 48 h d'attaque autonome contre des universités d'Asie de l'Est, via un 0-day dans MONAI Label ≤ 0.8.5, outil d'annotation d'imagerie médicale (GHSA-qc22-rmgc-vg94, pas de CVE, CVSS N/A).",
+   "comment": "Cairn, framework open source de pentest par IA, cartographie l'API et trouve une path traversal dans l'upload en 11 minutes ; reverse shell Python exécuté au démarrage de l'interpréteur (root), puis pivot vers une seconde université via un proxy.",
+   "pourquoi": "Découverte et exploitation d'un 0-day presque sans opérateur humain. MONAI Label n'a pas d'authentification par défaut ; correctif annoncé.",
+   "acteur": "Acteur non nommé lié à la Chine (Amazon : langue des prompts, fuseau horaire, intérêt stratégique)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1595",
+     "Active Scanning"
+    ],
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1059.006",
+     "Python"
+    ],
+    [
+     "T1546",
+     "Event Triggered Execution"
+    ],
+    [
+     "T1090",
+     "Proxy"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "SecurityWeek"
+    },
+    {
+     "t": "The Record"
+    },
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "Microsoft Entra Connect Health : métadonnées de tenants exposées",
+   "quoi": "Faille de l'API introduite le 23/07 : emails des contacts techniques et admins, ID et domaines de tenant, licences, état de synchro et un certificat expiré exposés. Nombre de tenants non communiqué.",
+   "comment": "Mécanisme non détaillé. Découverte le 9/11, correctif serveur le 19/11, notifications dès le 20/11. Aucun mot de passe, jeton ou clé valide exposé selon Microsoft.",
+   "pourquoi": "Une liste d'admins cloud vérifiés sert directement au spear-phishing et aux attaques AitM (proxy qui capture la session).",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [
+    [
+     "T1589.002",
+     "Email Addresses"
+    ],
+    [
+     "T1566",
+     "Phishing"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "Rackspace Spot : secrets Kubernetes clients exposés",
+   "quoi": "Intrusion dans la plateforme cloud Rackspace Spot : workloads non autorisés déployés et secrets Kubernetes de clusters clients consultés.",
+   "comment": "Identifiants compromis (détails N/A : article complet inaccessible).",
+   "pourquoi": "Les secrets Kubernetes contiennent tokens, clés cloud et mots de passe de base : tous les clients doivent les faire tourner.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [
+    [
+     "T1078",
+     "Valid Accounts"
+    ],
+    [
+     "T1610",
+     "Deploy Container"
+    ],
+    [
+     "T1552.007",
+     "Container API"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "Bell Canada : vol de données clients entreprise par un acteur « agentique »",
+   "quoi": "Vol confirmé le 17/11, dont un système de commande de circuits télécom ; l'acteur s'appuie sur des agents IA.",
+   "pourquoi": "Compromettre un opérateur télécom expose ses clients entreprise en aval.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "N-able : panne mondiale de Mail Assure et SpamExperts après intrusion",
+   "quoi": "N-able attribue la panne à une intrusion sur un serveur, avec un risque de vol d'identifiants.",
+   "pourquoi": "Un MSP de sécurité e-mail compromis expose tous ses clients.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "BleepingComputer"
+    }
+   ]
+  },
+  {
+   "titre": "FBI : intrusion présumée dans la base NCIC (non confirmé)",
+   "quoi": "Le FBI enquête ; aucun lien établi avec ShinyHunters. Source unique, pas de déclaration publique du FBI.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "SecurityWeek"
+    }
+   ]
+  },
+  {
+   "titre": "Commission européenne : attaque assistée par IA",
+   "quoi": "Attaque confirmée qui a perturbé des services, sans fuite de données constatée.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "SecurityWeek"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [
+   {
+    "victime": "CHU de Bordeaux",
+    "groupe": "Scarlettgroup",
+    "secteur": "Santé",
+    "date": "22/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Aucune confirmation publique trouvée"
+   },
+   {
+    "victime": "Alla France",
+    "groupe": "Everest",
+    "secteur": "N/A",
+    "date": "20/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Fiche ransomware.live générée par IA, entité non vérifiée"
+   },
+   {
+    "victime": "Mairie de Chambourcy (78)",
+    "groupe": "INC Ransom",
+    "secteur": "Collectivité",
+    "date": "19/11",
+    "statut": "Confirmée",
+    "verif": true,
+    "note": "Nouveau le 23/11 : documents de la police municipale publiés (ZATAZ) ; CNIL informée, plainte déposée"
+   }
+  ],
+  "tendance": "Environ 52 victimes visibles depuis le 20/11 06:00 UTC (réponse tronquée).",
+  "groupes": [
+   [
+    "Everest",
+    10
+   ],
+   [
+    "Safepay",
+    9
+   ],
+   [
+    "PixelLeaks",
+    5
+   ],
+   [
+    "HYFLOCK",
+    3
+   ],
+   [
+    "Rhysida",
+    3
+   ]
+  ]
+ },
+ "fuites": [
+  {
+   "victime": "Seazon",
+   "pays": "FR",
+   "volume": "N/A",
+   "donnees": "Noms, adresses postales et e-mail, téléphones, commandes, mots de passe hachés, liens titres-restaurant",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "Bonjour La Fuite",
+    "u": "https://bonjourlafuite.eu.org"
+   }
+  },
+  {
+   "victime": "France Travail (attribution du vendeur)",
+   "pays": "FR",
+   "volume": "4 156 230 lignes",
+   "donnees": "État civil, coordonnées, statut de demandeur d'emploi, identifiants, NIR",
+   "statut": "Non vérifiée",
+   "verif": false,
+   "source": {
+    "t": "ZATAZ",
+    "u": "https://www.zataz.com"
+   }
+  },
+  {
+   "victime": "Groupe pharmaceutique (Servier, cité par n0n)",
+   "pays": "FR",
+   "volume": "N/A",
+   "donnees": "N/A",
+   "statut": "Non vérifiée",
+   "verif": false,
+   "source": {
+    "t": "ZATAZ",
+    "u": "https://www.zataz.com"
+   }
+  },
+  {
+   "victime": "Careers360",
+   "pays": "IN",
+   "volume": "3 609 421 comptes",
+   "donnees": "E-mails, noms, téléphones, genre, caste, résultats d'examens",
+   "statut": "HIBP 20/11",
+   "verif": true,
+   "source": {
+    "t": "HIBP",
+    "u": "https://haveibeenpwned.com/PwnedWebsites"
+   }
+  },
+  {
+   "victime": "SBC Medical Group",
+   "pays": "JP",
+   "volume": "1,6 M à plus de 2 M",
+   "donnees": "Données clients et employés",
+   "statut": "Confirmée (SEC)",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer"
+   }
+  },
+  {
+   "victime": "Too Lost",
+   "pays": "N/A",
+   "volume": "724 323 comptes",
+   "donnees": "E-mails, hachés bcrypt, 4 derniers chiffres de carte, n° de pièce d'identité",
+   "statut": "HIBP 20/11",
+   "verif": true,
+   "source": {
+    "t": "HIBP",
+    "u": "https://haveibeenpwned.com/PwnedWebsites"
+   }
+  },
+  {
+   "victime": "Bromcom",
+   "pays": "UK",
+   "volume": "355 051 comptes",
+   "donnees": "E-mails, références SSO (écoles)",
+   "statut": "HIBP 23/11",
+   "verif": true,
+   "source": {
+    "t": "HIBP",
+    "u": "https://haveibeenpwned.com/PwnedWebsites"
+   }
+  },
+  {
+   "victime": "JPMorgan Chase (via un prestataire)",
+   "pays": "US",
+   "volume": "N/A",
+   "donnees": "Données personnelles et marketing",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer"
+   }
+  },
+  {
+   "victime": "Bell Canada",
+   "pays": "CA",
+   "volume": "N/A",
+   "donnees": "Données clients entreprise",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer"
+   }
+  }
+ ],
+ "iocs": [],
+ "regl": [
+  "UE : NoName057(16) entre sur la liste des sanctions cyber du Conseil (16/11, relayé le 20/11), avec 30 personnes et 2 entités dont la Social Design Agency.",
+  "Ukraine / FBI : arrestation de 4 membres présumés d'un groupe ransomware ; un suspect de 8-Digits Team extradé d'Italie vers les États-Unis.",
+  "États-Unis : Kirsten Davies nommée National Cyber Director (21/11)."
+ ],
+ "lab": {
+  "concept": "La désérialisation non sûre (cas de CVE-2026-129448) reconstruit des objets à partir de données fournies par l'attaquant. Une gadget chain, enchaînement de classes déjà présentes dans le classpath, déclenche alors l'exécution de code.",
+  "piste": "Sur une VM isolée en host-only, déployer Apache Roller 6.1.4 sous Docker. Intercepter /roller-services/xmlrpc avec Burp Suite et générer un gadget de test avec ysoserial. Côté défense : capturer l'échange dans Wireshark, écrire une règle Suricata ou Sigma sur les POST XML-RPC contenant des types sérialisés, puis appliquer enabledForExtensions=false et vérifier que l'attaque échoue."
+ },
+ "consultees": "The Hacker News, BleepingComputer, The Record, SecurityWeek, ZATAZ, CERT-FR, CISA KEV (GitHub), NVD, FIRST EPSS, ransomware.live, HIBP, Bonjour La Fuite, SANS ISC",
+ "indispo": "The Hacker News (flux figé au 27/10), LeMagIT, Next, FrenchBreaches (site non identifié), article Rackspace (erreur serveur), ransomware.live (réponses tronquées)"
+}
