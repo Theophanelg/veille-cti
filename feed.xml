@@ -6,7 +6,68 @@
 <atom:link href="https://theophanelg.github.io/veille-cti/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Bulletin de veille cybersécurité quotidien : vulnérabilités exploitées, menaces, ransomware, fuites de données.</description>
 <language>fr-fr</language>
-<lastBuildDate>Mon, 23 Nov 2026 13:38:10 +0100</lastBuildDate>
+<lastBuildDate>Mon, 23 Nov 2026 13:51:58 +0100</lastBuildDate>
+<item>
+<title>Bulletin CTI — Lundi 23 novembre 2026 (mi-journée) · Niveau Élevé</title>
+<link>https://theophanelg.github.io/veille-cti/bulletins/2026-11-23-1340.html</link>
+<guid isPermaLink="true">https://theophanelg.github.io/veille-cti/bulletins/2026-11-23-1340.html</guid>
+<pubDate>Mon, 23 Nov 2026 13:40:00 +0100</pubDate>
+<description>Niveau Élevé — Deux exploitations actives sans CVE corrigeable classique : une RCE pré-auth dans une bibliothèque ASP.NET abandonnée (aucun correctif) et une compromission de routeurs GL.iNet via leur cloud de gestion.</description>
+<content:encoded><![CDATA[<p><b>TLP:CLEAR</b> · lun. 23/11 07:00 → 13:40 (heure de Paris)</p>
+<p><b>Niveau de menace : Élevé</b> — Deux exploitations actives sans CVE corrigeable classique : une RCE pré-auth dans une bibliothèque ASP.NET abandonnée (aucun correctif) et une compromission de routeurs GL.iNet via leur cloud de gestion.</p>
+<h2>L'essentiel (BLUF)</h2><ul>
+<li>🔴 P1 <b>Idunno.AntiCsrf (CVE-2026-131914) :</b> RCE pré-auth par désérialisation dans une bibliothèque anti-CSRF ASP.NET abandonnée depuis 2008, exploitée selon Mandiant ; aucun correctif : retirer la bibliothèque et chercher AntiCsrfModule dans Web.config.</li>
+<li>🔴 P1 <b>GL.iNet GoodCloud :</b> le service cloud a servi à exécuter du code root et poser un malware sur routeurs et KVM ; mettre à jour le firmware, réinstaller proprement et bloquer les IOC.</li>
+<li>🟠 P2 <b>Cisco Expressway (CVE-2026-76466), élément nouveau :</b> déjà traité ce matin ; nouveau : exploitation rapportée contre une organisation russe peu après la publication d&#x27;un PoC public. Échéance KEV atteinte aujourd&#x27;hui.</li>
+<li>⚪ P3 <b>CERT-In : fraudes assistées par IA :</b> détournement de workflows d&#x27;approbation de paiement dans des banques et fintechs indiennes ; surveiller les changements de RIB fournisseurs et de circuits de validation.</li>
+</ul><h2>Vulnérabilités</h2>
+<p><i>Aucune publication CERT-FR datée du 23/11 à 13:40. Dernières : CERTFR-2026-ALE-017 (F5 NGINX) et ALE-016 (Oracle Java SE) du 18/11, AVI-1598 (VMware) du 20/11. Aucun ajout CISA KEV depuis le 20/11.</i></p>
+<h3>🔴 P1 · RCE pré-authentification dans Idunno.AntiCsrf (ASP.NET), exploitée, sans correctif</h3>
+<p><code>CVE-2026-131914</code> · CVSS <b>9,3</b> (4.0 (3.1 N/A)) · EPSS 0,006 (p50,4) · KEV non · Exploitation : Oui (Mandiant, MNDT-2026-0048) · PoC : Inconnu</p>
+<p><b>Produit :</b> Idunno.AntiCsrf ≤ 0.9.1 Beta (ASP.NET / IIS)<br><b>Type :</b> Désérialisation de données non fiables → RCE (CWE-502)<br><b>Correctif :</b> Aucun (projet abandonné depuis 2008)</p>
+<p><b>Quoi ?</b><br>Désérialisation non sûre dans AntiCsrfModule, module anti-CSRF ASP.NET historique toujours présent dans des applications legacy.</p>
+<p><b>Comment ?</b><br>Le jeton CSRF du formulaire est désérialisé par ObjectStateFormatter sans clé ni vérification MAC : un seul POST avec un cookie CSRF non vide et une gadget chain en Base64 exécute du code dans w3wp.exe.</p>
+<p><b>Pourquoi c'est important ?</b><br>Exploitation active observée par Google/Mandiant, sans authentification, et aucun correctif ne viendra : seule la suppression de la bibliothèque protège.</p>
+<p><b>Détection</b><br>Chercher Idunno.AntiCsrf ou AntiCsrfModule dans Web.config et bin/ ; POST anormaux vers des .aspx renvoyant 302 ou 500 ; processus enfants (cmd, powershell) de w3wp.exe.</p>
+<p><b>Remédiation</b><br>Remplacer par System.Web.Helpers.AntiForgery, ViewStateUserKey avec ViewState signé (MAC) ou IAntiforgery d&#x27;ASP.NET Core. Si compromis : rotation machineKey, clés et identifiants BDD, audit des webroots.</p>
+<p><small>Sources : <a href="https://thehackernews.com/2026/11/hackers-exploit-critical-aspnet-anti.html">The Hacker News</a> · <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-131914">NVD</a></small></p>
+<h3>🔴 P1 · GL.iNet GoodCloud : exécution root à distance sur routeurs et KVM, exploitée (pas de CVE)</h3>
+<p><code></code> · CVSS <b>N/A</b> (N/A) · EPSS N/A (pN/A) · KEV non · Exploitation : Oui (GL.iNet, RemoteToHome) · PoC : Inconnu</p>
+<p><b>Produit :</b> Routeurs GL.iNet (GL-MT3000, MT6000, MG1300, AXT1800, AX1800…) et KVM GL-RM1/RM4PE/RMQ1 avec GoodCloud activé<br><b>Type :</b> Commande cloud exécutée en root sans contrôle<br><b>Correctif :</b> Correctif cloud (vendredi) + firmware 4.11.1 / 4.8.4 / RM 1.10.3 / RMQ1 1.8.7</p>
+<p><b>Quoi ?</b><br>Faille du service de gestion à distance GoodCloud exploitée pour installer un malware sur des routeurs et KVM clients. Nombre d&#x27;appareils, acteur et date de début : N/A.</p>
+<p><b>Comment ?</b><br>Le client GoodCloud contient un handler qui exécute en root deux valeurs reçues d&#x27;un message cloud, sans vérification (code présent depuis décembre 2024). Reverse shell root observé vers une IP externe.</p>
+<p><b>Pourquoi c'est important ?</b><br>Le correctif cloud n&#x27;efface pas le malware déjà installé. Un KVM compromis donne un accès clavier/écran aux serveurs qu&#x27;il pilote.</p>
+<p><b>Détection</b><br>Processus « crond -i /tmp/.log » ; en SSH : ps | grep tmp (routeur) ou ps -aux | grep tmp (KVM) ; trafic vers les IOC listés.</p>
+<p><b>Remédiation</b><br>Mettre à jour le firmware, puis réinstaller proprement sans garder la configuration (recommandation des chercheurs, plus prudente que l&#x27;éditeur) ; considérer les secrets stockés comme exposés ; désactiver GoodCloud si inutile.</p>
+<p><small>Sources : <a href="https://thehackernews.com/2026/11/hackers-exploited-glinet-cloud-flaw-to.html">The Hacker News</a></small></p>
+<h3>🟠 P2 · Cisco Expressway : exploitation après publication d&#x27;un PoC (élément nouveau)</h3>
+<p><code>CVE-2026-76466</code> · CVSS <b>9,8</b> (3.1) · EPSS 0,022 (p82,9) · KEV <b>oui</b> · Exploitation : Oui (KEV ; cible russe rapportée) · PoC : Oui (selon The Hacker News)</p>
+<p><b>Produit :</b> Cisco Expressway Core/Edge jusqu&#x27;à X15.5.3<br><b>Type :</b> Identifiants codés en dur → RCE root (CWE-798)<br><b>Correctif :</b> Avis Cisco</p>
+<p>Traité dans l&#x27;édition du matin (P1). Nouveau : The Hacker News rapporte une exploitation contre une organisation russe peu après la sortie d&#x27;un PoC public ; BleepingComputer relaie l&#x27;alerte CISA ce matin. Échéance KEV : aujourd&#x27;hui.</p>
+<p><small>Sources : <a href="https://www.bleepingcomputer.com/news/security/cisa-flags-critical-cisco-expressway-rce-flaw-as-actively-exploited/">BleepingComputer</a> · <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-76466">NVD</a></small></p>
+<h2>Menaces &amp; campagnes</h2>
+<h3>CERT-In : paiements frauduleux par attaques assistées par IA dans la finance indienne</h3>
+<p><b>Quoi ?</b><br>Avis CIAD-2026-0062 : transactions non autorisées dans des banques, sociétés financières et prestataires gérant des paiements liés à l&#x27;État. Montants et acteur : N/A.</p>
+<p><b>Comment ?</b><br>Abus des applications métier et des circuits d&#x27;approbation : modification d&#x27;enregistrements ou de relations d&#x27;approbation, puis paiement via le processus légitime, vers des comptes de mules, sans déclencher d&#x27;alerte.</p>
+<p><b>Pourquoi c'est important ?</b><br>Fraude « dans le processus » invisible pour les contrôles techniques classiques ; CERT-In note que l&#x27;outillage agentique réduit le délai accès initial → impact de jours à heures.</p>
+<p><b>Attribution :</b> N/A (des alertes antérieures citent Crafty Falcon, outils ARTEX, PentAGI, CAIRN, CyberStrikeAI) · confiance faible</p>
+<p><b>TTPs :</b> <a href="https://attack.mitre.org/techniques/T1078/">T1078 Valid Accounts</a>, <a href="https://attack.mitre.org/techniques/T1565/001/">T1565.001 Stored Data Manipulation</a>, <a href="https://attack.mitre.org/techniques/T1657/">T1657 Financial Theft</a></p>
+<p><small>Sources : <a href="https://thehackernews.com/2026/11/ai-assisted-cyberattacks-trigger.html">The Hacker News</a></small></p>
+<h2>Ransomware — France</h2><ul>
+<li>Aucune revendication visant la France.</li>
+</ul>
+<p>Aucune nouvelle victime française ni nouvelle revendication visible depuis 07:00 sur ransomware.live (réponses tronquées, données possiblement en retard). CHU de Bordeaux et Chambourcy : voir l&#x27;édition du matin, pas d&#x27;élément nouveau. </p>
+<h2>Fuites de données</h2><ul>
+</ul>
+<h2>IOC notables</h2><ul>
+<li>IPv4 : <code>170.39.226[.]219</code> — Reverse shell root depuis un routeur GL.iNet (The Hacker News (RemoteToHome))</li>
+<li>IPv4 : <code>66.245.219[.]252</code> — Téléchargement du script et des binaires (KVM GL-RM1) (The Hacker News (RemoteToHome))</li>
+<li>Domaine : <code>gl-inet[.]top</code> — Domaine résolu par le malware (KVM GL-RM1) (The Hacker News (RemoteToHome))</li>
+<li>IPv4 : <code>65.20.71[.]131</code> — C2 présumé (KVM GL-RM1) (The Hacker News (RemoteToHome))</li>
+</ul>
+<h2>À creuser</h2><p><b>Concept :</b> Une protection CSRF qui désérialise son jeton sans MAC (code d&#x27;authentification de message) transforme un contrôle de sécurité en point d&#x27;entrée RCE : c&#x27;est le cas de CVE-2026-131914, même famille que les attaques ViewState sans machineKey.</p><p><b>Piste de lab :</b> Sur une VM Windows isolée (IIS + .NET Framework), monter une page .aspx avec ViewState non signé ; générer un payload ObjectStateFormatter avec ysoserial.net et l&#x27;envoyer via Burp Suite. Côté défense : journaliser les processus enfants de w3wp.exe avec Sysmon (Event ID 1) et écrire une règle Sigma, puis activer la validation MAC et vérifier l&#x27;échec.</p>
+<hr><p><small>Sources consultées : BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, CERT-FR, CISA KEV (GitHub), NVD, FIRST EPSS, ransomware.live, HIBP, Bonjour La Fuite, SANS ISC, recherche web (LeMagIT, Next, fuites de données). Indisponibles : The Record (flux figé au 20/11), SecurityWeek (flux figé au 22/11), article BleepingComputer Cisco (erreur serveur), ransomware.live (réponses tronquées), HIBP (flux figé au 20/10), LeMagIT et Next (rien de nouveau trouvé dans la fenêtre).</small></p>]]></content:encoded>
+</item>
 <item>
 <title>Bulletin CTI — Lundi 23 novembre 2026 · Niveau Élevé</title>
 <link>https://theophanelg.github.io/veille-cti/bulletins/2026-11-23.html</link>

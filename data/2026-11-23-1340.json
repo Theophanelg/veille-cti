@@ -1,0 +1,93 @@
+{
+ "date": "Lundi 23 novembre 2026 (mi-journée)",
+ "periode": "lun. 23/11 07:00 → 13:40 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Deux exploitations actives sans CVE corrigeable classique : une RCE pré-auth dans une bibliothèque ASP.NET abandonnée (aucun correctif) et une compromission de routeurs GL.iNet via leur cloud de gestion.",
+ "bluf": [
+  {"p": 1, "sujet": "Idunno.AntiCsrf (CVE-2026-131914)", "texte": "RCE pré-auth par désérialisation dans une bibliothèque anti-CSRF ASP.NET abandonnée depuis 2008, exploitée selon Mandiant ; aucun correctif : retirer la bibliothèque et chercher AntiCsrfModule dans Web.config."},
+  {"p": 1, "sujet": "GL.iNet GoodCloud", "texte": "le service cloud a servi à exécuter du code root et poser un malware sur routeurs et KVM ; mettre à jour le firmware, réinstaller proprement et bloquer les IOC."},
+  {"p": 2, "sujet": "Cisco Expressway (CVE-2026-76466), élément nouveau", "texte": "déjà traité ce matin ; nouveau : exploitation rapportée contre une organisation russe peu après la publication d'un PoC public. Échéance KEV atteinte aujourd'hui."},
+  {"p": 3, "sujet": "CERT-In : fraudes assistées par IA", "texte": "détournement de workflows d'approbation de paiement dans des banques et fintechs indiennes ; surveiller les changements de RIB fournisseurs et de circuits de validation."}
+ ],
+ "vulns": [
+  {
+   "prio": 1, "cves": ["CVE-2026-131914"],
+   "titre": "RCE pré-authentification dans Idunno.AntiCsrf (ASP.NET), exploitée, sans correctif",
+   "produit": "Idunno.AntiCsrf ≤ 0.9.1 Beta (ASP.NET / IIS)",
+   "type": "Désérialisation de données non fiables → RCE (CWE-502)",
+   "cvss": "9,3", "cvssv": "4.0 (3.1 N/A)", "epss": "0,006", "pct": "50,4", "kev": false, "poc": "Inconnu",
+   "exploit": "Oui (Mandiant, MNDT-2026-0048)", "correctif": "Aucun (projet abandonné depuis 2008)",
+   "quoi": "Désérialisation non sûre dans AntiCsrfModule, module anti-CSRF ASP.NET historique toujours présent dans des applications legacy.",
+   "comment": "Le jeton CSRF du formulaire est désérialisé par ObjectStateFormatter sans clé ni vérification MAC : un seul POST avec un cookie CSRF non vide et une gadget chain en Base64 exécute du code dans w3wp.exe.",
+   "pourquoi": "Exploitation active observée par Google/Mandiant, sans authentification, et aucun correctif ne viendra : seule la suppression de la bibliothèque protège.",
+   "detection": "Chercher Idunno.AntiCsrf ou AntiCsrfModule dans Web.config et bin/ ; POST anormaux vers des .aspx renvoyant 302 ou 500 ; processus enfants (cmd, powershell) de w3wp.exe.",
+   "remediation": "Remplacer par System.Web.Helpers.AntiForgery, ViewStateUserKey avec ViewState signé (MAC) ou IAntiforgery d'ASP.NET Core. Si compromis : rotation machineKey, clés et identifiants BDD, audit des webroots.",
+   "sources": [
+    {"t": "The Hacker News", "u": "https://thehackernews.com/2026/11/hackers-exploit-critical-aspnet-anti.html"},
+    {"t": "NVD", "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-131914"}
+   ]
+  },
+  {
+   "prio": 1, "cves": [],
+   "titre": "GL.iNet GoodCloud : exécution root à distance sur routeurs et KVM, exploitée (pas de CVE)",
+   "produit": "Routeurs GL.iNet (GL-MT3000, MT6000, MG1300, AXT1800, AX1800…) et KVM GL-RM1/RM4PE/RMQ1 avec GoodCloud activé",
+   "type": "Commande cloud exécutée en root sans contrôle",
+   "cvss": "N/A", "cvssv": "N/A", "epss": "N/A", "pct": "N/A", "kev": false, "poc": "Inconnu",
+   "exploit": "Oui (GL.iNet, RemoteToHome)",
+   "correctif": "Correctif cloud (vendredi) + firmware 4.11.1 / 4.8.4 / RM 1.10.3 / RMQ1 1.8.7",
+   "quoi": "Faille du service de gestion à distance GoodCloud exploitée pour installer un malware sur des routeurs et KVM clients. Nombre d'appareils, acteur et date de début : N/A.",
+   "comment": "Le client GoodCloud contient un handler qui exécute en root deux valeurs reçues d'un message cloud, sans vérification (code présent depuis décembre 2024). Reverse shell root observé vers une IP externe.",
+   "pourquoi": "Le correctif cloud n'efface pas le malware déjà installé. Un KVM compromis donne un accès clavier/écran aux serveurs qu'il pilote.",
+   "detection": "Processus « crond -i /tmp/.log » ; en SSH : ps | grep tmp (routeur) ou ps -aux | grep tmp (KVM) ; trafic vers les IOC listés.",
+   "remediation": "Mettre à jour le firmware, puis réinstaller proprement sans garder la configuration (recommandation des chercheurs, plus prudente que l'éditeur) ; considérer les secrets stockés comme exposés ; désactiver GoodCloud si inutile.",
+   "sources": [
+    {"t": "The Hacker News", "u": "https://thehackernews.com/2026/11/hackers-exploited-glinet-cloud-flaw-to.html"}
+   ]
+  },
+  {
+   "prio": 2, "cves": ["CVE-2026-76466"],
+   "titre": "Cisco Expressway : exploitation après publication d'un PoC (élément nouveau)",
+   "produit": "Cisco Expressway Core/Edge jusqu'à X15.5.3",
+   "type": "Identifiants codés en dur → RCE root (CWE-798)",
+   "cvss": "9,8", "cvssv": "3.1", "epss": "0,022", "pct": "82,9", "kev": true,
+   "poc": "Oui (selon The Hacker News)", "exploit": "Oui (KEV ; cible russe rapportée)", "correctif": "Avis Cisco",
+   "resume": "Traité dans l'édition du matin (P1). Nouveau : The Hacker News rapporte une exploitation contre une organisation russe peu après la sortie d'un PoC public ; BleepingComputer relaie l'alerte CISA ce matin. Échéance KEV : aujourd'hui.",
+   "sources": [
+    {"t": "BleepingComputer", "u": "https://www.bleepingcomputer.com/news/security/cisa-flags-critical-cisco-expressway-rce-flaw-as-actively-exploited/"},
+    {"t": "NVD", "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-76466"}
+   ]
+  }
+ ],
+ "alertes": "Aucune publication CERT-FR datée du 23/11 à 13:40. Dernières : CERTFR-2026-ALE-017 (F5 NGINX) et ALE-016 (Oracle Java SE) du 18/11, AVI-1598 (VMware) du 20/11. Aucun ajout CISA KEV depuis le 20/11.",
+ "menaces": [
+  {
+   "titre": "CERT-In : paiements frauduleux par attaques assistées par IA dans la finance indienne",
+   "quoi": "Avis CIAD-2026-0062 : transactions non autorisées dans des banques, sociétés financières et prestataires gérant des paiements liés à l'État. Montants et acteur : N/A.",
+   "comment": "Abus des applications métier et des circuits d'approbation : modification d'enregistrements ou de relations d'approbation, puis paiement via le processus légitime, vers des comptes de mules, sans déclencher d'alerte.",
+   "pourquoi": "Fraude « dans le processus » invisible pour les contrôles techniques classiques ; CERT-In note que l'outillage agentique réduit le délai accès initial → impact de jours à heures.",
+   "acteur": "N/A (des alertes antérieures citent Crafty Falcon, outils ARTEX, PentAGI, CAIRN, CyberStrikeAI)",
+   "confiance": 1,
+   "ttps": [["T1078", "Valid Accounts"], ["T1565.001", "Stored Data Manipulation"], ["T1657", "Financial Theft"]],
+   "sources": [{"t": "The Hacker News", "u": "https://thehackernews.com/2026/11/ai-assisted-cyberattacks-trigger.html"}]
+  }
+ ],
+ "ransomware": {
+  "victimes": [],
+  "tendance": "Aucune nouvelle victime française ni nouvelle revendication visible depuis 07:00 sur ransomware.live (réponses tronquées, données possiblement en retard). CHU de Bordeaux et Chambourcy : voir l'édition du matin, pas d'élément nouveau.",
+  "groupes": []
+ },
+ "fuites": [],
+ "iocs": [
+  {"type": "IPv4", "valeur": "170.39.226[.]219", "contexte": "Reverse shell root depuis un routeur GL.iNet", "source": "The Hacker News (RemoteToHome)"},
+  {"type": "IPv4", "valeur": "66.245.219[.]252", "contexte": "Téléchargement du script et des binaires (KVM GL-RM1)", "source": "The Hacker News (RemoteToHome)"},
+  {"type": "Domaine", "valeur": "gl-inet[.]top", "contexte": "Domaine résolu par le malware (KVM GL-RM1)", "source": "The Hacker News (RemoteToHome)"},
+  {"type": "IPv4", "valeur": "65.20.71[.]131", "contexte": "C2 présumé (KVM GL-RM1)", "source": "The Hacker News (RemoteToHome)"}
+ ],
+ "regl": [],
+ "lab": {
+  "concept": "Une protection CSRF qui désérialise son jeton sans MAC (code d'authentification de message) transforme un contrôle de sécurité en point d'entrée RCE : c'est le cas de CVE-2026-131914, même famille que les attaques ViewState sans machineKey.",
+  "piste": "Sur une VM Windows isolée (IIS + .NET Framework), monter une page .aspx avec ViewState non signé ; générer un payload ObjectStateFormatter avec ysoserial.net et l'envoyer via Burp Suite. Côté défense : journaliser les processus enfants de w3wp.exe avec Sysmon (Event ID 1) et écrire une règle Sigma, puis activer la validation MAC et vérifier l'échec."
+ },
+ "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, CERT-FR, CISA KEV (GitHub), NVD, FIRST EPSS, ransomware.live, HIBP, Bonjour La Fuite, SANS ISC, recherche web (LeMagIT, Next, fuites de données)",
+ "indispo": "The Record (flux figé au 20/11), SecurityWeek (flux figé au 22/11), article BleepingComputer Cisco (erreur serveur), ransomware.live (réponses tronquées), HIBP (flux figé au 20/10), LeMagIT et Next (rien de nouveau trouvé dans la fenêtre)"
+}
