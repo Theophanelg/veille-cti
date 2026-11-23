@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bulletin CTI quotidien</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -332,7 +339,7 @@ const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
 
 document.title='Bulletin CTI — '+D.date;
 $('title').textContent='Bulletin CTI — '+D.date;
-$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>`;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span><a href="/veille-cti/">Toutes les éditions</a>`;
 $('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
 $('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
 $('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;

@@ -199,20 +199,31 @@ def main():
     rss += ["</channel>", "</rss>", ""]
     (ROOT / "feed.xml").write_text("\n".join(rss), encoding="utf-8")
 
+    if items:
+        (ROOT / "latest.html").write_text(page(items[0][1], tpl), encoding="utf-8")
     rows = "".join(f'<li><a href="bulletins/{day}.html">{e(d["date"])}</a> <span>Niveau {NIV[d["niveau"]]}</span> '
                    f'<a class="md" href="bulletins/{day}.md">.md</a></li>' for day, d in items)
+    latest = (f'<a class="last" href="latest.html"><small>Dernier bulletin · Niveau {NIV[items[0][1]["niveau"]]}</small>'
+              f'<b>{e(items[0][1]["date"])}</b><span>{e(items[0][1]["justification"])}</span></a>') if items else ""
     (ROOT / "index.html").write_text(f"""<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bulletin CTI quotidien</title>
 <link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="{BASE}feed.xml">
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 body{{margin:0;background:#e9eaec;color:#111214;font:16px/1.55 system-ui,sans-serif;padding:32px max(4vw,16px)}}
 @media(prefers-color-scheme:dark){{body{{background:#141517;color:#ececed}}a{{color:#ececed}}}}
 h1{{font-size:40px;line-height:1.05;margin:0 0 8px;font-weight:600}}
 ul{{list-style:none;padding:0;max-width:720px}} li{{display:flex;gap:12px;padding:10px 0;border-top:1px solid #8884;flex-wrap:wrap}}
+.last{{display:grid;gap:4px;max-width:720px;margin:18px 0;padding:18px;border-radius:10px;background:#111214;color:#ececed;text-decoration:none;border-left:6px solid #ff4f00}}
+.last small{{opacity:.7}} .last b{{font-size:22px}} .last span{{opacity:.85}}
 span{{opacity:.7}} .md{{margin-left:auto;font-size:14px}} a{{color:inherit;text-decoration-color:#ff4f00}}
 </style></head><body>
 <h1>Bulletin CTI quotidien</h1>
+{latest}
 <p>Flux RSS : <a href="feed.xml">{BASE}feed.xml</a></p>
 <ul>{rows}</ul>
 </body></html>
