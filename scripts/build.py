@@ -201,33 +201,22 @@ def main():
 
     if items:
         (ROOT / "latest.html").write_text(page(items[0][1], tpl), encoding="utf-8")
-    rows = "".join(f'<li><a href="bulletins/{day}.html">{e(d["date"])}</a> <span>Niveau {NIV[d["niveau"]]}</span> '
-                   f'<a class="md" href="bulletins/{day}.md">.md</a></li>' for day, d in items)
-    latest = (f'<a class="last" href="latest.html"><small>Dernier bulletin · Niveau {NIV[items[0][1]["niveau"]]}</small>'
-              f'<b>{e(items[0][1]["date"])}</b><span>{e(items[0][1]["justification"])}</span></a>') if items else ""
-    (ROOT / "index.html").write_text(f"""<!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bulletin CTI quotidien</title>
-<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="{BASE}feed.xml">
-<link rel="manifest" href="/veille-cti/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
-<meta name="theme-color" content="#141517"><meta name="apple-mobile-web-app-capable" content="yes">
-<style>
-body{{margin:0;background:#e9eaec;color:#111214;font:16px/1.55 system-ui,sans-serif;padding:32px max(4vw,16px)}}
-@media(prefers-color-scheme:dark){{body{{background:#141517;color:#ececed}}a{{color:#ececed}}}}
-h1{{font-size:40px;line-height:1.05;margin:0 0 8px;font-weight:600}}
-ul{{list-style:none;padding:0;max-width:720px}} li{{display:flex;gap:12px;padding:10px 0;border-top:1px solid #8884;flex-wrap:wrap}}
-.last{{display:grid;gap:4px;max-width:720px;margin:18px 0;padding:18px;border-radius:10px;background:#111214;color:#ececed;text-decoration:none;border-left:6px solid #ff4f00}}
-.last small{{opacity:.7}} .last b{{font-size:22px}} .last span{{opacity:.85}}
-span{{opacity:.7}} .md{{margin-left:auto;font-size:14px}} a{{color:inherit;text-decoration-color:#ff4f00}}
-</style></head><body>
-<h1>Bulletin CTI quotidien</h1>
-{latest}
-<p>Flux RSS : <a href="feed.xml">{BASE}feed.xml</a></p>
-<ul>{rows}</ul>
-</body></html>
-""", encoding="utf-8")
+    idx = []
+    for day, d in items:
+        hm = day[11:15]
+        texts = [d["date"], d.get("justification", "")] + [b["sujet"] + " " + b["texte"] for b in d["bluf"]]
+        texts += [v["titre"] + " " + v.get("produit", "") + " " + " ".join(v["cves"]) for v in d["vulns"]]
+        texts += [m["titre"] + " " + m.get("acteur", "") for m in d["menaces"]]
+        texts += [r["victime"] + " " + r["groupe"] for r in d["ransomware"].get("victimes", [])]
+        texts += [f["victime"] for f in d["fuites"]]
+        idx.append({"id": day, "date": d["date"], "niveau": d["niveau"],
+                    "edition": f"Édition de {hm[:2]}h{hm[2:]}" if hm else "Édition du matin",
+                    "p1": sum(1 for v in d["vulns"] if v["prio"] == 1),
+                    "resume": " · ".join(b["sujet"] for b in d["bluf"][:3]),
+                    "cves": sorted({c for v in d["vulns"] for c in v["cves"]}),
+                    "search": " ".join(texts).lower()})
+    shell = (ROOT / "scripts" / "index_template.html").read_text(encoding="utf-8")
+    (ROOT / "index.html").write_text(shell.replace("__DATA__", json.dumps(idx, ensure_ascii=False).replace("</", "<\\/")), encoding="utf-8")
     print(f"{len(items)} bulletin(s) construits ; feed.xml : {min(30, len(items))} items")
 
 

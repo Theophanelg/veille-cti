@@ -3,7 +3,7 @@
  "short_name": "Bulletin CTI",
  "description": "Veille cybersécurité quotidienne : vulnérabilités exploitées, menaces, ransomware, fuites.",
  "lang": "fr",
- "start_url": "/veille-cti/latest.html",
+ "start_url": "/veille-cti/",
  "scope": "/veille-cti/",
  "display": "standalone",
  "background_color": "#141517",

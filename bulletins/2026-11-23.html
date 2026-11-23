@@ -45,7 +45,7 @@ h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:
 .why{font-size:17px;margin:14px 0 0;max-width:70ch}
 .why b{color:var(--acc)}
 .top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;margin:22px 0 10px}
-.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start}
+.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start;align-self:start}
 .tally div{background:var(--card);padding:12px 14px}
 .tally strong{display:block;font-size:30px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
 .tally span{font-size:13px;color:var(--mute)}
@@ -748,7 +748,7 @@ const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
 
 document.title='Bulletin CTI — '+D.date;
 $('title').textContent='Bulletin CTI — '+D.date;
-$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span><a href="/veille-cti/">Toutes les éditions</a>`;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>${window.self===window.top?'<a href="/veille-cti/">Toutes les éditions</a>':''}`;
 $('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
 $('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
 $('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;

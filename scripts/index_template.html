@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bulletin CTI</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: the duty desk's binder of past briefs
+   IDEA a ring binder with dated tabs: the tab list on the left, the open sheet on the right
+   PICTURE the open bulletin itself, full height beside its tabs
+   COLOUR night ground #141517, ink #ececed, orange #ff4f00 for the selected tab; level colours on each tab
+   TYPE Geist 600 titles, Geist text, Geist Mono for CVE search hits
+   LAYOUT laptop: 320px tab column + reader; phone: tab list full screen, tap opens reader with a back bar */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--side:light-dark(#f6f6f7,#1a1c1f);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--acc:#ff4f00;--l0:light-dark(#3f7d4e,#6fbf83);--l1:light-dark(#8a7a00,#e0c84a);--l2:light-dark(#c45a00,#ff8a3d);--l3:light-dark(#c4201a,#ff5a47)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Geist,system-ui,sans-serif;overflow:hidden}
+.app{display:grid;grid-template-columns:330px minmax(0,1fr);height:100%}
+aside{background:var(--side);border-right:1px solid var(--rule);display:flex;flex-direction:column;height:100%;padding-top:env(safe-area-inset-top,0px)}
+.top{padding:18px 18px 10px}
+h1{font-size:24px;line-height:1.1;margin:0 0 12px;font-weight:600;letter-spacing:-.01em}
+#q{width:100%;font:16px Geist,system-ui,sans-serif;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+#q:focus{outline:2px solid var(--acc);outline-offset:1px}
+.filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.filters button{font:13px Geist,system-ui,sans-serif;padding:6px 10px;min-height:32px;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.list{overflow-y:auto;flex:1;padding:0 10px 20px}
+.week{font-size:13px;color:var(--mute);padding:14px 8px 6px;font-weight:500}
+.tab{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 8px;min-height:56px;border:0;border-radius:8px;background:none;color:var(--ink);font:inherit;cursor:pointer;position:relative}
+.tab:hover{background:var(--card)}
+.tab:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.tab.on{background:var(--card);box-shadow:inset 4px 0 0 var(--acc)}
+.day{display:grid;justify-items:center;line-height:1.05}
+.day b{font-size:22px;font-weight:600}
+.day small{font-size:12px;color:var(--mute)}
+.what b{display:block;font-weight:600;font-size:15px}
+.what span{display:block;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lvl{font-size:12px;font-weight:600;padding:2px 7px;border-radius:4px;color:#fff;white-space:nowrap}
+:root[data-theme=dark] .lvl{color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .lvl{color:#111}}
+.lvl.l0{background:var(--l0)}.lvl.l1{background:var(--l1)}.lvl.l2{background:var(--l2)}.lvl.l3{background:var(--l3)}
+.hit{font:500 12px "Geist Mono",monospace;color:var(--acc)}
+.empty{padding:20px 8px;color:var(--mute);font-size:14px}
+.foot{padding:10px 18px 14px;border-top:1px solid var(--rule);font-size:13px;color:var(--mute);padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+.foot a{color:var(--ink)}
+main{display:flex;flex-direction:column;height:100%}
+.bar{display:none;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top,0px));border-bottom:1px solid var(--rule);background:var(--side)}
+.bar button{font:15px Geist,system-ui,sans-serif;min-height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.bar span{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar a{margin-left:auto;font-size:14px;color:var(--ink);white-space:nowrap}
+iframe{flex:1;width:100%;border:0;background:var(--bg)}
+@media(max-width:800px){
+.app{grid-template-columns:minmax(0,1fr)}
+main{display:none}
+.app.reading aside{display:none}
+.app.reading main{display:flex}
+.bar{display:flex}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<aside>
+<div class="top">
+<h1>Bulletin CTI</h1>
+<input id="q" type="search" placeholder="Rechercher : CVE, produit, acteur…" autocomplete="off" aria-label="Rechercher dans les bulletins">
+<div class="filters" id="filters">
+<button type="button" data-f="all" aria-pressed="true">Tous</button>
+<button type="button" data-f="hot" aria-pressed="false">Élevé et critique</button>
+<button type="button" data-f="p1" aria-pressed="false">Avec P1</button>
+</div>
+</div>
+<div class="list" id="list"></div>
+<div class="foot">Nouveau bulletin chaque jour à 6h35 · <a href="/veille-cti/feed.xml">Flux RSS</a></div>
+</aside>
+<main>
+<div class="bar"><button type="button" id="back">← Liste</button><span id="cur"></span><a id="open" href="#" target="_blank" rel="noopener">Plein écran</a></div>
+<iframe id="view" title="Bulletin sélectionné"></iframe>
+</main>
+</div>
+<script id="items" type="application/json">__DATA__</script>
+<script>
+{
+const I=JSON.parse(document.getElementById('items').textContent);
+const L=['Faible','Modéré','Élevé','Critique'];
+const M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const dt=id=>{const [y,m,d]=id.slice(0,10).split('-').map(Number);return new Date(y,m-1,d)};
+const monday=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+let filter='all',sel=null;
+
+const render=()=>{
+ const q=$('q').value.trim().toLowerCase();
+ const rows=I.filter(it=>(filter==='all'||(filter==='hot'&&it.niveau>=2)||(filter==='p1'&&it.p1>0))&&(!q||it.search.includes(q)));
+ let html='',wk='';
+ for(const it of rows){
+  const d=dt(it.id),w=monday(d),wl=`Semaine du ${w.getDate()} ${M[w.getMonth()]} ${w.getFullYear()}`;
+  if(wl!==wk){html+=`<div class="week">${wl}</div>`;wk=wl}
+  const hit=q&&it.cves.find(c=>c.toLowerCase().includes(q));
+  html+=`<button type="button" class="tab ${it.id===sel?'on':''}" data-id="${e(it.id)}"><span class="day"><small>${J[d.getDay()]}</small><b>${d.getDate()}</b></span><span class="what"><b>${e(it.edition)}</b><span>${hit?`<span class="hit">${e(hit)}</span> · `:''}${e(it.resume)}</span></span><span class="lvl l${it.niveau}">${L[it.niveau]}</span></button>`;
+ }
+ $('list').innerHTML=html||'<div class="empty">Aucun bulletin ne correspond.</div>';
+};
+const open=(id,push)=>{
+ const it=I.find(x=>x.id===id)||I[0]; if(!it)return;
+ sel=it.id;
+ const url=`bulletins/${it.id}.html`;
+ if($('view').getAttribute('src')!==url)$('view').setAttribute('src',url);
+ $('cur').textContent=it.date;$('open').href=url;
+ document.title='Bulletin CTI — '+it.date;
+ if(push&&location.hash!=='#'+it.id)history.replaceState(null,'','#'+it.id);
+ render();
+};
+$('list').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;open(b.dataset.id,true);$('app').classList.add('reading')});
+$('back').addEventListener('click',()=>$('app').classList.remove('reading'));
+$('q').addEventListener('input',render);
+$('filters').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;filter=b.dataset.f;for(const x of $('filters').children)x.setAttribute('aria-pressed',x===b);render()});
+window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(id&&I.some(x=>x.id===id)){open(id,false);$('app').classList.add('reading')}});
+const h=location.hash.slice(1);
+open(I.some(x=>x.id===h)?h:(I[0]||{}).id,false);
+if(h&&I.some(x=>x.id===h))$('app').classList.add('reading');
+}
+</script>
+</body>
+</html>
