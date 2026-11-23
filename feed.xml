@@ -6,13 +6,13 @@
 <atom:link href="https://theophanelg.github.io/veille-cti/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Bulletin de veille cybersécurité quotidien : vulnérabilités exploitées, menaces, ransomware, fuites de données.</description>
 <language>fr-fr</language>
-<lastBuildDate>Mon, 23 Nov 2026 13:26:14 +0100</lastBuildDate>
+<lastBuildDate>Mon, 23 Nov 2026 13:34:28 +0100</lastBuildDate>
 <item>
 <title>Bulletin CTI — Lundi 23 novembre 2026 · Niveau Élevé</title>
 <link>https://theophanelg.github.io/veille-cti/bulletins/2026-11-23.html</link>
 <guid isPermaLink="true">https://theophanelg.github.io/veille-cti/bulletins/2026-11-23.html</guid>
 <pubDate>Mon, 23 Nov 2026 06:35:00 +0100</pubDate>
-<description>VMware vCenter (CVE-2026-123890) : contournement d&#x27;authentification exploité depuis septembre par UNC5221 (Golden SAML, vol de bases AD) ; patcher (VMSA-2026-0009) et chasser les comptes admin SSO créés. 3 autres ajouts KEV du 20/11 : Apache Roller (RCE pré-auth), Cisco Expressway (RCE root) et SAP NetWeaver EP (injection JNDI), échéance CISA au 23/11 ; vérifier l&#x27;exposition Internet aujourd&#x27;hui. F5 BIG-IP : 5 débordements de pile critiques (CVSS 3.1 9,8) dans TMM, sans authentification et sans atténuation ; appliquer les hotfix. CHU de Bordeaux : revendiqué par Scarlettgroup le 22/11 (revendication non vérifiée) ; anticiper le phishing ciblant patients et personnel. Microsoft Entra Connect Health : fuite de métadonnées de tenants (emails d&#x27;admins) ; s&#x27;attendre à du spear-phishing ciblé et imposer une MFA résistante au phishing.</description>
+<description>Niveau Élevé — 4 ajouts KEV dont un vCenter exploité par un acteur étatique présumé, échéance fédérale fixée à aujourd&#x27;hui, et un CHU français revendiqué.</description>
 <content:encoded><![CDATA[<p><b>TLP:CLEAR</b> · ven. 20/11 07:00 → lun. 23/11 07:00 (heure de Paris)</p>
 <p><b>Niveau de menace : Élevé</b> — 4 ajouts KEV dont un vCenter exploité par un acteur étatique présumé, échéance fédérale fixée à aujourd&#x27;hui, et un CHU français revendiqué.</p>
 <h2>L'essentiel (BLUF)</h2><ul>

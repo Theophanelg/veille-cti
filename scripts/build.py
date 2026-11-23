@@ -189,7 +189,7 @@ def main():
         y, m, j = map(int, day.split("-"))
         pub = format_datetime(datetime.datetime(y, m, j, 6, 35, tzinfo=PARIS))
         url = f"{BASE}bulletins/{day}.html"
-        desc = " ".join(f'{b["sujet"]} : {b["texte"]}' for b in d["bluf"])
+        desc = f'Niveau {NIV[d["niveau"]]} — {d["justification"]}'
         rss += ["<item>", f"<title>{e('Bulletin CTI — ' + d['date'] + ' · Niveau ' + NIV[d['niveau']])}</title>",
                 f"<link>{url}</link>", f'<guid isPermaLink="true">{url}</guid>', f"<pubDate>{pub}</pubDate>",
                 f"<description>{e(desc)}</description>",
