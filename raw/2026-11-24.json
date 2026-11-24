@@ -1,8 +1,8 @@
 {
- "genere_le": "2026-11-24T09:13:58+01:00",
+ "genere_le": "2026-11-24T09:15:44+01:00",
  "fenetre": {
   "debut": "2026-11-23T06:35:00+01:00",
-  "fin": "2026-11-24T09:13:58+01:00"
+  "fin": "2026-11-24T09:15:44+01:00"
  },
  "avertissement": "Extraits courts et métadonnées uniquement. Ouvrir l'URL de l'article pour le détail.",
  "flux": {
@@ -481,9 +481,45 @@
    "dernier_article": "2026-11-23T07:36:04+01:00"
   },
   "LeMagIT": {
-   "ok": false,
-   "erreur": "HTTP Error 404: Not Found",
-   "items": []
+   "ok": true,
+   "items": [
+    {
+     "titre": "« Le vent tourne » en Europe : OVHCloud vise 2 milliards d’euros de chiffre d’affaires",
+     "url": "https://www.lemagit.fr/actualites/366655352/Le-vent-tourne-en-Europe-OVHCloud-vise-2-milliards-deuros-de-chiffre-daffaires",
+     "date": "2026-11-23T14:33:00+01:00",
+     "extrait": "Lors de l’AI Summit, Octave Klaba a révélé à la presse ses ambitions de réaliser un chiffre d’affaires de 2 milliards d’euros, près du double de l’exercice fiscal 2026. Le dirigeant ne pose toutefois pas d’échéance en face de cette ambition.",
+     "categories": []
+    },
+    {
+     "titre": "Washington remet Jensen Huang à la tête de Nvidia",
+     "url": "https://www.lemagit.fr/actualites/366655333/Washington-remet-Jensen-Huang-a-la-tete-de-Nvidia",
+     "date": "2026-11-23T13:53:00+01:00",
+     "extrait": "Après une démission qui n’aura tenu qu’une dizaine de jours, le fondateur de Nvidia en reprend les rênes, a priori grâce à une intervention de la Maison-Blanche. Pour l’heure, le sujet semble davantage concerner des intérêts financiers que des questions de morales ou de sécurité nationale.",
+     "categories": []
+    },
+    {
+     "titre": "Pour Octave Klaba (OVHcloud), les GPU de Nvidia sont enfin rentables",
+     "url": "https://www.lemagit.fr/actualites/366655332/Pour-Octave-Klaba-OVHcloud-les-GPU-de-Nvidia-sont-enfin-rentables",
+     "date": "2026-11-23T13:48:00+01:00",
+     "extrait": "Lors de son AI Summit, OVHcloud a annoncé l’arrivée prochaine d’une plus grande quantité de GPU Blackwell Ultra et les premières machines de la génération Rubin. En 2025, Octave Klaba, son PDG, jugeait que l’achat de H100 et H200 était un risque. Les puces plus puissantes justifient l’investissement, malgré des coûts multipliés par trois au mégawatt. Tout comme l’IA agentique.",
+     "categories": []
+    },
+    {
+     "titre": "Supply Chain IA : les fuites de secrets dans les infrastructures d’inférence",
+     "url": "https://www.lemagit.fr/actualites/366655292/Supply-Chain-IA-les-fuites-de-secrets-dans-les-infrastructures-dinference",
+     "date": "2026-11-23T11:58:00+01:00",
+     "extrait": "L’analyse de la chaîne logistique de l’inférence IA révèle des failles structurelles et des compromissions de fournisseurs exposant les données clients. Une expérimentation de plusieurs mois en dresse une cartographie.",
+     "categories": []
+    },
+    {
+     "titre": "Ransomware : les frameworks offensifs agentiques sont entrés dans la danse",
+     "url": "https://www.lemagit.fr/actualites/366655137/Ransomware-les-frameworks-offensifs-agentiques-sont-entres-dans-la-danse",
+     "date": "2026-11-23T11:55:00+01:00",
+     "extrait": "Les cybercriminels ne se contentent plus d’un usage superficiel des modèles d’IA générative : ils ont commencé à s’appuyer sur des frameworks offensifs agentiques tels qu’Artex.",
+     "categories": []
+    }
+   ],
+   "dernier_article": "2026-11-23T14:33:00+01:00"
   },
   "Next": {
    "ok": true,
