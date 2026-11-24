@@ -1,8 +1,8 @@
 {
- "genere_le": "2026-11-24T09:11:23+01:00",
+ "genere_le": "2026-11-24T09:13:58+01:00",
  "fenetre": {
   "debut": "2026-11-23T06:35:00+01:00",
-  "fin": "2026-11-24T09:11:23+01:00"
+  "fin": "2026-11-24T09:13:58+01:00"
  },
  "avertissement": "Extraits courts et métadonnées uniquement. Ouvrir l'URL de l'article pour le détail.",
  "flux": {
@@ -479,6 +479,185 @@
     }
    ],
    "dernier_article": "2026-11-23T07:36:04+01:00"
+  },
+  "LeMagIT": {
+   "ok": false,
+   "erreur": "HTTP Error 404: Not Found",
+   "items": []
+  },
+  "Next": {
+   "ok": true,
+   "items": [
+    {
+     "titre": "Avec Olala, OVH vise un « Mythos européen » et un modèle à 3 000 milliards de paramètres",
+     "url": "https://next.ink/269175/avec-olala-ovh-vise-un-mythos-europeen-et-un-modele-a-3-000-milliards-de-parametres/",
+     "date": "2026-11-24T09:09:00+01:00",
+     "extrait": "Dans la première partie de notre dossier sur Olala, le modèle « souverain » d’OVHai LLM, nous avons détaillé son architecture, son entrainement, ses galères… Dans cette seconde partie, nous parlons de la suite des événements. Octave Klaba a de grandes ambitions pour Olala, jusqu’à construire un « Mythos européen ». Il en profite pour […]",
+     "categories": [
+      "IA et algorithmes"
+     ]
+    },
+    {
+     "titre": "GLM-5.4 avec Loop Transformer : Z.ai propose un modèle pour le code plus généraliste",
+     "url": "https://next.ink/269432/glm-5-4-avec-loop-transformer-z-ai-propose-un-modele-pour-le-code-plus-generaliste/",
+     "date": "2026-11-24T08:45:00+01:00",
+     "extrait": "Après avoir titillé les plates-bandes de Mythos du côté de la cybersécurité avec son modèle GLM-5.2, l’entreprise chinoise Z.ai propose un nouveau modèle, GLM-5.4, annoncé comme étant plus généraliste concernant le code. Fin juin, Z.ai sortait GLM-5.2 sous l’angle très à la mode de la cybersécurité, montrant au passage que les entreprises chinoises pouvaient espérer […]",
+     "categories": [
+      "IA et algorithmes"
+     ]
+    },
+    {
+     "titre": "SpaceX gagne plus en louant ses GPU à Anthropic qu’avec Grok, « incapable de rivaliser »",
+     "url": "https://next.ink/269521/spacex-gagne-plus-en-louant-ses-gpu-a-anthropic-quavec-grok-incapable-de-rivaliser/",
+     "date": "2026-11-24T08:20:00+01:00",
+     "extrait": "L’IA développée par xAI, devenue SpaceXAI puis maintenant SpaceXSI, n’est toujours pas en mesure de concurrencer sérieusement les modèles d’OpenAI et d’Anthropic. À tel point que la filiale de SpaceX spécialisée dans l’IA générative gagne davantage d’argent dans la location de GPU qu’en les utilisant pour ses propres services comme Grok. Elon Musk est tout […]",
+     "categories": [
+      "IA et algorithmes"
+     ]
+    },
+    {
+     "titre": "Malgré le DMA, WebKit reste le seul moteur des rivaux de Safari en Europe",
+     "url": "https://next.ink/269516/malgre-le-dma-webkit-reste-le-seul-moteur-des-rivaux-de-safari-en-europe/",
+     "date": "2026-11-24T07:44:45+01:00",
+     "extrait": "S’il est possible de changer de navigateur web par défaut sur un iPhone ou un iPad, les rivaux de Safari doivent toujours composer avec WebKit d’Apple alors que le règlement sur les marchés numériques rend possible l’utilisation d’un autre moteur web. Brave, Vivaldi et d’autres signataires demandent à Bruxelles d’ouvrir une enquête sur les conditions […]",
+     "categories": [
+      "Logiciel"
+     ]
+    },
+    {
+     "titre": "☕️ Xavier Niel reprend 60 Millions de consommateurs",
+     "url": "https://next.ink/brief-article/xavier-niel-reprend-60-millions-de-consommateurs/",
+     "date": "2026-11-24T07:02:00+01:00",
+     "extrait": "Xavier Niel va bel et bien reprendre le magazine 60 Millions de consommateurs, sept mois après la liquidation de l’INC (Institut national de la consommation), l’organisme public qui publiait le mensuel. Trois propositions étaient sur la table, dont celle de NJJ Médias (Xavier Niel), et une autre de Que Choisir Ensemble, anciennement UFC-Que Choisir. Selon […]",
+     "categories": [
+      "Économie"
+     ]
+    },
+    {
+     "titre": "DMA : la conformité de façade des géants du numérique épinglée par le BEUC",
+     "url": "https://next.ink/269443/dma-la-conformite-de-facade-des-geants-du-numerique-epinglee-par-le-beuc/",
+     "date": "2026-11-23T17:45:15+01:00",
+     "extrait": "Deux ans et demi après sa mise en route, le règlement sur les marchés numériques (DMA) a encore beaucoup de chemin à parcourir pour rééquilibrer la concurrence dans le paysage numérique européen. Les contrôleurs d’accès ont encore de sérieux problèmes de non conformité, selon le BEUC. Les contrôleurs d’accès peuvent et doivent mieux faire, assène […]",
+     "categories": [
+      "Droit"
+     ]
+    },
+    {
+     "titre": "Olala : on a disséqué le modèle d’OVH",
+     "url": "https://next.ink/268967/olala-on-a-disseque-le-modele-dovh-avec-trois-tetes-folles/",
+     "date": "2026-11-23T17:07:00+01:00",
+     "extrait": "La semaine dernière, OVHcloud a présenté son premier modèle Olala mini. Il est souverain, de la conception à l’entrainement… mais un bastion résiste encore et toujours. Dans cette première partie nous analysons l’architecture du modèle, son fonctionnement et ses déconvenues après l’entrainement. Trois responsables d’OVHai étaient présents pour nous donner des explications. Olala est issu […]",
+     "categories": [
+      "IA et algorithmes"
+     ]
+    },
+    {
+     "titre": "PowerShell 7 va intégrer Windows, les entreprises vont devoir vérifier sa compatibilité",
+     "url": "https://next.ink/269400/powershell-7-va-integrer-windows-les-entreprises-vont-devoir-verifier-sa-compatibilite/",
+     "date": "2026-11-23T16:42:00+01:00",
+     "extrait": "Microsoft a officiellement déprécié Windows PowerShell 5.1 le 17 novembre et intégrera PowerShell 7 à la prochaine version de Windows. Les deux moutures cohabiteront, mais PowerShell 7 n’est pas une simple mise à jour. Pour les équipes qui exploitent des milliers de scripts, de tâches planifiées et de stratégies de groupe, cela signifie qu’il faut […]",
+     "categories": [
+      "Logiciel"
+     ]
+    },
+    {
+     "titre": "☕️ Apple limite l’usage de son IA et vend des quotas plus élevés avec iCloud+",
+     "url": "https://next.ink/brief-article/apple-limite-lusage-de-son-ia-et-vend-des-quotas-plus-eleves-avec-icloud/",
+     "date": "2026-11-23T16:22:00+01:00",
+     "extrait": "Les fonctions les plus avancées d’Apple Intelligence sont gratuites… jusqu’à un certain point. Avec les versions 27.3 de ses systèmes d’exploitation (actuellement en bêta), Apple instaure des limites à l’usage quotidien que l’on peut avoir de ces fonctionnalités, et propose de souscrire à un abonnement iCloud+ payant pour faire sauter les digues. Apple promet une […]",
+     "categories": [
+      "IA et algorithmes"
+     ]
+    },
+    {
+     "titre": "☕️ Une pétition pour sauver le CNRS et la recherche publique dépasse les 16 000 signatures",
+     "url": "https://next.ink/brief-article/une-petition-pour-sauver-le-cnrs-et-la-recherche-publique-depasse-les-16-000-signatures/",
+     "date": "2026-11-23T15:59:29+01:00",
+     "extrait": "Alors que le gouvernement impose un plan de redressement à l’organisme de recherche après lui avoir siphonné sa trésorerie, une pétition publiée sur le site de l’Assemblée nationale a recueilli plus de 16 000 signatures. Alexis Verger, biologiste au CNRS et auteur du texte, y dénonce la « crise financière sans précédent qui accélère le décrochage historique […]",
+     "categories": [
+      "Sciences et espace"
+     ]
+    },
+    {
+     "titre": "NVIDIA réinstalle Jensen Huang à son poste de CEO !",
+     "url": "https://next.ink/269365/nvidia-reinstalle-jensen-huang-a-son-poste-de-ceo/",
+     "date": "2026-11-23T15:09:14+01:00",
+     "extrait": "Le conseil d’administration de NVIDIA a annoncé lundi 23 novembre la réintégration de Jensen Huang à son poste de CEO. La décision a été votée « à l’unanimité ». Jensen is back. Le conseil d’administration de NVIDIA a signalé lundi, trente minutes avant l’ouverture de Wall Street, avoir voté à l’unanimité en faveur de la réintégration de […]",
+     "categories": [
+      "Économie"
+     ]
+    },
+    {
+     "titre": "Hypothèse de Riemann : une preuve générée par IA est-elle utile aux mathématiciens ?",
+     "url": "https://next.ink/269118/hypothese-de-riemann-une-preuve-generee-par-ia-est-elle-utile-aux-mathematiciens/",
+     "date": "2026-11-23T14:22:36+01:00",
+     "extrait": "Deux mathématiciens ont publié des propositions de preuve d’une conjecture des plus classiques des mathématiques : l’hypothèse de Riemann. L’un, Alessandro Maria Masullo, sans l’aide de l’IA, a mis en ligne un manuscrit de 940 pages expliquant sa démonstration. L’autre, Levent Alpöge, mathématicien chez Anthropic a mis en ligne un code de 17 millions de lignes […]",
+     "categories": [
+      "Sciences et espace"
+     ]
+    },
+    {
+     "titre": "☕️ CrowdStrike va racheter Zscaler pour 44 milliards de dollars",
+     "url": "https://next.ink/brief-article/crowdstrike-va-racheter-zscaler-pour-44-milliards-de-dollars/",
+     "date": "2026-11-23T13:43:27+01:00",
+     "extrait": "Consolidation en marche dans le secteur de la cybersécurité : l’américain CrowdStrike vient d’annoncer son intention d’acquérir son compatriote et concurrent spécialiste des réseaux, Zscaler. La transaction devrait se faire par échange d’actions. Elle valorise Zscaler à hauteur de 43,9 milliards de dollars. « CrowdStrike est un leader de la sécurité des terminaux, des charges de […]",
+     "categories": [
+      "Économie"
+     ]
+    },
+    {
+     "titre": "Microsoft fusionne ses gestions de tâches dans Planner, To Do va disparaître",
+     "url": "https://next.ink/269199/microsoft-fusionne-ses-gestions-de-taches-dans-planner-to-do-va-disparaitre/",
+     "date": "2026-11-23T11:25:16+01:00",
+     "extrait": "Microsoft va fusionner To Do avec les plans de base et premium de Planner en un service unique hébergé sur Azure. Les applications To Do seront retirées le 30 juin 2027, sans possibilité de migrer les tâches existantes. Pour les particuliers, c’est une mauvaise nouvelle, car Planner est réservé aux offres professionnelles. Le 18 novembre, […]",
+     "categories": [
+      "Logiciel"
+     ]
+    },
+    {
+     "titre": "Verisign recule sur le .name, OVHcloud garde le .ovh pour son propre usage",
+     "url": "https://next.ink/269107/verisign-recule-sur-le-name-ovhcloud-garde-le-ovh-pour-son-propre-usage/",
+     "date": "2026-11-23T10:10:19+01:00",
+     "extrait": "Pour commencer la semaine, deux nouvelles sur des extensions de premier niveau. Verisign, tout d’abord, fait machine arrière et va laisser les anciens clients utiliser et renouveler leur domaine de troisième niveau en .name. De son côté, OVHcloud nous parle de son extension .ovh, qu’elle compte bien réutiliser pour ses propres services. Les anciens clients […]",
+     "categories": [
+      "Internet"
+     ]
+    },
+    {
+     "titre": "☕️ Le CHU de Guadeloupe est paralysé par une cyberattaque",
+     "url": "https://next.ink/brief-article/le-chu-de-guadeloupe-est-paralyse-par-une-cyberattaque/",
+     "date": "2026-11-23T09:44:14+01:00",
+     "extrait": "Le centre hospitalier universitaire (CHU) de Guadeloupe a activé dimanche 22 novembre son dispositif de gestion de crise, le « plan blanc », suite à une cyberattaque survenue la veille, dans la soirée. « Depuis hier soir, nous sommes victimes d’une cyberattaque de l’extérieur qui affecte grandement notre système d’information et la téléphonie de l’établissement », a déclaré Éric […]",
+     "categories": [
+      "Sécurité"
+     ]
+    },
+    {
+     "titre": "[MàJ] À cause d’un bug, les pilotes AMD et NVIDIA écrivent constamment sur le disque",
+     "url": "https://next.ink/268322/a-cause-dun-bug-les-pilotes-amd-et-nvidia-ecrivent-constamment-sur-le-disque/",
+     "date": "2026-11-23T08:31:51+01:00",
+     "extrait": "Des utilisateurs ont noté des comportements étranges provenant des pilotes graphiques d’AMD et NVIDIA : des écritures constantes sur le disque, parfois dans de vastes proportions. Pour les SSD, cela peut signifier une usure précoce. Mise à jour du 23 novembre à 8h32 : NVIDIA a reconnu le problème à son tour et a publié le […]",
+     "categories": [
+      "Hardware"
+     ]
+    },
+    {
+     "titre": "Près d’un Français sur deux habite à moins de 10 km d’un datacenter",
+     "url": "https://next.ink/268395/pres-dun-francais-sur-deux-habite-a-moins-de-10-km-dun-datacenter/",
+     "date": "2026-11-23T07:58:00+01:00",
+     "extrait": "Les datacenters sont largement implantés en France, avec une moyenne d’âge de 15 ans selon l’Arcep. Ces voisins sont de moins en moins discrets, surtout avec l’arrivée de l’IA générative. Savez-vous où se trouve le plus proche de chez vous ? Notre carte permet de le savoir et d’en tirer des estimations globales. La première : […]",
+     "categories": [
+      "Hardware"
+     ]
+    }
+   ],
+   "dernier_article": "2026-11-24T09:09:00+01:00"
+  },
+  "CERT-FR (flux)": {
+   "ok": true,
+   "items": [],
+   "dernier_article": "2026-11-23T01:00:00+01:00",
+   "remarque": "flux figé : aucun article dans la fenêtre"
   }
  },
  "certfr": {
@@ -1099,6 +1278,15 @@
      "description": "Industrial Machinery & Equipment"
     },
     {
+     "victime": "knox.edu",
+     "groupe": "Scarlettgroup",
+     "pays": "US",
+     "secteur": "Education",
+     "date": "2026-11-24T04:59:27.809823+01:00",
+     "site": "knox.edu",
+     "description": "Knox College is a private liberal arts college founded in 1837 in Galesburg, Illinois, offering 42 majors, small class sizes, and hands-on learning opportunities such as research and internships."
+    },
+    {
      "victime": "MASTER RESULT SOLUÇÕES CONTÁBEIS LTDA",
      "groupe": "spacebears",
      "pays": "BR",
@@ -1603,7 +1791,7 @@
      "description": "Suzlon Energy is multinational company and one of the world’s leading win... Leak deadline: 2026-12-07 23:00:00 UTC"
     }
    ],
-   "total": 78,
+   "total": 79,
    "groupes": [
     [
      "N0n",
