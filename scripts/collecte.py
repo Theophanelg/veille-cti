@@ -31,6 +31,9 @@ FEEDS = {
     "ZATAZ": "https://www.zataz.com/feed/",
     "SANS ISC": "https://isc.sans.edu/rssfeed_full.xml",
     "HIBP": "https://feeds.feedburner.com/HaveIBeenPwnedLatestBreaches",
+    "LeMagIT": "https://www.lemagit.fr/rss/Securite.xml",
+    "Next": "https://next.ink/feed/",
+    "CERT-FR (flux)": "https://cert.cyber.gouv.fr/feed/",
 }
 CERT_PAGES = ["alerte", "avis", "actualite", "cti", "ioc"]
 KEV_URL = "https://raw.githubusercontent.com/cisagov/kev-data/develop/known_exploited_vulnerabilities.json"
