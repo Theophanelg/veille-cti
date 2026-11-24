@@ -1,0 +1,471 @@
+{
+ "date": "Mardi 24 novembre 2026",
+ "periode": "lun. 23/11 06:35 → mar. 24/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Deux ajouts KEV (MONAI Label, N-able MailAssure) à échéance du 26/11, une faille Azure API Management exploitée contre l'énergie norvégienne et le CHU de Guadeloupe paralysé par une cyberattaque.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "MONAI Label et N-able MailAssure au KEV",
+   "texte": "ajoutés le 23/11, échéance CISA au 26/11 ; nouveau : exploitation confirmée. Passer MONAI Label en 0.8.6 et vérifier le build MailAssure/SpamExperts (≥ 20261121.1943)."
+  },
+  {
+   "p": 1,
+   "sujet": "Azure API Management Classic",
+   "texte": "faille exploitée pour voler les identifiants d'API stockés, liée par la Norvège aux attaques contre Equinor et Skagerak Energi ; faire tourner les secrets stockés dans APIM."
+  },
+  {
+   "p": 2,
+   "sujet": "CHU de Guadeloupe",
+   "texte": "plan blanc depuis le 22/11 après une cyberattaque ; vecteur et acteur non communiqués, s'attendre à du phishing opportuniste visant patients et personnel."
+  },
+  {
+   "p": 2,
+   "sujet": "binary-parser (npm)",
+   "texte": "injection de code JavaScript (CVSS 4.0 9,2) si l'attaquant contrôle les définitions de parseur ; mettre à jour en 2.3.1."
+  },
+  {
+   "p": 2,
+   "sujet": "Webworm",
+   "texte": "l'acteur aligné sur la Chine utiliserait un SoftEther VPN Bridge modifié, déguisé en outil de supervision, pour un accès persistant ; chasser les binaires SoftEther inattendus."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133968"
+   ],
+   "titre": "MONAI Label : path traversal menant à une RCE, ajoutée au KEV",
+   "produit": "MONAI Label < 0.8.6",
+   "type": "Path traversal (CWE-24)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,037",
+   "pct": "89,9",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui, depuis septembre 2026",
+   "correctif": "0.8.6",
+   "quoi": "Faille de MONAI Label, serveur d'annotation d'imagerie médicale par IA. Nouveau : ajoutée au KEV le 23/11, échéance fédérale au 26/11.",
+   "comment": "Le paramètre image de l'endpoint PUT /datastore/image permet, sans authentification, d'écrire un fichier hors du datastore, d'où une exécution de code.",
+   "pourquoi": "Exploitée depuis septembre 2026 contre des universités (opération Cairn, agents IA autonomes). Les serveurs de recherche exposés sur Internet sont visés.",
+   "detection": "Requêtes PUT /datastore/image contenant ../ dans le paramètre image ; fichiers Python inattendus (sitecustomize.py) ; processus enfants du service MONAI Label.",
+   "remediation": "Mettre à jour en 0.8.6, retirer l'instance d'Internet ou la placer derrière une authentification. Si exposée depuis septembre : traiter comme compromise.",
+   "sources": [
+    {
+     "t": "CISA KEV",
+     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133968"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133968"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-134624"
+   ],
+   "titre": "N-able MailAssure / SpamExperts : SSRF ajoutée au KEV",
+   "produit": "MailAssure (SpamExperts) < 20261121.1943",
+   "type": "SSRF (CWE-918)",
+   "cvss": "9,3",
+   "cvssv": "4.0",
+   "epss": "0,004",
+   "pct": "29,7",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (CISA KEV, 23/11)",
+   "correctif": "Build 20261121.1943",
+   "quoi": "SSRF (le serveur est forcé à émettre des requêtes vers des cibles choisies) dans la vérification de connexion LDAP. Nouveau depuis hier : exploitation confirmée par l'ajout au KEV le 23/11.",
+   "comment": "Un utilisateur API authentifié fait connecter le serveur à des hôtes et ports internes arbitraires, cartographie ceux qui répondent et leur envoie des données forgées.",
+   "pourquoi": "Découverte pendant l'enquête sur l'intrusion du Hosted Cloud de N-able. Service de filtrage mail mutualisé par des MSP : un rebond vers l'interne touche de nombreux clients.",
+   "detection": "Journaux API de configuration de relais/LDAP pointant vers des IP privées ou des ports inhabituels ; connexions sortantes du serveur vers le réseau interne.",
+   "remediation": "Vérifier le build (≥ 20261121.1943) sur Local Cloud, recréer les jetons API/OAuth révoqués et filtrer les flux sortants du serveur vers l'interne.",
+   "sources": [
+    {
+     "t": "CISA KEV",
+     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-134624"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134624"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/n-able-patches-critical-flaw-disclosed-after-mail-assure-cyberattack/"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [],
+   "titre": "Azure API Management Classic : vol des identifiants d'API stockés, exploitée",
+   "produit": "Azure API Management, offres Classic",
+   "type": "N/A",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui (Microsoft, autorités norvégiennes)",
+   "correctif": "Corrigé côté Microsoft (service cloud)",
+   "quoi": "Microsoft avertit qu'une faille des offres Classic d'Azure API Management (APIM, passerelle d'API managée) a été exploitée. Identifiant CVE et mécanisme non communiqués.",
+   "comment": "N/A : les attaquants ont récupéré des identifiants d'API stockés dans APIM ; mode opératoire non détaillé.",
+   "pourquoi": "La Norvège relie la faille aux attaques contre Equinor et Skagerak Energi ; d'autres secteurs sont aussi touchés. Les secrets volés ouvrent les backends derrière la passerelle.",
+   "detection": "Journaux d'activité Azure et diagnostics APIM : lecture des named values, clés d'abonnement ou identifiants backend ; appels backend depuis des IP inconnues.",
+   "remediation": "Le correctif est côté Microsoft, mais les secrets déjà volés restent valides : les faire tourner (named values, clés d'abonnement, identifiants backend) et migrer vers Key Vault.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+    },
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-134814"
+   ],
+   "titre": "binary-parser : injection de JavaScript via des définitions de parseur",
+   "produit": "binary-parser (npm) < 2.3.1",
+   "type": "Injection de code (CWE-94)",
+   "cvss": "9,2",
+   "cvssv": "4.0",
+   "epss": "0,006",
+   "pct": "50,1",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "2.3.1",
+   "resume": "Des options non validées (length, key, tag, offset, alias namely()) sont injectées dans le code généré à la compilation du parseur : exécution de JavaScript dans le processus Node.js. Exploitable seulement si l'attaquant contrôle la définition.",
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/critical-binary-parser-flaw-enables.html"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134814"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [],
+   "titre": "phpAfterShell : désérialisation de session PHP relançant la voie PHP2Shell",
+   "produit": "PHP (gestion des sessions)",
+   "type": "Désérialisation non sûre",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "N/A",
+   "resume": "Si l'écriture d'une session est interrompue, un attaquant qui contrôle les nouvelles données peut déclencher une désérialisation et une RCE. CVE, versions et correctif non précisés dans la source.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/phpaftershell-vulnerability-revives-php2shells-attack-path/"
+    }
+   ]
+  }
+ ],
+ "alertes": "Aucune nouvelle alerte CERT-FR dans la fenêtre (dernières : ALE-016 et ALE-017 du 18/11). Le 23/11 : 9 avis (AVI-1599 à AVI-1607) et le bulletin d'actualité ACT-049 ; leurs titres ne figurent pas dans la collecte.",
+ "menaces": [
+  {
+   "titre": "Norvège : la faille Azure APIM exploitée contre Equinor et Skagerak Energi",
+   "quoi": "Les autorités norvégiennes relient l'exploitation d'Azure API Management Classic à des attaques visant des identifiants sensibles chez Equinor et Skagerak Energi.",
+   "comment": "Vol d'identifiants d'API stockés dans le service cloud, puis usage présumé pour atteindre des systèmes internes (détails non publiés).",
+   "pourquoi": "Énergie, secteur critique ; montre que les secrets confiés à un service SaaS restent une cible même quand le fournisseur a corrigé.",
+   "acteur": "N/A (aucune attribution publiée)",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1552",
+     "Unsecured Credentials"
+    ],
+    [
+     "T1078.004",
+     "Cloud Accounts"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+    },
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+    }
+   ]
+  },
+  {
+   "titre": "CHU de Guadeloupe paralysé par une cyberattaque",
+   "quoi": "Cyberattaque le 21/11 au soir ; le CHU a déclenché son plan blanc (dispositif de crise hospitalier) le 22/11 et fonctionne en mode dégradé.",
+   "comment": "N/A : vecteur, nature (rançongiciel ou non) et données touchées non communiqués.",
+   "pourquoi": "Deuxième établissement de santé français touché en quelques jours après le CHU de Bordeaux (revendication non vérifiée) ; risque sur la continuité des soins.",
+   "acteur": "N/A (aucune revendication relevée)",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "Next",
+     "u": "https://next.ink/brief-article/le-chu-de-guadeloupe-est-paralyse-par-une-cyberattaque/"
+    }
+   ]
+  },
+  {
+   "titre": "Webworm : un SoftEther VPN Bridge modifié pour l'accès distant",
+   "quoi": "Webworm, acteur aligné sur la Chine, utiliserait une version modifiée de SoftEther VPN Bridge (VPN open source), déguisée en logiciel de supervision réseau.",
+   "comment": "Les empreintes reconnaissables de SoftEther sont retirées du binaire, qui maintient un tunnel vers l'infrastructure de l'attaquant : accès distant sans malware classique.",
+   "pourquoi": "Un outil légitime modifié échappe aux signatures ; seules la télémétrie réseau et l'inventaire logiciel le révèlent. Rapid7 évoque des cibles gouvernementales.",
+   "acteur": "Webworm, aligné sur la Chine (soupçon des chercheurs)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1572",
+     "Protocol Tunneling"
+    ],
+    [
+     "T1036",
+     "Masquerading"
+    ],
+    [
+     "T1133",
+     "External Remote Services"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html"
+    },
+    {
+     "t": "Rapid7",
+     "u": "https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge"
+    }
+   ]
+  },
+  {
+   "titre": "BlackHatSect0r : extorsion, phishing bancaire et IA offensive à louer (non confirmé)",
+   "quoi": "Selon ZATAZ, ce groupe revendique des attaques contre des sociétés françaises, dont AAAEP (585 000 personnes potentiellement concernées), et loue une « IA offensive » 500 €.",
+   "comment": "Phishing bancaire, extorsion, destruction des sauvegardes et ciblage d'interfaces industrielles exposées sur Internet.",
+   "pourquoi": "Acteur francophone visant des PME françaises ; la destruction des sauvegardes rend les sauvegardes hors ligne indispensables.",
+   "acteur": "BlackHatSect0r",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1566",
+     "Phishing"
+    ],
+    [
+     "T1490",
+     "Inhibit System Recovery"
+    ],
+    [
+     "T1657",
+     "Financial Theft"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/blackhatsect0r-phishing-bancaire-extorsion-et-industrie/"
+    },
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/blackhat-sector-une-ia-offensive-a-louer-pour-500-e/"
+    }
+   ]
+  },
+  {
+   "titre": "Ransomware : les frameworks offensifs agentiques comme Artex arrivent",
+   "quoi": "LeMagIT relève que des opérateurs de rançongiciels s'appuient désormais sur des frameworks offensifs agentiques (agents IA qui enchaînent les actions), tels qu'Artex.",
+   "sources": [
+    {
+     "t": "LeMagIT",
+     "u": "https://www.lemagit.fr/actualites/366655137/Ransomware-les-frameworks-offensifs-agentiques-sont-entres-dans-la-danse"
+    }
+   ]
+  },
+  {
+   "titre": "Bulgarie : cinq ans de cyberespionnage, 62 millions de pages volées",
+   "quoi": "La Bulgarie révèle une campagne de cyberespionnage de cinq ans et le vol d'au moins 62 millions de pages ; attribution non précisée dans l'extrait.",
+   "sources": [
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/cyberespionnage-en-bulgarie-62-millions-de-pages-volees/"
+    }
+   ]
+  },
+  {
+   "titre": "GlobeTopper : 2,5 M$ de pertes après une cyberattaque",
+   "quoi": "Le fournisseur B2B de recharges a subi une interruption estimée à 2,5 M$ de chiffre d'affaires ; l'attaquant a encaissé 70 000 $ de cartes cadeaux.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/globetopper-loses-25-million-after-hackers-steal-70k-in-gift-cards/"
+    }
+   ]
+  },
+  {
+   "titre": "BadBox 3.0 perturbé",
+   "quoi": "L'opération de fraude publicitaire BadBox 3.0 (40 milliards de requêtes d'enchères par jour) a été perturbée ; des appareils bon marché à porte dérobée servaient aussi de proxys résidentiels.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/badbox-3-0-ad-fraud-operation-generating-40-billion-daily-bid-requests-disrupted/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [
+   {
+    "victime": "Ipsos",
+    "groupe": "Qilin",
+    "secteur": "Études et sondages",
+    "date": "23/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Ipsos figure sur Bonjour La Fuite depuis le 16/11 ; lien avec la revendication non établi"
+   },
+   {
+    "victime": "Piment Intérim (Groupe Piment)",
+    "groupe": "SpaceBears",
+    "secteur": "Intérim / RH",
+    "date": "23/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Aucune confirmation publique trouvée"
+   }
+  ],
+  "tendance": "30 revendications mondiales visibles dans la fenêtre sur ransomware.live ; Safepay en tête (9). N0n a publié 27 entrées le 22-23/11, presque toutes avant la fenêtre.",
+  "groupes": [
+   [
+    "Safepay",
+    9
+   ],
+   [
+    "Aurora",
+    3
+   ],
+   [
+    "Anubis",
+    2
+   ],
+   [
+    "Rhysida",
+    2
+   ],
+   [
+    "Qilin",
+    2
+   ]
+  ]
+ },
+ "fuites": [
+  {
+   "victime": "AAAEP (revendiquée par BlackHatSect0r)",
+   "pays": "FR",
+   "volume": "585 000 personnes potentiellement",
+   "donnees": "Données psychotechniques, enregistrements d'appels",
+   "statut": "Non vérifiée",
+   "verif": false,
+   "source": {
+    "t": "ZATAZ",
+    "u": "https://www.zataz.com/cyberattaque-contre-aaaep-585-000-personnes-exposees/"
+   }
+  },
+  {
+   "victime": "KEPCO (Korea Electric Power Corporation)",
+   "pays": "KR",
+   "volume": "1,5 million de personnes",
+   "donnees": "Données de clients, employés et sous-traitants",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer",
+    "u": "https://www.bleepingcomputer.com/news/security/south-koreas-power-giant-kepco-confirms-data-breach-impacting-15-million/"
+   }
+  },
+  {
+   "victime": "LaLiga",
+   "pays": "ES",
+   "volume": "N/A",
+   "donnees": "Données personnelles d'utilisateurs de LaLiga et de clubs affiliés",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer",
+    "u": "https://www.bleepingcomputer.com/news/security/spanish-laliga-confirms-hackers-stole-soccer-fans-personal-data/"
+   }
+  },
+  {
+   "victime": "Ministère autrichien des Affaires étrangères",
+   "pays": "AT",
+   "volume": "N/A",
+   "donnees": "Noms et coordonnées professionnelles des agents (siège et missions diplomatiques)",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "The Record",
+    "u": "https://therecord.media/austrian-foreign-ministry-says-website-hacked"
+   }
+  },
+  {
+   "victime": "Bromcom",
+   "pays": "GB",
+   "volume": "355 051 comptes",
+   "donnees": "E-mails d'élèves et de personnels, données d'inscription SSO",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "HIBP",
+    "u": "https://haveibeenpwned.com/Breach/Bromcom"
+   }
+  }
+ ],
+ "iocs": [
+  {
+   "type": "Plage IP",
+   "valeur": "109.160.32[.]0/24",
+   "contexte": "Scans persistants vus par DShield sur 90 jours, toujours actifs (AS198364, BANATSYNC SRL, Roumanie)",
+   "source": "SANS ISC"
+  }
+ ],
+ "regl": [
+  "France : dix personnes mises en examen après le piratage de trois courtiers en métaux précieux dont les clients étaient ensuite démarchés par de faux policiers (ZATAZ).",
+  "États-Unis : un opérateur de centre d'appels péruvien condamné à 8 ans de prison pour une fraude à l'usurpation d'administration visant plus de 30 000 résidents.",
+  "Microsoft : Windows PowerShell 5.1 déprécié depuis le 17/11 ; PowerShell 7 sera intégré à la prochaine version de Windows, scripts d'administration à tester."
+ ],
+ "lab": {
+  "concept": "La SSRF (CVE-2026-134624) détourne une fonction du serveur, ici un test de connexion LDAP, pour joindre des hôtes internes. Les différences de réponse ou de délai révèlent les ports ouverts : le serveur devient un scanner derrière le pare-feu.",
+  "piste": "Sous Ubuntu avec Docker : une app Flask exposant un « test de connexion » (hôte, port) et un Redis interne non exposé. Scanner le réseau Docker via l'app, puis envoyer des commandes Redis brutes. Côté défense : journaliser les destinations, filtrer la sortie par liste blanche et vérifier le blocage."
+ },
+ "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, SANS ISC, HIBP, CERT-FR (alertes, avis, actualités, CTI, IOC), CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, recherche web (Rapid7)",
+ "indispo": "Flux CERT-FR figé (aucun article dans la fenêtre ; titres des avis du 23/11 absents) ; Bonjour La Fuite sans nouvelle entrée dans la fenêtre ; identifiant CVE de la faille Azure APIM non trouvé"
+}

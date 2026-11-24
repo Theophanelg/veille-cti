@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulletin CTI quotidien</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a duty officer's morning sheet, dense but calm
+   IDEA the printed threat placard pinned in a SOC: one scale, one pointer, then the triage list
+   PICTURE a long threat-level scale with the day's pointer, tallies beneath it
+   COLOUR aluminium ground, black ink, orange pointer; red/amber/grey for P1/P2/P3
+   TYPE Geist 600 for titles, Geist for text, Geist Mono for CVE ids and IOC
+   LAYOUT laptop: scale full width, BLUF beside tallies; phone: scale, tallies, BLUF, then cards stacked */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--tint:light-dark(#f4f4f5,#24272b);--acc:#ff4f00;--p1:light-dark(#d1291a,#ff5a47);--p2:light-dark(#b86a00,#f5a524);--p3:light-dark(#6b7079,#9aa0a8)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Geist,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+header{padding:28px 0 8px}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;color:var(--mute);margin-top:10px;font-size:14px}
+.tlp{background:#111214;color:#fff;font-weight:600;padding:2px 8px;border-radius:4px;font-size:13px}
+:root[data-theme=dark] .tlp{background:#fff;color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tlp{background:#fff;color:#111}}
+.scale{margin:26px 0 6px}
+.track{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.seg{height:14px;border-radius:3px;background:var(--rule)}
+.seg.on{background:var(--ink)}
+.seg.cur{background:var(--acc)}
+.labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;font-size:14px;color:var(--mute)}
+.labels .cur{color:var(--ink);font-weight:600}
+.pointer{position:absolute;top:-12px;width:0;height:0;border:8px solid transparent;border-top-color:var(--acc);transform:translateX(-50%)}
+.why{font-size:17px;margin:14px 0 0;max-width:70ch}
+.why b{color:var(--acc)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;margin:22px 0 10px}
+.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start;align-self:start}
+.tally div{background:var(--card);padding:12px 14px}
+.tally strong{display:block;font-size:30px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.tally span{font-size:13px;color:var(--mute)}
+.bluf{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:6px 18px}
+.bluf h2{font-size:15px;margin:10px 0 2px;color:var(--mute);font-weight:500}
+.bluf ul{list-style:none;margin:0;padding:0}
+.bluf li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--rule)}
+.bluf li:first-of-type{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--p3)}
+.dot.p1{background:var(--p1)}.dot.p2{background:var(--p2)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:8px 0}
+nav a{flex:none;text-decoration:none;font-size:14px;padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-color:var(--ink);outline:none}
+@media(min-width:900px){nav{position:sticky;top:0;z-index:5;background:var(--bg)}}
+section{padding:26px 0 8px}
+h2.sec{font-size:26px;line-height:1.1;letter-spacing:-.01em;margin:0 0 14px;font-weight:600}
+.note{color:var(--mute);font-size:14px;margin:0 0 14px;max-width:80ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px;margin-bottom:12px}
+.card.p1{border-left:5px solid var(--p1)}.card.p2{border-left:5px solid var(--p2)}.card.p3{border-left:5px solid var(--p3)}
+.head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.pill{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;background:var(--p3)}
+.pill.p1{background:var(--p1)}.pill.p2{background:var(--p2)}
+:root[data-theme=dark] .pill{color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pill{color:#111}}
+.cve{font:500 14px/1.4 "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+h3{font-size:19px;line-height:1.25;margin:4px 0 10px;font-weight:600;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{font-size:13px;padding:3px 9px;border-radius:999px;background:var(--tint);white-space:nowrap}
+.chip b{font-weight:600}
+.chip.hot{background:var(--acc);color:#fff}
+.chip.dash{background:none;border:1px dashed var(--mute)}
+.qcp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.qcp h4{margin:0 0 4px;font-size:14px;color:var(--mute);font-weight:600}
+.qcp p{margin:0}
+.act{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.act div{background:var(--tint);border-radius:8px;padding:12px 14px;font-size:15px}
+.act h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.src{margin-top:12px;font-size:14px;color:var(--mute)}
+.src a{color:var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:4px 14px;font-size:15px}
+.row dt{color:var(--mute);font-size:13px}
+.row dd{margin:0 0 6px}
+details summary{cursor:pointer;font-size:14px;color:var(--mute);padding:6px 0;min-height:32px}
+.ttps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ttps a{font-size:13px;text-decoration:none;padding:3px 9px;border:1px solid var(--rule);border-radius:4px}
+.ttps a span{font-family:"Geist Mono",monospace;font-weight:500}
+.conf{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.conf i{width:14px;height:6px;border-radius:2px;background:var(--rule)}
+.conf i.on{background:var(--ink)}
+.list{background:var(--card);border:1px solid var(--rule);border-radius:10px}
+.item{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) auto;gap:6px 16px;padding:14px 18px;border-top:1px solid var(--rule);align-items:start}
+.item:first-child{border-top:0}
+.item .name{font-weight:600}
+.item .sub{color:var(--mute);font-size:14px}
+.tag{font-size:13px;padding:2px 8px;border-radius:4px;white-space:nowrap;background:var(--ink);color:var(--bg);justify-self:end}
+.tag.unv{background:none;color:var(--ink);border:1px dashed var(--mute)}
+.bars{margin-top:14px;display:grid;gap:6px;max-width:560px}
+.bar{display:grid;grid-template-columns:8em minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:14px}
+.bar i{display:block;height:12px;border-radius:2px;background:var(--acc)}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.lab{background:var(--ink);color:var(--bg);border-radius:10px;padding:20px}
+.lab h4{margin:0 0 4px;font-size:14px;opacity:.75;font-weight:600}
+.lab p{margin:0 0 12px}
+ul.plain{margin:0;padding-left:18px}
+ul.plain li{margin-bottom:8px}
+footer{padding:20px 0 40px;font-size:14px;color:var(--mute)}
+.scroll{overflow-x:auto}
+@media(max-width:900px){.top{grid-template-columns:minmax(0,1fr)}.qcp{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.act{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.item{grid-template-columns:minmax(0,1fr) auto}.item .sub2{grid-column:1/-1}.labels{font-size:13px}.card{padding:14px}}
+@media(prefers-reduced-motion:no-preference){.pointer{transition:left .6s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="title">Bulletin CTI</h1>
+<div class="meta" id="meta"></div>
+<div class="scale">
+<div class="track" id="track"></div>
+<div class="labels" id="labels"></div>
+</div>
+<p class="why" id="why"></p>
+</header>
+<div class="top">
+<div class="tally" id="tally"></div>
+<div class="bluf"><h2>L'essentiel (BLUF)</h2><ul id="bluf"></ul></div>
+</div>
+<nav id="nav" aria-label="Sections"></nav>
+<div id="main"></div>
+<footer id="foot"></footer>
+</div>
+
+<!-- DONNEES DU JOUR : seul ce bloc JSON change d'un bulletin à l'autre -->
+<script id="data" type="application/json">
+{
+ "date": "Mardi 24 novembre 2026",
+ "periode": "lun. 23/11 06:35 → mar. 24/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Deux ajouts KEV (MONAI Label, N-able MailAssure) à échéance du 26/11, une faille Azure API Management exploitée contre l'énergie norvégienne et le CHU de Guadeloupe paralysé par une cyberattaque.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "MONAI Label et N-able MailAssure au KEV",
+   "texte": "ajoutés le 23/11, échéance CISA au 26/11 ; nouveau : exploitation confirmée. Passer MONAI Label en 0.8.6 et vérifier le build MailAssure/SpamExperts (≥ 20261121.1943)."
+  },
+  {
+   "p": 1,
+   "sujet": "Azure API Management Classic",
+   "texte": "faille exploitée pour voler les identifiants d'API stockés, liée par la Norvège aux attaques contre Equinor et Skagerak Energi ; faire tourner les secrets stockés dans APIM."
+  },
+  {
+   "p": 2,
+   "sujet": "CHU de Guadeloupe",
+   "texte": "plan blanc depuis le 22/11 après une cyberattaque ; vecteur et acteur non communiqués, s'attendre à du phishing opportuniste visant patients et personnel."
+  },
+  {
+   "p": 2,
+   "sujet": "binary-parser (npm)",
+   "texte": "injection de code JavaScript (CVSS 4.0 9,2) si l'attaquant contrôle les définitions de parseur ; mettre à jour en 2.3.1."
+  },
+  {
+   "p": 2,
+   "sujet": "Webworm",
+   "texte": "l'acteur aligné sur la Chine utiliserait un SoftEther VPN Bridge modifié, déguisé en outil de supervision, pour un accès persistant ; chasser les binaires SoftEther inattendus."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133968"
+   ],
+   "titre": "MONAI Label : path traversal menant à une RCE, ajoutée au KEV",
+   "produit": "MONAI Label < 0.8.6",
+   "type": "Path traversal (CWE-24)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,037",
+   "pct": "89,9",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui, depuis septembre 2026",
+   "correctif": "0.8.6",
+   "quoi": "Faille de MONAI Label, serveur d'annotation d'imagerie médicale par IA. Nouveau : ajoutée au KEV le 23/11, échéance fédérale au 26/11.",
+   "comment": "Le paramètre image de l'endpoint PUT /datastore/image permet, sans authentification, d'écrire un fichier hors du datastore, d'où une exécution de code.",
+   "pourquoi": "Exploitée depuis septembre 2026 contre des universités (opération Cairn, agents IA autonomes). Les serveurs de recherche exposés sur Internet sont visés.",
+   "detection": "Requêtes PUT /datastore/image contenant ../ dans le paramètre image ; fichiers Python inattendus (sitecustomize.py) ; processus enfants du service MONAI Label.",
+   "remediation": "Mettre à jour en 0.8.6, retirer l'instance d'Internet ou la placer derrière une authentification. Si exposée depuis septembre : traiter comme compromise.",
+   "sources": [
+    {
+     "t": "CISA KEV",
+     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133968"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133968"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-134624"
+   ],
+   "titre": "N-able MailAssure / SpamExperts : SSRF ajoutée au KEV",
+   "produit": "MailAssure (SpamExperts) < 20261121.1943",
+   "type": "SSRF (CWE-918)",
+   "cvss": "9,3",
+   "cvssv": "4.0",
+   "epss": "0,004",
+   "pct": "29,7",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (CISA KEV, 23/11)",
+   "correctif": "Build 20261121.1943",
+   "quoi": "SSRF (le serveur est forcé à émettre des requêtes vers des cibles choisies) dans la vérification de connexion LDAP. Nouveau depuis hier : exploitation confirmée par l'ajout au KEV le 23/11.",
+   "comment": "Un utilisateur API authentifié fait connecter le serveur à des hôtes et ports internes arbitraires, cartographie ceux qui répondent et leur envoie des données forgées.",
+   "pourquoi": "Découverte pendant l'enquête sur l'intrusion du Hosted Cloud de N-able. Service de filtrage mail mutualisé par des MSP : un rebond vers l'interne touche de nombreux clients.",
+   "detection": "Journaux API de configuration de relais/LDAP pointant vers des IP privées ou des ports inhabituels ; connexions sortantes du serveur vers le réseau interne.",
+   "remediation": "Vérifier le build (≥ 20261121.1943) sur Local Cloud, recréer les jetons API/OAuth révoqués et filtrer les flux sortants du serveur vers l'interne.",
+   "sources": [
+    {
+     "t": "CISA KEV",
+     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-134624"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134624"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/n-able-patches-critical-flaw-disclosed-after-mail-assure-cyberattack/"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [],
+   "titre": "Azure API Management Classic : vol des identifiants d'API stockés, exploitée",
+   "produit": "Azure API Management, offres Classic",
+   "type": "N/A",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui (Microsoft, autorités norvégiennes)",
+   "correctif": "Corrigé côté Microsoft (service cloud)",
+   "quoi": "Microsoft avertit qu'une faille des offres Classic d'Azure API Management (APIM, passerelle d'API managée) a été exploitée. Identifiant CVE et mécanisme non communiqués.",
+   "comment": "N/A : les attaquants ont récupéré des identifiants d'API stockés dans APIM ; mode opératoire non détaillé.",
+   "pourquoi": "La Norvège relie la faille aux attaques contre Equinor et Skagerak Energi ; d'autres secteurs sont aussi touchés. Les secrets volés ouvrent les backends derrière la passerelle.",
+   "detection": "Journaux d'activité Azure et diagnostics APIM : lecture des named values, clés d'abonnement ou identifiants backend ; appels backend depuis des IP inconnues.",
+   "remediation": "Le correctif est côté Microsoft, mais les secrets déjà volés restent valides : les faire tourner (named values, clés d'abonnement, identifiants backend) et migrer vers Key Vault.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+    },
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-134814"
+   ],
+   "titre": "binary-parser : injection de JavaScript via des définitions de parseur",
+   "produit": "binary-parser (npm) < 2.3.1",
+   "type": "Injection de code (CWE-94)",
+   "cvss": "9,2",
+   "cvssv": "4.0",
+   "epss": "0,006",
+   "pct": "50,1",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "2.3.1",
+   "resume": "Des options non validées (length, key, tag, offset, alias namely()) sont injectées dans le code généré à la compilation du parseur : exécution de JavaScript dans le processus Node.js. Exploitable seulement si l'attaquant contrôle la définition.",
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/critical-binary-parser-flaw-enables.html"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134814"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [],
+   "titre": "phpAfterShell : désérialisation de session PHP relançant la voie PHP2Shell",
+   "produit": "PHP (gestion des sessions)",
+   "type": "Désérialisation non sûre",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "N/A",
+   "resume": "Si l'écriture d'une session est interrompue, un attaquant qui contrôle les nouvelles données peut déclencher une désérialisation et une RCE. CVE, versions et correctif non précisés dans la source.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/phpaftershell-vulnerability-revives-php2shells-attack-path/"
+    }
+   ]
+  }
+ ],
+ "alertes": "Aucune nouvelle alerte CERT-FR dans la fenêtre (dernières : ALE-016 et ALE-017 du 18/11). Le 23/11 : 9 avis (AVI-1599 à AVI-1607) et le bulletin d'actualité ACT-049 ; leurs titres ne figurent pas dans la collecte.",
+ "menaces": [
+  {
+   "titre": "Norvège : la faille Azure APIM exploitée contre Equinor et Skagerak Energi",
+   "quoi": "Les autorités norvégiennes relient l'exploitation d'Azure API Management Classic à des attaques visant des identifiants sensibles chez Equinor et Skagerak Energi.",
+   "comment": "Vol d'identifiants d'API stockés dans le service cloud, puis usage présumé pour atteindre des systèmes internes (détails non publiés).",
+   "pourquoi": "Énergie, secteur critique ; montre que les secrets confiés à un service SaaS restent une cible même quand le fournisseur a corrigé.",
+   "acteur": "N/A (aucune attribution publiée)",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1552",
+     "Unsecured Credentials"
+    ],
+    [
+     "T1078.004",
+     "Cloud Accounts"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+    },
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+    }
+   ]
+  },
+  {
+   "titre": "CHU de Guadeloupe paralysé par une cyberattaque",
+   "quoi": "Cyberattaque le 21/11 au soir ; le CHU a déclenché son plan blanc (dispositif de crise hospitalier) le 22/11 et fonctionne en mode dégradé.",
+   "comment": "N/A : vecteur, nature (rançongiciel ou non) et données touchées non communiqués.",
+   "pourquoi": "Deuxième établissement de santé français touché en quelques jours après le CHU de Bordeaux (revendication non vérifiée) ; risque sur la continuité des soins.",
+   "acteur": "N/A (aucune revendication relevée)",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "Next",
+     "u": "https://next.ink/brief-article/le-chu-de-guadeloupe-est-paralyse-par-une-cyberattaque/"
+    }
+   ]
+  },
+  {
+   "titre": "Webworm : un SoftEther VPN Bridge modifié pour l'accès distant",
+   "quoi": "Webworm, acteur aligné sur la Chine, utiliserait une version modifiée de SoftEther VPN Bridge (VPN open source), déguisée en logiciel de supervision réseau.",
+   "comment": "Les empreintes reconnaissables de SoftEther sont retirées du binaire, qui maintient un tunnel vers l'infrastructure de l'attaquant : accès distant sans malware classique.",
+   "pourquoi": "Un outil légitime modifié échappe aux signatures ; seules la télémétrie réseau et l'inventaire logiciel le révèlent. Rapid7 évoque des cibles gouvernementales.",
+   "acteur": "Webworm, aligné sur la Chine (soupçon des chercheurs)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1572",
+     "Protocol Tunneling"
+    ],
+    [
+     "T1036",
+     "Masquerading"
+    ],
+    [
+     "T1133",
+     "External Remote Services"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html"
+    },
+    {
+     "t": "Rapid7",
+     "u": "https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge"
+    }
+   ]
+  },
+  {
+   "titre": "BlackHatSect0r : extorsion, phishing bancaire et IA offensive à louer (non confirmé)",
+   "quoi": "Selon ZATAZ, ce groupe revendique des attaques contre des sociétés françaises, dont AAAEP (585 000 personnes potentiellement concernées), et loue une « IA offensive » 500 €.",
+   "comment": "Phishing bancaire, extorsion, destruction des sauvegardes et ciblage d'interfaces industrielles exposées sur Internet.",
+   "pourquoi": "Acteur francophone visant des PME françaises ; la destruction des sauvegardes rend les sauvegardes hors ligne indispensables.",
+   "acteur": "BlackHatSect0r",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1566",
+     "Phishing"
+    ],
+    [
+     "T1490",
+     "Inhibit System Recovery"
+    ],
+    [
+     "T1657",
+     "Financial Theft"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/blackhatsect0r-phishing-bancaire-extorsion-et-industrie/"
+    },
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/blackhat-sector-une-ia-offensive-a-louer-pour-500-e/"
+    }
+   ]
+  },
+  {
+   "titre": "Ransomware : les frameworks offensifs agentiques comme Artex arrivent",
+   "quoi": "LeMagIT relève que des opérateurs de rançongiciels s'appuient désormais sur des frameworks offensifs agentiques (agents IA qui enchaînent les actions), tels qu'Artex.",
+   "sources": [
+    {
+     "t": "LeMagIT",
+     "u": "https://www.lemagit.fr/actualites/366655137/Ransomware-les-frameworks-offensifs-agentiques-sont-entres-dans-la-danse"
+    }
+   ]
+  },
+  {
+   "titre": "Bulgarie : cinq ans de cyberespionnage, 62 millions de pages volées",
+   "quoi": "La Bulgarie révèle une campagne de cyberespionnage de cinq ans et le vol d'au moins 62 millions de pages ; attribution non précisée dans l'extrait.",
+   "sources": [
+    {
+     "t": "ZATAZ",
+     "u": "https://www.zataz.com/cyberespionnage-en-bulgarie-62-millions-de-pages-volees/"
+    }
+   ]
+  },
+  {
+   "titre": "GlobeTopper : 2,5 M$ de pertes après une cyberattaque",
+   "quoi": "Le fournisseur B2B de recharges a subi une interruption estimée à 2,5 M$ de chiffre d'affaires ; l'attaquant a encaissé 70 000 $ de cartes cadeaux.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/globetopper-loses-25-million-after-hackers-steal-70k-in-gift-cards/"
+    }
+   ]
+  },
+  {
+   "titre": "BadBox 3.0 perturbé",
+   "quoi": "L'opération de fraude publicitaire BadBox 3.0 (40 milliards de requêtes d'enchères par jour) a été perturbée ; des appareils bon marché à porte dérobée servaient aussi de proxys résidentiels.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/badbox-3-0-ad-fraud-operation-generating-40-billion-daily-bid-requests-disrupted/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [
+   {
+    "victime": "Ipsos",
+    "groupe": "Qilin",
+    "secteur": "Études et sondages",
+    "date": "23/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Ipsos figure sur Bonjour La Fuite depuis le 16/11 ; lien avec la revendication non établi"
+   },
+   {
+    "victime": "Piment Intérim (Groupe Piment)",
+    "groupe": "SpaceBears",
+    "secteur": "Intérim / RH",
+    "date": "23/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Aucune confirmation publique trouvée"
+   }
+  ],
+  "tendance": "30 revendications mondiales visibles dans la fenêtre sur ransomware.live ; Safepay en tête (9). N0n a publié 27 entrées le 22-23/11, presque toutes avant la fenêtre.",
+  "groupes": [
+   [
+    "Safepay",
+    9
+   ],
+   [
+    "Aurora",
+    3
+   ],
+   [
+    "Anubis",
+    2
+   ],
+   [
+    "Rhysida",
+    2
+   ],
+   [
+    "Qilin",
+    2
+   ]
+  ]
+ },
+ "fuites": [
+  {
+   "victime": "AAAEP (revendiquée par BlackHatSect0r)",
+   "pays": "FR",
+   "volume": "585 000 personnes potentiellement",
+   "donnees": "Données psychotechniques, enregistrements d'appels",
+   "statut": "Non vérifiée",
+   "verif": false,
+   "source": {
+    "t": "ZATAZ",
+    "u": "https://www.zataz.com/cyberattaque-contre-aaaep-585-000-personnes-exposees/"
+   }
+  },
+  {
+   "victime": "KEPCO (Korea Electric Power Corporation)",
+   "pays": "KR",
+   "volume": "1,5 million de personnes",
+   "donnees": "Données de clients, employés et sous-traitants",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer",
+    "u": "https://www.bleepingcomputer.com/news/security/south-koreas-power-giant-kepco-confirms-data-breach-impacting-15-million/"
+   }
+  },
+  {
+   "victime": "LaLiga",
+   "pays": "ES",
+   "volume": "N/A",
+   "donnees": "Données personnelles d'utilisateurs de LaLiga et de clubs affiliés",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "BleepingComputer",
+    "u": "https://www.bleepingcomputer.com/news/security/spanish-laliga-confirms-hackers-stole-soccer-fans-personal-data/"
+   }
+  },
+  {
+   "victime": "Ministère autrichien des Affaires étrangères",
+   "pays": "AT",
+   "volume": "N/A",
+   "donnees": "Noms et coordonnées professionnelles des agents (siège et missions diplomatiques)",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "The Record",
+    "u": "https://therecord.media/austrian-foreign-ministry-says-website-hacked"
+   }
+  },
+  {
+   "victime": "Bromcom",
+   "pays": "GB",
+   "volume": "355 051 comptes",
+   "donnees": "E-mails d'élèves et de personnels, données d'inscription SSO",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "HIBP",
+    "u": "https://haveibeenpwned.com/Breach/Bromcom"
+   }
+  }
+ ],
+ "iocs": [
+  {
+   "type": "Plage IP",
+   "valeur": "109.160.32[.]0/24",
+   "contexte": "Scans persistants vus par DShield sur 90 jours, toujours actifs (AS198364, BANATSYNC SRL, Roumanie)",
+   "source": "SANS ISC"
+  }
+ ],
+ "regl": [
+  "France : dix personnes mises en examen après le piratage de trois courtiers en métaux précieux dont les clients étaient ensuite démarchés par de faux policiers (ZATAZ).",
+  "États-Unis : un opérateur de centre d'appels péruvien condamné à 8 ans de prison pour une fraude à l'usurpation d'administration visant plus de 30 000 résidents.",
+  "Microsoft : Windows PowerShell 5.1 déprécié depuis le 17/11 ; PowerShell 7 sera intégré à la prochaine version de Windows, scripts d'administration à tester."
+ ],
+ "lab": {
+  "concept": "La SSRF (CVE-2026-134624) détourne une fonction du serveur, ici un test de connexion LDAP, pour joindre des hôtes internes. Les différences de réponse ou de délai révèlent les ports ouverts : le serveur devient un scanner derrière le pare-feu.",
+  "piste": "Sous Ubuntu avec Docker : une app Flask exposant un « test de connexion » (hôte, port) et un Redis interne non exposé. Scanner le réseau Docker via l'app, puis envoyer des commandes Redis brutes. Côté défense : journaliser les destinations, filtrer la sortie par liste blanche et vérifier le blocage."
+ },
+ "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, SANS ISC, HIBP, CERT-FR (alertes, avis, actualités, CTI, IOC), CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, recherche web (Rapid7)",
+ "indispo": "Flux CERT-FR figé (aucun article dans la fenêtre ; titres des avis du 23/11 absents) ; Bonjour La Fuite sans nouvelle entrée dans la fenêtre ; identifiant CVE de la faille Azure APIM non trouvé"
+}
+</script>
+
+<script>
+{
+const D=JSON.parse(document.getElementById('data').textContent);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const L=['Faible','Modéré','Élevé','Critique'];
+const src=a=>(a||[]).map(s=>s.u?`<a href="${e(s.u)}" target="_blank" rel="noopener">${e(s.t)}</a>`:e(s.t)).join(' · ');
+const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
+
+document.title='Bulletin CTI — '+D.date;
+$('title').textContent='Bulletin CTI — '+D.date;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>${window.self===window.top?'<a href="/veille-cti/">Toutes les éditions</a>':''}`;
+$('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
+$('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
+$('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;
+
+const V=D.vulns||[],R=(D.ransomware||{}).victimes||[],F=D.fuites||[],M=D.menaces||[];
+const T=[[V.filter(v=>v.prio===1).length,'vulnérabilités P1'],[V.filter(v=>v.kev).length,'au KEV cette période'],[R.length,'revendications ransomware FR'],[F.filter(f=>f.pays==='FR').length+' / '+F.length,'fuites France / total']];
+$('tally').innerHTML=T.map(t=>`<div><strong>${e(t[0])}</strong><span>${e(t[1])}</span></div>`).join('');
+$('bluf').innerHTML=(D.bluf||[]).map(b=>`<li><i class="dot p${b.p}"></i><div><b>${e(b.sujet)} :</b> ${e(b.texte)}</div></li>`).join('');
+
+const chips=v=>`<div class="chips"><span class="chip">CVSS <b>${e(v.cvss)}</b> (${e(v.cvssv)})</span><span class="chip">EPSS <b>${e(v.epss)}</b>${v.pct?' · p'+e(v.pct):''}</span>${v.kev?'<span class="chip hot"><b>KEV</b></span>':''}<span class="chip ${/^oui/i.test(v.exploit)?'hot':'dash'}">Exploitation : ${e(v.exploit)}</span><span class="chip">PoC : ${e(v.poc)}</span></div>`;
+const vcard=v=>{
+ const ids=v.cves.map(c=>`<span class="cve">${e(c)}</span>`).join(', ');
+ const head=`<div class="head"><span class="pill p${v.prio}">P${v.prio}</span>${ids}</div><h3>${e(v.titre)}</h3>`;
+ const facts=`<dl class="row"><div><dt>Produit / versions</dt><dd>${e(v.produit)}</dd></div><div><dt>Type</dt><dd>${e(v.type)}</dd></div><div><dt>Correctif</dt><dd>${e(v.correctif)}</dd></div></dl>`;
+ if(v.quoi) return `<article class="card p${v.prio}">${head}${chips(v)}<div class="qcp"><div><h4>Quoi ?</h4><p>${e(v.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(v.comment)}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(v.pourquoi)}</p></div></div><div class="act"><div><h4>Détection</h4>${e(v.detection)}</div><div><h4>Remédiation</h4>${e(v.remediation)}</div></div><details><summary>Produit, type et correctif</summary>${facts}</details>${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+ return `<article class="card p${v.prio}">${head}${chips(v)}${facts}${v.resume?`<p class="note" style="margin:6px 0 0">${e(v.resume)}</p>`:''}${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+};
+const conf=n=>n?`<span class="conf" aria-label="confiance ${['','faible','moyenne','élevée'][n]}">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span> ${['','faible','moyenne','élevée'][n]}`:'';
+const mcard=m=>{
+ const full=m.comment||m.pourquoi;
+ const body=full?`<div class="qcp"><div><h4>Quoi ?</h4><p>${e(m.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(m.comment||'N/A')}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(m.pourquoi||'N/A')}</p></div></div>`:`<p style="margin:0">${e(m.quoi)}</p>`;
+ return `<article class="card">${'<h3>'+e(m.titre)+'</h3>'}${body}${m.acteur&&m.acteur!=='N/A'?`<p class="src" style="color:var(--ink)"><b>Attribution :</b> ${e(m.acteur)} · confiance ${conf(m.confiance)}</p>`:''}${m.ttps&&m.ttps.length?`<div class="ttps">${m.ttps.map(t=>`<a href="${ttpUrl(t[0])}" target="_blank" rel="noopener"><span>${e(t[0])}</span> ${e(t[1])}</a>`).join('')}</div>`:''}<div class="src">Sources : ${src(m.sources)}</div></article>`;
+};
+const mini=M.filter(m=>!(m.comment||m.pourquoi)&&!(m.ttps||[]).length);
+const big=M.filter(m=>!mini.includes(m));
+
+const S=[];
+const p1=V.filter(v=>v.quoi),rest=V.filter(v=>!v.quoi);
+S.push(['vulns','Vulnérabilités',`<p class="note">${e(D.alertes||'')}</p>${p1.map(vcard).join('')}${rest.length?`<h3 style="margin-top:22px">Autres vulnérabilités (P2 / P3)</h3>${rest.map(vcard).join('')}`:''}`]);
+S.push(['menaces','Menaces & campagnes',big.map(mcard).join('')+(mini.length?`<div class="list">${mini.map(m=>`<div class="item"><div class="name">${e(m.titre)}</div><div class="sub sub2">${e(m.quoi)}</div><div class="sub">${src(m.sources)}</div></div>`).join('')}</div>`:'')]);
+const rw=D.ransomware||{},gmax=Math.max(1,...(rw.groupes||[]).map(g=>g[1]));
+S.push(['ransomware','Ransomware — France',`<div class="list">${R.map(r=>`<div class="item"><div><div class="name">${e(r.victime)}</div><div class="sub">${e(r.groupe)} · ${e(r.secteur)} · ${e(r.date)}</div></div><div class="sub sub2">${e(r.note)}</div><span class="tag ${r.verif?'':'unv'}">${e(r.statut)}</span></div>`).join('')||'<div class="item">Aucune revendication visant la France.</div>'}</div><p class="note" style="margin-top:16px">${e(rw.tendance||'')} Groupes les plus actifs :</p><div class="bars">${(rw.groupes||[]).map(g=>`<div class="bar"><span>${e(g[0])}</span><i style="width:${g[1]/gmax*100}%"></i><span>${g[1]}</span></div>`).join('')}</div>`]);
+S.push(['fuites','Fuites de données',`<div class="list">${F.map(f=>`<div class="item"><div><div class="name">${e(f.victime)}</div><div class="sub">${e(f.pays)} · ${e(f.volume)}</div></div><div class="sub sub2">${e(f.donnees)}${f.source?' — '+src([f.source]):''}</div><span class="tag ${f.verif?'':'unv'}">${e(f.statut)}</span></div>`).join('')}</div>`]);
+if((D.iocs||[]).length) S.push(['ioc','IOC notables',`<div class="scroll"><table style="width:100%;border-collapse:collapse;background:var(--card)"><thead><tr><th align="left">Type</th><th align="left">Valeur</th><th align="left">Contexte</th><th align="left">Source</th></tr></thead><tbody>${D.iocs.map(i=>`<tr><td>${e(i.type)}</td><td class="cve">${e(i.valeur)}</td><td>${e(i.contexte)}</td><td>${e(i.source)}</td></tr>`).join('')}</tbody></table></div>`]);
+if((D.regl||[]).length) S.push(['regl','Réglementaire & institutionnel',`<div class="card"><ul class="plain">${D.regl.map(r=>`<li>${e(r)}</li>`).join('')}</ul></div>`]);
+if(D.lab) S.push(['lab','À creuser',`<div class="lab"><h4>Concept</h4><p>${e(D.lab.concept)}</p><h4>Piste de lab</h4><p style="margin:0">${e(D.lab.piste)}</p></div>`]);
+
+$('nav').innerHTML=S.map(s=>`<a href="#${s[0]}">${s[1]}</a>`).join('');
+$('main').innerHTML=S.map(s=>`<section id="${s[0]}"><h2 class="sec">${s[1]}</h2>${s[2]}</section>`).join('');
+$('foot').innerHTML=`<p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
+}
+</script>
+</body>
+</html>
