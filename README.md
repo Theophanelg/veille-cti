@@ -94,9 +94,10 @@ Chaque bulletin a aussi une adresse directe : `…/veille-cti/#2026-11-23`, et c
 ## 4. Fonctionnement technique
 
 ```
-Chaque matin (6h35)                         Toutes les 20 min (GitHub Actions)
-  tâche planifiée Claude                      scripts/critique.py
-  → collecte + analyse des sources            → CISA KEV, NVD, EPSS, CERT-FR
+4h15-6h15 (GitHub Actions)                  Toutes les 20 min (GitHub Actions)
+  scripts/collecte.py → raw/AAAA-MM-JJ.json   scripts/critique.py
+Chaque matin (6h35) : tâche planifiée Claude  → CISA KEV, NVD, EPSS, CERT-FR
+  → lit raw/, rédige, contrôle (verifier.py)
   → écrit data/AAAA-MM-JJ.json                → critique/items.json
   → scripts/build.py                          → critique.xml
       bulletins/<date>.html  (page)
@@ -116,7 +117,27 @@ Chaque matin (6h35)                         Toutes les 20 min (GitHub Actions)
 | `scripts/critique.py`, `.github/workflows/critique.yml` | Robot des alertes CVE critiques |
 | `critique/watchlist.txt` | Produits surveillés par le robot |
 
+| `scripts/collecte.py`, `.github/workflows/collecte.yml` | Robot de collecte des sources (4h15, 5h15, 6h15) → `raw/AAAA-MM-JJ.json` |
+| `scripts/verifier.py` | Garde-fou exécuté avant chaque publication du bulletin |
+
 Régénérer le site en local : `python3 scripts/build.py`
+
+---
+
+## 5. Sécurité et données
+
+- **Aucun secret** dans le dépôt : les robots utilisent le jeton temporaire fourni par GitHub, limité à l'écriture du dépôt, et ne se lancent jamais sur une contribution extérieure (*pull request*). Les actions GitHub sont figées par empreinte (SHA).
+- **Contenus externes = données, jamais instructions.** Le bulletin est rédigé à partir de textes écrits par des tiers (articles, descriptions de CVE, revendications). Pour qu'un texte piégé ne puisse pas détourner la publication :
+  - `build.py` refuse tout bulletin qui contient une clé inconnue, du HTML actif (`<script>`, `onerror=`…) ou un lien autre que `http(s)://` ;
+  - `verifier.py` refuse la publication si un fichier autre que ceux du bulletin du jour a été modifié ;
+  - les pages n'affichent que des liens `http(s)://` et appliquent une politique de sécurité du contenu (CSP) et `no-referrer`.
+- **Données personnelles limitées** : la liste mondiale des revendications ransomware est conservée sans nom de victime ; les extraits d'articles font 400 caractères au plus ; `raw/` ne garde que 7 jours.
+- **Victimes nommées** : uniquement des organisations, et toute revendication non confirmée par la victime est marquée « Non vérifiée ».
+
+Signaler une erreur ou un contenu à retirer : ouvrir une *issue* sur ce dépôt.
+
+## 6. Crédits
+Données : [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) · [NVD (NIST)](https://nvd.nist.gov/) · [EPSS (FIRST)](https://www.first.org/epss/) · [CERT-FR (ANSSI)](https://cert.cyber.gouv.fr/) · [ransomware.live](https://www.ransomware.live/) · [Bonjour La Fuite](https://bonjourlafuite.eu.org/) · [Have I Been Pwned](https://haveibeenpwned.com/) · [MITRE ATT&CK](https://attack.mitre.org/). Les articles cités restent la propriété de leurs éditeurs ; seuls des titres, liens et extraits courts sont repris.
 
 ---
 

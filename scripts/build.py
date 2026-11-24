@@ -23,20 +23,78 @@ def ttp_url(t):
     return "https://attack.mitre.org/techniques/" + t.replace(".", "/") + "/"
 
 
+URL_OK = re.compile(r"^https?://[^\s\"'<>`]+$")
+
+
+def safe_url(u):
+    """N'accepte que des liens http(s) sans caractère dangereux (bloque javascript:, data:, etc.)."""
+    u = str(u or "").strip()
+    return u if URL_OK.match(u) else ""
+
+
 def src_html(lst):
-    return " · ".join(f'<a href="{e(s["u"])}">{e(s["t"])}</a>' if s.get("u") else e(s["t"]) for s in lst or [])
+    return " · ".join(f'<a href="{e(safe_url(s.get("u")))}">{e(s["t"])}</a>' if safe_url(s.get("u")) else e(s["t"]) for s in lst or [])
+
+
+def md_text(s):
+    return str(s).replace("[", "(").replace("]", ")")
 
 
 def src_md(lst):
-    return " · ".join(f'[{s["t"]}]({s["u"]})' if s.get("u") else s["t"] for s in lst or [])
+    return " · ".join(f'[{md_text(s["t"])}]({safe_url(s.get("u"))})' if safe_url(s.get("u")) else md_text(s["t"]) for s in lst or [])
 
 
-def validate(d):
+SCHEMA = {
+    "": {"date", "periode", "niveau", "justification", "bluf", "vulns", "alertes", "menaces", "ransomware", "fuites",
+         "iocs", "regl", "lab", "consultees", "indispo"},
+    "bluf": {"p", "sujet", "texte"},
+    "vulns": {"prio", "cves", "titre", "produit", "type", "cvss", "cvssv", "epss", "pct", "kev", "poc", "exploit", "correctif",
+              "quoi", "comment", "pourquoi", "detection", "remediation", "resume", "sources"},
+    "menaces": {"titre", "quoi", "comment", "pourquoi", "acteur", "confiance", "ttps", "sources"},
+    "ransomware": {"victimes", "tendance", "groupes"},
+    "victimes": {"victime", "groupe", "secteur", "date", "statut", "verif", "note"},
+    "fuites": {"victime", "pays", "volume", "donnees", "statut", "verif", "source"},
+    "iocs": {"type", "valeur", "contexte", "source"},
+    "lab": {"concept", "piste"},
+    "sources": {"t", "u"},
+    "source": {"t", "u"},
+}
+DANGER = re.compile(r"<\s*/|<\s*(script|iframe|img|svg|object|embed|style|link|meta|a)\b|javascript:|data:text|\bon[a-z]+\s*=", re.I)
+
+
+def validate(d, where="bulletin"):
+    """Contrôle strict : clés connues seulement, texte sans HTML actif, liens http(s) uniquement, longueurs bornées.
+    Protège le site si la tâche du matin était manipulée par un contenu piégé (injection de prompt)."""
+    errs = []
+
+    def walk(x, key, path):
+        if isinstance(x, dict):
+            allowed = SCHEMA.get(key)
+            if allowed is not None:
+                extra = set(x) - allowed
+                if extra:
+                    errs.append(f"{path} : clé(s) inattendue(s) {sorted(extra)}")
+            for k, v in x.items():
+                if k == "u" and v and not safe_url(v):
+                    errs.append(f"{path}.u : lien refusé ({str(v)[:60]})")
+                walk(v, k, f"{path}.{k}")
+        elif isinstance(x, list):
+            for i, v in enumerate(x):
+                walk(v, key, f"{path}[{i}]")
+        elif isinstance(x, str):
+            if DANGER.search(x):
+                errs.append(f"{path} : contenu HTML ou script refusé")
+            if len(x) > 1500:
+                errs.append(f"{path} : texte trop long ({len(x)} caractères)")
+
     for k in ["date", "periode", "niveau", "justification", "bluf", "vulns", "menaces", "ransomware", "fuites"]:
         if k not in d:
-            raise SystemExit(f"clé manquante : {k}")
-    if json.dumps(d, ensure_ascii=False).find("</") >= 0:
-        raise SystemExit("une chaîne contient '</'")
+            errs.append(f"clé manquante : {k}")
+    if not isinstance(d.get("niveau"), int) or not 0 <= d.get("niveau", -1) <= 3:
+        errs.append("niveau doit être un entier de 0 à 3")
+    walk(d, "", where)
+    if errs:
+        raise SystemExit("Bulletin refusé :\n- " + "\n- ".join(errs[:20]))
 
 
 # ---------- page HTML (modèle + données) ----------
@@ -138,7 +196,7 @@ def fragment(d, day=""):
     if d.get("lab"):
         o.append(f'<hr><h2>À creuser</h2><p><strong>Concept.</strong> {e(d["lab"]["concept"])}</p>'
                  f'<blockquote><p><strong>Piste de lab :</strong> {e(d["lab"]["piste"])}</p></blockquote>')
-    o.append(f'<hr><p><small>Sources consultées : {e(d.get("consultees", ""))}.<br>Indisponibles : {e(d.get("indispo", "aucune"))}.</small></p>')
+    o.append(f'<hr><p><small>Bulletin généré automatiquement à partir de sources publiques ; les revendications non confirmées sont signalées « Non vérifiée ».<br>Sources consultées : {e(d.get("consultees", ""))}.<br>Indisponibles : {e(d.get("indispo", "aucune"))}.</small></p>')
     return "\n".join(o)
 
 
@@ -209,7 +267,7 @@ def main():
     for f in sorted((ROOT / "data").glob("????-??-??*.json")):
         day = f.stem
         d = json.loads(f.read_text(encoding="utf-8"))
-        validate(d)
+        validate(d, day)
         (ROOT / "bulletins" / f"{day}.html").write_text(page(d, tpl), encoding="utf-8")
         (ROOT / "bulletins" / f"{day}.md").write_text(markdown(d, day), encoding="utf-8")
         items.append((day, d))

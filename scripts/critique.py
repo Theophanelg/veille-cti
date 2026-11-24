@@ -33,6 +33,14 @@ NOW = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
 LOG = []
 
 
+URL_OK = re.compile(r"^https?://[^\s\"'<>`]+$")
+
+
+def safe_url(u):
+    u = str(u or "").strip()
+    return u if URL_OK.match(u) else ""
+
+
 def get(url, as_json=True, tries=3):
     for i in range(tries):
         try:
@@ -151,6 +159,8 @@ def from_certfr(seen):
             continue
         if url.startswith("/"):
             url = "https://cert.cyber.gouv.fr" + url
+        if not url.startswith("https://cert.cyber.gouv.fr/"):
+            continue
         found.append({"ref": ref, "url": url, "titre": label if label and label != ref else ref})
     return found
 
@@ -205,7 +215,7 @@ def build_cve_item(cid, nvd, kev, ep, why, watch):
                     f'{"<br><strong>Utilisée par des ransomwares :</strong> " + e(kev["knownRansomwareCampaignUse"]) if kev.get("knownRansomwareCampaignUse") else ""}</p>')
     if prods:
         rows.append(f"<p><small>Produits (CPE) : {e(', '.join(prods[:8]))}</small></p>")
-    refs = [r["url"] for r in (nvd or {}).get("references", [])][:5]
+    refs = [u for u in (safe_url(r.get("url")) for r in (nvd or {}).get("references", [])) if u][:5]
     if refs:
         rows.append("<p><small>Références : " + " · ".join(f'<a href="{e(u)}">{e(urllib.parse.urlparse(u).netloc)}</a>' for u in refs) + "</small></p>")
     return {"id": ("KEV:" if kev else "NVD:") + cid, "title": title, "link": f"https://nvd.nist.gov/vuln/detail/{cid}", "date": NOW.isoformat(),

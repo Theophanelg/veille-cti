@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <title>Bulletin CTI</title>
 <link rel="manifest" href="/veille-cti/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
@@ -99,8 +101,8 @@ main{display:none}
 <div class="foot">Nouveau bulletin chaque jour à 6h35 · <a href="/veille-cti/feed.xml">Flux RSS</a> · <a href="/veille-cti/critique.xml">CVE critiques</a></div>
 </aside>
 <main>
-<div class="bar"><button type="button" id="back">← Liste</button><span id="cur"></span><a id="open" href="#" target="_blank" rel="noopener">Plein écran</a></div>
-<iframe id="view" title="Bulletin sélectionné"></iframe>
+<div class="bar"><button type="button" id="back">← Liste</button><span id="cur"></span><a id="open" href="#" target="_blank" rel="noopener noreferrer">Plein écran</a></div>
+<iframe id="view" title="Bulletin sélectionné" referrerpolicy="no-referrer"></iframe>
 </main>
 </div>
 <script id="items" type="application/json">__DATA__</script>
@@ -116,6 +118,7 @@ const dt=id=>{const [y,m,d]=id.slice(0,10).split('-').map(Number);return new Dat
 const monday=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
 let filter='all',sel=null,mode='b',C=[];
 const H=id=>id.replace(/[^A-Za-z0-9-]/g,'-');
+const okUrl=u=>/^https?:\/\/[^\s"'<>`]+$/i.test(String(u||''));
 const fmtDay=d=>`${J[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`;
 const cInfo=c=>{
  const ref=c.id.split(':').pop();
@@ -136,9 +139,9 @@ code{font:500 13px "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
 small{color:var(--mute);font-size:14px}p{margin:0 0 12px}`;
 const showCrit=c=>{
  const i=cInfo(c);
- const doc=`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base target="_blank"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet"><style>${SRC_CSS}</style></head><body><div class="w"><h1>${e(c.title)}</h1><div class="meta"><span>${e(c.kind)}</span><span>Détectée le ${i.d.toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'})}</span><a href="${e(c.link)}">Source officielle →</a></div><div class="card">${c.html}</div></div></body></html>`;
+ const doc=`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><base target="_blank"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet"><style>${SRC_CSS}</style></head><body><div class="w"><h1>${e(c.title)}</h1><div class="meta"><span>${e(c.kind)}</span><span>Détectée le ${i.d.toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'})}</span>${okUrl(c.link)?`<a href="${e(c.link)}">Source officielle →</a>`:''}</div><div class="card">${c.html}</div></div></body></html>`;
  $('view').removeAttribute('src');$('view').srcdoc=doc;
- $('cur').textContent=i.ref;$('open').href=c.link;
+ $('cur').textContent=i.ref;$('open').href=okUrl(c.link)?c.link:'#';
  document.title=i.ref+' — CVE critiques';
 };
 

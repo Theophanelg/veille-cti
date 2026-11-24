@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <title>Bulletin CTI quotidien</title>
 <link rel="manifest" href="/veille-cti/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
@@ -234,7 +236,8 @@ const D=JSON.parse(document.getElementById('data').textContent);
 const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
 const L=['Faible','Modéré','Élevé','Critique'];
-const src=a=>(a||[]).map(s=>s.u?`<a href="${e(s.u)}" target="_blank" rel="noopener">${e(s.t)}</a>`:e(s.t)).join(' · ');
+const okUrl=u=>/^https?:\/\/[^\s"'<>`]+$/i.test(String(u||''));
+const src=a=>(a||[]).map(s=>okUrl(s.u)?`<a href="${e(s.u)}" target="_blank" rel="noopener noreferrer">${e(s.t)}</a>`:e(s.t)).join(' · ');
 const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
 
 document.title='Bulletin CTI — '+D.date;
@@ -279,7 +282,7 @@ if(D.lab) S.push(['lab','À creuser',`<div class="lab"><h4>Concept</h4><p>${e(D.
 
 $('nav').innerHTML=S.map(s=>`<a href="#${s[0]}">${s[1]}</a>`).join('');
 $('main').innerHTML=S.map(s=>`<section id="${s[0]}"><h2 class="sec">${s[1]}</h2>${s[2]}</section>`).join('');
-$('foot').innerHTML=`<p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
+$('foot').innerHTML=`<p>Bulletin généré automatiquement à partir de sources publiques : vérifier auprès des sources citées avant toute décision. Les revendications de groupes criminels restent « Non vérifiées » tant que la victime ne les a pas confirmées.</p><p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
 }
 </script>
 </body>
