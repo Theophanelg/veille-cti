@@ -7,7 +7,92 @@
 <description>Alertes quasi temps réel : ajouts CISA KEV, alertes CERT-FR, CVE CVSS ≥ 9 réseau sans authentification sur produits surveillés.</description>
 <language>fr-fr</language>
 <ttl>20</ttl>
-<lastBuildDate>Tue, 24 Nov 2026 08:45:10 +0000</lastBuildDate>
+<lastBuildDate>Tue, 24 Nov 2026 21:31:54 +0000</lastBuildDate>
+<item>
+<title>🚨 CVE-2026-135797 — Php · CVSS 10,0</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-135797</link>
+<guid isPermaLink="false">critique-NVD:CVE-2026-135797</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>NVD</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> CVSS 10,0, exploitable par le réseau sans authentification, produit surveillé (php).</p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-135797">CVE-2026-135797</a><br><strong>CVSS</strong> 10,0 (v3.1)<br><strong>EPSS</strong> N/A<br><strong>KEV</strong> non</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H</code></small></p>
+<blockquote><p>A vulnerability was identified in Volans NGFW Next-Generation Firewall r5.1. Impacted is the function exec of the file sslvpn/sslvpn_client.php of the component SSLVPN Client. Such manipulation of the argument img leads to os command injection. The attack can be executed remotely. The exploit is publicly available and might be used. The vendor was contacted early about this disclosure but did not respond in any way.</p></blockquote>
+<p><small>Références : <a href="https://github.com/nenghun/IoT/blob/main/Volans%20NGFW%20(nf51)/Root_RCE/Volans%20NGFW%20(nf51)_rce.md">github.com</a> · <a href="https://vuldb.com/cve/CVE-2026-135797">vuldb.com</a> · <a href="https://vuldb.com/submit/1055817">vuldb.com</a> · <a href="https://vuldb.com/vuln/442767">vuldb.com</a> · <a href="https://vuldb.com/vuln/442767/cti">vuldb.com</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-111497 — Google Brotli · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-111497</link>
+<guid isPermaLink="false">critique-NVD:CVE-2026-111497</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>NVD</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> CVSS 9,8, exploitable par le réseau sans authentification, produit surveillé (microsoft). Déjà au KEV.</p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-111497">CVE-2026-111497</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 1,000 · p100,0<br><strong>KEV</strong> non</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>A buffer overflow vulnerability in the Brotli decoder (c/dec/decode.c) in Google Brotli versions 1.0.3 through 1.2.0 on all platforms allows a remote unauthenticated attacker to corrupt adjacent decoder state memory, disclose sensitive memory contents, cause a denial of service, or potentially execute arbitrary code using a crafted Brotli-compressed stream.
+
+
+
+
+
+Users need to update any Brotli libraries or binaries between 1.0.3 through 1.2.0 to the latest available version: 1.0.10 or 1.1.1 or 1.2.1.</p></blockquote>
+<p><small>Produits (CPE) : google brotli, nodejs node.js, python-hyper brotlicffi, microsoft .net, debian debian linux, istio istio, anthropic bun, envoyproxy envoy</small></p>
+<p><small>Références : <a href="https://github.com/andybalholm/brotli/releases/tag/v1.2.7">github.com</a> · <a href="https://nodejs.org/en/blog/vulnerability/october-2026-security-releases#nodejs-brotli-decoder-out-of-bounds-write-permits-remote-code-execution-cve-2026-111497---high">nodejs.org</a> · <a href="http://www.openwall.com/lists/oss-security/2026/10/23/25">www.openwall.com</a> · <a href="http://www.openwall.com/lists/oss-security/2026/10/24/6">www.openwall.com</a> · <a href="http://www.openwall.com/lists/oss-security/2026/10/26/12">www.openwall.com</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-109618 — Php Php · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-109618</link>
+<guid isPermaLink="false">critique-NVD:CVE-2026-109618</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>NVD</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> CVSS 9,8, exploitable par le réseau sans authentification, produit surveillé (pan-os). Déjà au KEV.</p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-109618">CVE-2026-109618</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 1,000 · p100,0<br><strong>KEV</strong> non</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>PHP uses longjmp() for out-of-memory (OOM) errors to exit the current context and abort handling of the request. Some contexts may not properly account for this scenario and leave request memory in an uninitialized state before performing an allocation. The subsequent request cleanup procedure may read or branch on this memory. Multiple OOM strategies can consistently trigger this condition and lead to remote code execution (RCE).</p></blockquote>
+<p><small>Produits (CPE) : php php, siemens ruggedcom ape1808 firmware, paloaltonetworks pan-os, paloaltonetworks panorama virtual appliance, siemens blueplanet 360 nx3 m6 wm od iisx firmware, siemens blueplanet 360 nx3 m6 wm od iisx-s firmware, siemens energy engage, siemens local monitoring bt-monitoring-vm</small></p>
+<p><small>Références : <a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">github.com</a> · <a href="http://seclists.org/fulldisclosure/2026/Oct/51">seclists.org</a> · <a href="http://www.openwall.com/lists/oss-security/2026/10/21/6">www.openwall.com</a> · <a href="http://www.openwall.com/lists/oss-security/2026/10/23/5">www.openwall.com</a> · <a href="https://github.com/rapid7/metasploit-framework/pull/22139">github.com</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-132165 — Drupal Core · KEV</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-132165</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-132165</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Drupal Core Remote Code Execution Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-132165">CVE-2026-132165</a><br><strong>CVSS</strong> N/A<br><strong>EPSS</strong> N/A<br><strong>KEV</strong> oui, ajout le 2026-11-24</p>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-27<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-131914 — Idunno AntiCsrf · KEV · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-131914</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-131914</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Idunno AntiCsrf Deserialization of Untrusted Data Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-131914">CVE-2026-131914</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 0,006 · p50,2<br><strong>KEV</strong> oui, ajout le 2026-11-24</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>Deserialization of untrusted data in double-submit cookie vs. form field validation in Idunno.AntiCsrf versions through 0.9.1 Beta on ASP.NET allows remote unauthenticated attackers to execute code via object injection</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-27<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : blowdart anticsrf</small></p>
+<p><small>Références : <a href="https://codeplexarchive.org/project/AntiCSRF">codeplexarchive.org</a> · <a href="https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0048.md">github.com</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-131914">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-132224 — Optimizely Web Experimentation · KEV · CVSS 8,7</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-132224</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-132224</guid>
+<pubDate>Tue, 24 Nov 2026 21:31:54 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Optimizely Web Experimentation External Control of Critical State Data Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-132224">CVE-2026-132224</a><br><strong>CVSS</strong> 8,7 (v3.1)<br><strong>EPSS</strong> 0,004 · p35,8<br><strong>KEV</strong> oui, ajout le 2026-11-24</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N</code></small></p>
+<blockquote><p>Optimizely Web Experimentation before 2026-11-17 mishandles the account signup flow, leading to presence of attacker-controlled code in the projectJS (aka Project JavaScript) field of certain cdn.optimizely.com assets.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-27<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : optimizely web experimentation</small></p>
+<p><small>Références : <a href="https://arstechnica.com/security/2026/11/malicious-code-delivered-through-optimizely-hits-visitors-to-hundreds-of-sites/">arstechnica.com</a> · <a href="https://blog.report-uri.com/worlds-largest-brands-infected-with-malware-via-optimizely/">blog.report-uri.com</a> · <a href="https://github.com/brave/adblock-resources/pull/355">github.com</a> · <a href="https://krebsonsecurity.com/2026/11/attackers-used-optimizely-to-a-b-test-malware-on-top-websites/">krebsonsecurity.com</a> · <a href="https://news.ycombinator.com/item?id=50524767">news.ycombinator.com</a></small></p>]]></content:encoded>
+</item>
 <item>
 <title>🚨 CVE-2026-135202 — Php · CVSS 9,8</title>
 <link>https://nvd.nist.gov/vuln/detail/CVE-2026-135202</link>
