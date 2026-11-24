@@ -31,7 +31,7 @@ FEEDS = {
     "ZATAZ": "https://www.zataz.com/feed/",
     "SANS ISC": "https://isc.sans.edu/rssfeed_full.xml",
     "HIBP": "https://feeds.feedburner.com/HaveIBeenPwnedLatestBreaches",
-    "LeMagIT": "https://www.lemagit.fr/rss/Securite.xml",
+    "LeMagIT": "https://www.lemagit.fr/rss/ContentSyndication.xml",
     "Next": "https://next.ink/feed/",
     "CERT-FR (flux)": "https://cert.cyber.gouv.fr/feed/",
 }
