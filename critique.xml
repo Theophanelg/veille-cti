@@ -7,7 +7,169 @@
 <description>Alertes quasi temps réel : ajouts CISA KEV, alertes CERT-FR, CVE CVSS ≥ 9 réseau sans authentification sur produits surveillés.</description>
 <language>fr-fr</language>
 <ttl>20</ttl>
-<lastBuildDate>Tue, 24 Nov 2026 21:31:54 +0000</lastBuildDate>
+<lastBuildDate>Wed, 25 Nov 2026 23:34:43 +0000</lastBuildDate>
+<item>
+<title>🚨 CVE-2026-137090 — Node.Js · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-137090</link>
+<guid isPermaLink="false">critique-NVD:CVE-2026-137090</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>NVD</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> CVSS 9,8, exploitable par le réseau sans authentification, produit surveillé (node.js).</p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-137090">CVE-2026-137090</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> N/A<br><strong>KEV</strong> non</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>build-git-clone before 1.0.4 contains an OS command injection vulnerability in the clone() function that allows attackers to execute commands by supplying crafted repository URLs. Attackers can embed shell metacharacters such as ; or $() in the url argument, which is concatenated into a sh -c command, to execute operating system commands with Node.js process privileges.</p></blockquote>
+<p><small>Références : <a href="https://github.com/emanuelmoraes-dev/build-git-clone/blob/68bc305028d04c9a71a030c4b0b5cc36450201b9/src/index.ts#L77">github.com</a> · <a href="https://github.com/emanuelmoraes-dev/build-git-clone/commit/3d55e64e5b7c61e560b5d030d6a918cad5c67a29">github.com</a> · <a href="https://github.com/emanuelmoraes-dev/build-git-clone/pull/1">github.com</a> · <a href="https://www.vulncheck.com/advisories/build-git-clone-before-1.0.4-os-command-injection-in-clone-via-repository-url">www.vulncheck.com</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133323 — Mitel MiCollab · KEV · CVSS 10,0</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133323</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133323</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Mitel MiCollab OS Command Injection Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133323">CVE-2026-133323</a><br><strong>CVSS</strong> 10,0 (v3.1)<br><strong>EPSS</strong> 0,025 · p85,7<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:H</code></small></p>
+<blockquote><p>A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct a blind command injection attack due to insufficient parameter sanitization. A successful exploit could allow an attacker to execute arbitrary commands within the context of the system. This is MTLVULN-1864.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : mitel micollab</small></p>
+<p><small>Références : <a href="https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012">www.mitel.com</a> · <a href="https://accenture.github.io/cyber-intelligence/micollab-exploitation/">accenture.github.io</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133323">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133303 — Mitel MiCollab · KEV · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133303</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133303</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Mitel MiCollab XML Injection Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133303">CVE-2026-133303</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 0,005 · p37,1<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to leverage pre-staged malicious content to conduct an XML injection attack due to insufficient parameter validation. A successful exploit could allow an attacker to execute arbitrary commands within the context of the system. This is MTLVULN-1862.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : mitel micollab</small></p>
+<p><small>Références : <a href="https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012">www.mitel.com</a> · <a href="https://accenture.github.io/cyber-intelligence/micollab-exploitation/">accenture.github.io</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133303">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133311 — Mitel MiCollab · KEV · CVSS 5,9</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133311</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133311</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Mitel MiCollab Weak Authentication Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133311">CVE-2026-133311</a><br><strong>CVSS</strong> 5,9 (v3.1)<br><strong>EPSS</strong> 0,004 · p25,4<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N</code></small></p>
+<blockquote><p>A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker, with knowledge of a specific system-generated random identifier or pre-staged content, to conduct an unauthorized access attack due to improper authentication mechanisms. A successful exploit could allow an attacker to obtain sensitive information. The vulnerability is limited to the affected functionality and does not provide unrestricted access to arbitrary files elsewhere on the system. This is MTLVULN-1863.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-12-09<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : mitel micollab</small></p>
+<p><small>Références : <a href="https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012">www.mitel.com</a> · <a href="https://accenture.github.io/cyber-intelligence/micollab-exploitation/">accenture.github.io</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133311">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133275 — Mitel MiCollab · KEV · CVSS 5,3</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133275</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133275</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Mitel MiCollab Unrestricted Upload of File with Dangerous Type Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133275">CVE-2026-133275</a><br><strong>CVSS</strong> 5,3 (v3.1)<br><strong>EPSS</strong> 0,003 · p16,9<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N</code></small></p>
+<blockquote><p>A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct an arbitrary file upload attack due to insufficient file type validation. A successful exploit could allow an attacker to upload arbitrary files to the target system. This is MTLVULN-1861.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : mitel micollab</small></p>
+<p><small>Références : <a href="https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012">www.mitel.com</a> · <a href="https://accenture.github.io/cyber-intelligence/micollab-exploitation/">accenture.github.io</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133275">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133324 — Mitel MiCollab · KEV · CVSS 5,3</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133324</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133324</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Mitel MiCollab Not Failing Securely Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133324">CVE-2026-133324</a><br><strong>CVSS</strong> 5,3 (v3.1)<br><strong>EPSS</strong> 0,004 · p27,3<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N</code></small></p>
+<blockquote><p>A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct an authentication bypass attack due to improper handling of authentication. A successful exploit could allow an attacker to bypass authentication and perform unauthorized actions within the context of the application. This is MTLVULN-1877.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : mitel micollab</small></p>
+<p><small>Références : <a href="https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012">www.mitel.com</a> · <a href="https://accenture.github.io/cyber-intelligence/micollab-exploitation/">accenture.github.io</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133324">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2023-25915 — Danfoss AK-SM 800A Series · KEV · CVSS 9,9</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2023-25915</link>
+<guid isPermaLink="false">critique-KEV:CVE-2023-25915</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Danfoss AK-SM 800A Series Improper Input Validation Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-25915">CVE-2023-25915</a><br><strong>CVSS</strong> 9,9 (v3.1)<br><strong>EPSS</strong> 0,014 · p73,2<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H</code></small></p>
+<blockquote><p>Due to improper input validation, an authenticated remote attacker could execute arbitrary commands on the target system.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : danfoss ak-sm 800a firmware</small></p>
+<p><small>Références : <a href="https://csirt.divd.nl/CVE-2023-25915">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/DIVD-2023-00025">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/CVE-2023-25915">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/DIVD-2023-00025">csirt.divd.nl</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2023-25915">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2023-25914 — Danfoss AK-SM 800A Series · KEV · CVSS 8,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2023-25914</link>
+<guid isPermaLink="false">critique-KEV:CVE-2023-25914</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Danfoss AK-SM 800A Series Path Traversal Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-25914">CVE-2023-25914</a><br><strong>CVSS</strong> 8,8 (v3.1)<br><strong>EPSS</strong> 0,011 · p64,6<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>Due to improper restriction, authenticated attackers could retrieve and read system files of the underlying server through the XML interface. The information that can be read can lead to a full system compromise.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : danfoss ak-sm 800a firmware</small></p>
+<p><small>Références : <a href="https://csirt.divd.nl/CVE-2023-25914">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/DIVD-2023-00025">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/CVE-2023-25914">csirt.divd.nl</a> · <a href="https://csirt.divd.nl/DIVD-2023-00025">csirt.divd.nl</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2023-25914">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2025-41450 — Danfoss AK-SM 800A Series · KEV · CVSS 8,2</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2025-41450</link>
+<guid isPermaLink="false">critique-KEV:CVE-2025-41450</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Danfoss AK-SM 800A Series Improper Authentication Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-41450">CVE-2025-41450</a><br><strong>CVSS</strong> 8,2 (v3.1)<br><strong>EPSS</strong> 0,005 · p37,0<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:H</code></small></p>
+<blockquote><p>Improper Authentication vulnerability in Danfoss AKSM8xxA Series.This issue affects Danfoss AK-SM 8xxA Series prior to version 4.2</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-12-09<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : danfoss ak-sm 800a firmware</small></p>
+<p><small>Références : <a href="https://www.danfoss.com/en/service-and-support/coordinated-vulnerability-disclosure/danfoss-security-advisories/dsa-2025-03-01/">www.danfoss.com</a> · <a href="https://github.com/msuiche/fromagegate">github.com</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2025-41450">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-133469 — Vates Xen Orchestra · KEV · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-133469</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-133469</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Vates Xen Orchestra Improper Validation of Specified Type of Input Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-133469">CVE-2026-133469</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 0,011 · p65,3<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>XO (Xen Orchestra) is a solution to visualize, manage, backup and delegate your XCP-ng (or XenServer) infrastructure. Prior to 6.9.2 and 6.10.1, REST cookie parsing turns authenticationToken=j:%7B%7D into {}. REST authentication passes that object to the XO token provider without requiring a string. The token collection treats {} as an unfiltered lookup and returns its first token; the provider authenticates as that token&#x27;s owner if it is unexpired. The authenticated /rest/v0/users/me/authentication_tokens route then returns reusable login token IDs. This vulnerability is actively exploited in the wild. This vulnerability is fixed in 6.9.2 and 6.10.1.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : xen-orchestra xen orchestra server, xen-orchestra xen orchestra</small></p>
+<p><small>Références : <a href="https://docs.vates.tech/security-advisories/advisories/2026/vates-sa-2026-062">docs.vates.tech</a> · <a href="https://github.com/vatesfr/xen-orchestra/commit/50166fe3a49c02069d35ba9046ca4a1f77f4e11d">github.com</a> · <a href="https://github.com/vatesfr/xen-orchestra/pull/10748">github.com</a> · <a href="https://github.com/vatesfr/xen-orchestra/security/advisories/GHSA-2r3w-c2vx-fv5g">github.com</a> · <a href="https://github.com/vatesfr/xen-orchestra/security/advisories/GHSA-2r3w-c2vx-fv5g">github.com</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-103406 — Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router · KEV · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-103406</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-103406</guid>
+<pubDate>Wed, 25 Nov 2026 23:34:43 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router OS Command Injection Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-103406">CVE-2026-103406</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 0,009 · p56,0<br><strong>KEV</strong> oui, ajout le 2026-11-25</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>An Improper Neutralization of Special Elements used in an OS Command vulnerability in the AutomatedProvisioner in Juniper Networks Session Smart Conductor allows a remote attacker to execute arbitrary commands as root via a specially crafted salt minion ID.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-28<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : juniper session smart conductor</small></p>
+<p><small>Références : <a href="https://supportportal.juniper.net/JSA112183">supportportal.juniper.net</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-103406">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
 <item>
 <title>🚨 CVE-2026-135797 — Php · CVSS 10,0</title>
 <link>https://nvd.nist.gov/vuln/detail/CVE-2026-135797</link>
