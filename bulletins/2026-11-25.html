@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Bulletin CTI quotidien</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a duty officer's morning sheet, dense but calm
+   IDEA the printed threat placard pinned in a SOC: one scale, one pointer, then the triage list
+   PICTURE a long threat-level scale with the day's pointer, tallies beneath it
+   COLOUR aluminium ground, black ink, orange pointer; red/amber/grey for P1/P2/P3
+   TYPE Geist 600 for titles, Geist for text, Geist Mono for CVE ids and IOC
+   LAYOUT laptop: scale full width, BLUF beside tallies; phone: scale, tallies, BLUF, then cards stacked */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--tint:light-dark(#f4f4f5,#24272b);--acc:#ff4f00;--p1:light-dark(#d1291a,#ff5a47);--p2:light-dark(#b86a00,#f5a524);--p3:light-dark(#6b7079,#9aa0a8)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Geist,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+header{padding:28px 0 8px}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;color:var(--mute);margin-top:10px;font-size:14px}
+.tlp{background:#111214;color:#fff;font-weight:600;padding:2px 8px;border-radius:4px;font-size:13px}
+:root[data-theme=dark] .tlp{background:#fff;color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tlp{background:#fff;color:#111}}
+.scale{margin:26px 0 6px}
+.track{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.seg{height:14px;border-radius:3px;background:var(--rule)}
+.seg.on{background:var(--ink)}
+.seg.cur{background:var(--acc)}
+.labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;font-size:14px;color:var(--mute)}
+.labels .cur{color:var(--ink);font-weight:600}
+.pointer{position:absolute;top:-12px;width:0;height:0;border:8px solid transparent;border-top-color:var(--acc);transform:translateX(-50%)}
+.why{font-size:17px;margin:14px 0 0;max-width:70ch}
+.why b{color:var(--acc)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;margin:22px 0 10px}
+.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start;align-self:start}
+.tally div{background:var(--card);padding:12px 14px}
+.tally strong{display:block;font-size:30px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.tally span{font-size:13px;color:var(--mute)}
+.bluf{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:6px 18px}
+.bluf h2{font-size:15px;margin:10px 0 2px;color:var(--mute);font-weight:500}
+.bluf ul{list-style:none;margin:0;padding:0}
+.bluf li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--rule)}
+.bluf li:first-of-type{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--p3)}
+.dot.p1{background:var(--p1)}.dot.p2{background:var(--p2)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:8px 0}
+nav a{flex:none;text-decoration:none;font-size:14px;padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-color:var(--ink);outline:none}
+@media(min-width:900px){nav{position:sticky;top:0;z-index:5;background:var(--bg)}}
+section{padding:26px 0 8px}
+h2.sec{font-size:26px;line-height:1.1;letter-spacing:-.01em;margin:0 0 14px;font-weight:600}
+.note{color:var(--mute);font-size:14px;margin:0 0 14px;max-width:80ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px;margin-bottom:12px}
+.card.p1{border-left:5px solid var(--p1)}.card.p2{border-left:5px solid var(--p2)}.card.p3{border-left:5px solid var(--p3)}
+.head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.pill{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;background:var(--p3)}
+.pill.p1{background:var(--p1)}.pill.p2{background:var(--p2)}
+:root[data-theme=dark] .pill{color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pill{color:#111}}
+.cve{font:500 14px/1.4 "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+h3{font-size:19px;line-height:1.25;margin:4px 0 10px;font-weight:600;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{font-size:13px;padding:3px 9px;border-radius:999px;background:var(--tint);white-space:nowrap}
+.chip b{font-weight:600}
+.chip.hot{background:var(--acc);color:#fff}
+.chip.dash{background:none;border:1px dashed var(--mute)}
+.qcp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.qcp h4{margin:0 0 4px;font-size:14px;color:var(--mute);font-weight:600}
+.qcp p{margin:0}
+.act{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.act div{background:var(--tint);border-radius:8px;padding:12px 14px;font-size:15px}
+.act h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.src{margin-top:12px;font-size:14px;color:var(--mute)}
+.src a{color:var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:4px 14px;font-size:15px}
+.row dt{color:var(--mute);font-size:13px}
+.row dd{margin:0 0 6px}
+details summary{cursor:pointer;font-size:14px;color:var(--mute);padding:6px 0;min-height:32px}
+.ttps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ttps a{font-size:13px;text-decoration:none;padding:3px 9px;border:1px solid var(--rule);border-radius:4px}
+.ttps a span{font-family:"Geist Mono",monospace;font-weight:500}
+.conf{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.conf i{width:14px;height:6px;border-radius:2px;background:var(--rule)}
+.conf i.on{background:var(--ink)}
+.list{background:var(--card);border:1px solid var(--rule);border-radius:10px}
+.item{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) auto;gap:6px 16px;padding:14px 18px;border-top:1px solid var(--rule);align-items:start}
+.item:first-child{border-top:0}
+.item .name{font-weight:600}
+.item .sub{color:var(--mute);font-size:14px}
+.tag{font-size:13px;padding:2px 8px;border-radius:4px;white-space:nowrap;background:var(--ink);color:var(--bg);justify-self:end}
+.tag.unv{background:none;color:var(--ink);border:1px dashed var(--mute)}
+.bars{margin-top:14px;display:grid;gap:6px;max-width:560px}
+.bar{display:grid;grid-template-columns:8em minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:14px}
+.bar i{display:block;height:12px;border-radius:2px;background:var(--acc)}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.lab{background:var(--ink);color:var(--bg);border-radius:10px;padding:20px}
+.lab h4{margin:0 0 4px;font-size:14px;opacity:.75;font-weight:600}
+.lab p{margin:0 0 12px}
+ul.plain{margin:0;padding-left:18px}
+ul.plain li{margin-bottom:8px}
+footer{padding:20px 0 40px;font-size:14px;color:var(--mute)}
+.scroll{overflow-x:auto}
+@media(max-width:900px){.top{grid-template-columns:minmax(0,1fr)}.qcp{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.act{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.item{grid-template-columns:minmax(0,1fr) auto}.item .sub2{grid-column:1/-1}.labels{font-size:13px}.card{padding:14px}}
+@media(prefers-reduced-motion:no-preference){.pointer{transition:left .6s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="title">Bulletin CTI</h1>
+<div class="meta" id="meta"></div>
+<div class="scale">
+<div class="track" id="track"></div>
+<div class="labels" id="labels"></div>
+</div>
+<p class="why" id="why"></p>
+</header>
+<div class="top">
+<div class="tally" id="tally"></div>
+<div class="bluf"><h2>L'essentiel (BLUF)</h2><ul id="bluf"></ul></div>
+</div>
+<nav id="nav" aria-label="Sections"></nav>
+<div id="main"></div>
+<footer id="foot"></footer>
+</div>
+
+<!-- DONNEES DU JOUR : seul ce bloc JSON change d'un bulletin à l'autre -->
+<script id="data" type="application/json">
+{
+ "date": "Mercredi 25 novembre 2026",
+ "periode": "mar. 24/11 06:35 → mer. 25/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Trois ajouts KEV du 24/11 à échéance du 27/11, dont une RCE Drupal core via l'installateur et la chaîne d'approvisionnement Optimizely (OPTIMJACK, 178 organisations) ; collecte automatique du jour absente, couverture partielle.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "Drupal core (CVE-2026-132165)",
+   "texte": "RCE via l'installateur install.php, ajoutée au KEV le 24/11 ; passer en 10.6.22 / 11.4.13 et bloquer install.php d'ici le 27/11."
+  },
+  {
+   "p": 1,
+   "sujet": "Optimizely Web Experimentation (CVE-2026-132224)",
+   "texte": "code JavaScript malveillant injecté dans les scripts projectJS servis par le CDN Optimizely (OPTIMJACK : skimmer et crypto clipper) ; auditer les snippets chargés par vos sites."
+  },
+  {
+   "p": 1,
+   "sujet": "Idunno.AntiCsrf (CVE-2026-131914)",
+   "texte": "RCE pré-auth déjà signalée exploitée, désormais au KEV (échéance 27/11) ; sans correctif, retirer la bibliothèque des applications WebForms."
+  },
+  {
+   "p": 1,
+   "sujet": "Volans NGFW r5.1 (CVE-2026-135797)",
+   "texte": "injection de commande pré-auth dans le client SSL VPN, CVSS 10, PoC public, éditeur muet ; ne pas exposer l'interface SSL VPN."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132165"
+   ],
+   "titre": "Drupal core : RCE non authentifiée via l'installateur, ajoutée au KEV",
+   "produit": "Drupal core (versions corrigées : 10.6.22, 11.4.13)",
+   "type": "Prise de contrôle / RCE via install.php",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "10.6.22 / 11.4.13",
+   "quoi": "Faille critique du site installer de Drupal core permettant une prise de contrôle du site sans authentification.",
+   "comment": "Passe par le script install.php accessible à distance ; mécanisme détaillé N/A dans les sources consultées.",
+   "pourquoi": "La CISA confirme l'exploitation active (ajout KEV le 24/11, échéance 27/11) et Drupal avait prévenu que des exploits arriveraient vite. Les CMS sont exposés à Internet par nature.",
+   "detection": "Requêtes HTTP vers /core/install.php ou /install.php sur des sites déjà installés ; nouveaux comptes administrateurs, modules ou fichiers PHP inattendus.",
+   "remediation": "Mettre à jour vers 10.6.22 ou 11.4.13 ; bloquer l'accès à install.php au niveau du serveur web ; appliquer le triage forensique demandé par la CISA si le site était exposé.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://bleepingcomputer.com/news/security/drupal-patches-critical-rce-flaw-warns-exploits-may-surface-quickly"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-patches-critical-installer-flaw.html"
+    },
+    {
+     "t": "SmartScope",
+     "u": "https://smartscope.blog/en/blog/drupal-exploited-rce-update-10-6-22-11-2026/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132224"
+   ],
+   "titre": "Optimizely Web Experimentation : code injecté dans les scripts CDN (OPTIMJACK), ajoutée au KEV",
+   "produit": "Optimizely Web Experimentation avant le 17/11/2026 (SaaS)",
+   "type": "Contrôle externe de données d'état critiques → injection JavaScript côté client",
+   "cvss": "8,7",
+   "cvssv": "3.1",
+   "epss": "0,004",
+   "pct": "35,8",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, campagne OPTIMJACK)",
+   "correctif": "Corrigé côté éditeur le 17/11",
+   "quoi": "Le flux d'inscription Optimizely laissait un attaquant placer son code dans le champ projectJS d'actifs servis par cdn.optimizely.com.",
+   "comment": "Les sites clients chargeaient ce JavaScript de confiance ; il embarquait un skimmer de cartes et un crypto clipper (malware qui remplace les adresses de portefeuille copiées).",
+   "pourquoi": "Attaque de chaîne d'approvisionnement côté client touchant au moins 178 organisations, dont des sites de grands médias. Ajout KEV le 24/11, échéance 27/11.",
+   "detection": "Inventorier les scripts cdn.optimizely.com chargés par vos pages et comparer le projectJS à la version attendue ; alertes CSP (Content Security Policy) vers des domaines d'exfiltration inconnus.",
+   "remediation": "Vérifier et nettoyer le projectJS de chaque projet, faire tourner les accès Optimizely, imposer une CSP stricte et le SRI (contrôle d'intégrité) quand c'est possible ; notifier les clients si des paiements ont transité.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-delivers-malware-to-cnn-fox-news-bbc-salesforce-sites/"
+    },
+    {
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
+    },
+    {
+     "t": "Sophos",
+     "u": "https://www.sophos.com/blog/hijacked-optimizely-snippets-served-malicious-code"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132224"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-131914"
+   ],
+   "titre": "Idunno.AntiCsrf (ASP.NET WebForms) : RCE pré-auth, désormais au KEV",
+   "produit": "Idunno.AntiCsrf jusqu'à 0.9.1 Beta (ASP.NET)",
+   "type": "Désérialisation de données non fiables → RCE (CWE-502)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,006",
+   "pct": "50,2",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "Aucun (bibliothèque abandonnée)",
+   "quoi": "Déjà traitée le 23/11 ; élément nouveau : ajout au KEV le 24/11 avec échéance fédérale au 27/11.",
+   "comment": "La validation double-submit cookie / champ de formulaire désérialise des objets fournis par l'attaquant : injection d'objet et exécution de code sans authentification.",
+   "pourquoi": "Bibliothèque anti-CSRF ancienne encore présente dans des applications WebForms exposées ; pas de correctif, donc seule la suppression protège.",
+   "detection": "Cookies ou champs anti-CSRF anormalement longs ou encodés en base64 ; processus enfants (cmd.exe, powershell.exe) lancés par w3wp.exe.",
+   "remediation": "Retirer Idunno.AntiCsrf et le remplacer par la protection anti-CSRF native d'ASP.NET (ViewStateUserKey) ; à défaut, isoler l'application. Échéance KEV : 27/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-131914"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-135797"
+   ],
+   "titre": "Volans NGFW r5.1 : injection de commande pré-auth dans le client SSL VPN, PoC public",
+   "produit": "Volans NGFW Next-Generation Firewall r5.1",
+   "type": "Injection de commande OS (paramètre img de sslvpn/sslvpn_client.php)",
+   "cvss": "10,0",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Oui",
+   "exploit": "Non signalée",
+   "correctif": "Aucun (éditeur sans réponse)",
+   "quoi": "Injection de commande dans la fonction exec de sslvpn/sslvpn_client.php du composant SSL VPN Client.",
+   "comment": "Le paramètre img est passé au système sans filtrage ; l'attaque se fait à distance sans authentification (vecteur AV:N/PR:N, scope changé).",
+   "pourquoi": "CVSS 10 avec exploit public sur une interface VPN exposée à Internet par conception, et éditeur resté muet : P1 selon nos critères.",
+   "detection": "Requêtes vers sslvpn_client.php avec métacaractères shell (;, |, $( ), backticks) dans img ; processus shell lancés par le serveur web du pare-feu.",
+   "remediation": "Pas de correctif : retirer l'interface SSL VPN d'Internet ou la filtrer par IP source, surveiller les logs, envisager le remplacement de l'équipement.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-135797"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-109618"
+   ],
+   "titre": "PHP : état mémoire non initialisé après une erreur OOM menant à une RCE",
+   "produit": "PHP (CPE incluant PAN-OS, Panorama et équipements Siemens)",
+   "type": "Utilisation de mémoire non initialisée → RCE",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "N/A (voir avis PHP)",
+   "resume": "Signalée par le robot CVE critiques le 24/11 (mise à jour NVD). PHP sort d'une erreur OOM par longjmp() en laissant de la mémoire non initialisée, lue ensuite au nettoyage de la requête. Versions corrigées N/A dans les données.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-109618"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [
+    "CVE-2026-111497"
+   ],
+   "titre": "Brotli : débordement de tampon du décodeur, enrichissement NVD",
+   "produit": "Google Brotli 1.0.3 → 1.2.0 (Node.js, .NET, Envoy, Istio, Bun, brotlicffi)",
+   "type": "Débordement de tampon (décodeur)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "1.0.10 / 1.1.1 / 1.2.1",
+   "resume": "Faille d'octobre ; élément nouveau : enrichissement NVD le 24/11 (liste de produits CPE). Vérifier que les runtimes et proxys qui décompressent du Brotli non fiable sont à jour.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-111497"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/10/brotli-decoder-flaw-behind-nodejs-rce.html"
+    }
+   ]
+  }
+ ],
+ "alertes": "Collecte CERT-FR du jour indisponible : aucune alerte ou avis nouveau n'a pu être vérifié dans la fenêtre. Se reporter directement à cert.ssi.gouv.fr.",
+ "menaces": [
+  {
+   "titre": "OPTIMJACK : scripts Optimizely détournés pour voler cartes et cryptomonnaies",
+   "quoi": "Campagne de chaîne d'approvisionnement côté client : au moins 178 organisations ont servi à leurs visiteurs du JavaScript malveillant hébergé par Optimizely.",
+   "comment": "Abus du flux d'inscription (CVE-2026-132224) pour écrire dans le projectJS ; charge utile combinant skimmer de cartes et crypto clipper.",
+   "pourquoi": "Un script tiers de confiance, déjà autorisé par la CSP, contourne la plupart des défenses serveur ; l'ajout KEV du 24/11 confirme la gravité.",
+   "acteur": "N/A",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ],
+    [
+     "T1189",
+     "Drive-by Compromise"
+    ],
+    [
+     "T1056.003",
+     "Web Portal Capture"
+    ],
+    [
+     "T1565.002",
+     "Transmitted Data Manipulation"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
+    },
+    {
+     "t": "ReversingLabs",
+     "u": "https://www.reversinglabs.com/blog/optimjack-when-trusted-javascript-becomes-a-supply-chain-attack"
+    },
+    {
+     "t": "Zscaler",
+     "u": "https://www.zscaler.com/blogs/security-research/attackers-exploit-optimizely-flaw-inject-malicious-javascript"
+    }
+   ]
+  },
+  {
+   "titre": "Check Point : les groupes ransomware se multiplient alors que moins de victimes paient",
+   "quoi": "Rapport du 3e trimestre 2026 relayé le 24/11 : nombre de groupes en hausse, taux de paiement en baisse (chiffres N/A dans les sources consultées).",
+   "sources": [
+    {
+     "t": "Help Net Security",
+     "u": "https://www.helpnetsecurity.com/2026/11/24/check-point-ransomware-attacks-q3-2026-report/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [],
+  "tendance": "Données ransomware.live du jour indisponibles (collecte absente) : aucune revendication française vérifiable dans la fenêtre.",
+  "groupes": []
+ },
+ "fuites": [],
+ "iocs": [],
+ "regl": [
+  "CISA : les ajouts KEV du 24/11 renvoient à la directive BOD 26-04 (priorisation des correctifs par le risque) et à des exigences de triage forensique."
+ ],
+ "lab": {
+  "concept": "Une attaque de chaîne d'approvisionnement côté client (cas OPTIMJACK) modifie un script tiers chargé par le navigateur : le serveur n'est pas touché, mais chaque visiteur exécute le code de l'attaquant.",
+  "piste": "Sur une VM Ubuntu isolée, servir une page de paiement factice chargeant un script tiers local, puis modifier ce script pour exfiltrer le formulaire vers un second conteneur. Côté défense : ajouter une CSP stricte et un attribut integrity (SRI), observer le blocage dans la console et collecter les rapports CSP avec un petit serveur Python."
+ },
+ "consultees": "Robot CVE critiques (critique/items.json : NVD, CISA KEV, EPSS), WebSearch : BleepingComputer, The Hacker News, StepSecurity, Sophos, ReversingLabs, Zscaler, SmartScope, Help Net Security",
+ "indispo": "Collecte automatique raw/2026-11-25.json absente après 3 tentatives (15 min) ; raw/2026-11-24.json, le plus récent, couvre la fenêtre précédente déjà traitée. Donc indisponibles : flux presse, CERT-FR, ransomware.live, Bonjour La Fuite, HIBP. Valeurs EPSS 1,000 du robot pour CVE-2026-111497 et CVE-2026-109618 incohérentes (mention KEV contradictoire) : remplacées par N/A."
+}
+</script>
+
+<script>
+{
+const D=JSON.parse(document.getElementById('data').textContent);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const L=['Faible','Modéré','Élevé','Critique'];
+const okUrl=u=>/^https?:\/\/[^\s"'<>`]+$/i.test(String(u||''));
+const src=a=>(a||[]).map(s=>okUrl(s.u)?`<a href="${e(s.u)}" target="_blank" rel="noopener noreferrer">${e(s.t)}</a>`:e(s.t)).join(' · ');
+const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
+
+document.title='Bulletin CTI — '+D.date;
+$('title').textContent='Bulletin CTI — '+D.date;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>${window.self===window.top?'<a href="/veille-cti/">Toutes les éditions</a>':''}`;
+$('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
+$('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
+$('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;
+
+const V=D.vulns||[],R=(D.ransomware||{}).victimes||[],F=D.fuites||[],M=D.menaces||[];
+const T=[[V.filter(v=>v.prio===1).length,'vulnérabilités P1'],[V.filter(v=>v.kev).length,'au KEV cette période'],[R.length,'revendications ransomware FR'],[F.filter(f=>f.pays==='FR').length+' / '+F.length,'fuites France / total']];
+$('tally').innerHTML=T.map(t=>`<div><strong>${e(t[0])}</strong><span>${e(t[1])}</span></div>`).join('');
+$('bluf').innerHTML=(D.bluf||[]).map(b=>`<li><i class="dot p${b.p}"></i><div><b>${e(b.sujet)} :</b> ${e(b.texte)}</div></li>`).join('');
+
+const chips=v=>`<div class="chips"><span class="chip">CVSS <b>${e(v.cvss)}</b> (${e(v.cvssv)})</span><span class="chip">EPSS <b>${e(v.epss)}</b>${v.pct?' · p'+e(v.pct):''}</span>${v.kev?'<span class="chip hot"><b>KEV</b></span>':''}<span class="chip ${/^oui/i.test(v.exploit)?'hot':'dash'}">Exploitation : ${e(v.exploit)}</span><span class="chip">PoC : ${e(v.poc)}</span></div>`;
+const vcard=v=>{
+ const ids=v.cves.map(c=>`<span class="cve">${e(c)}</span>`).join(', ');
+ const head=`<div class="head"><span class="pill p${v.prio}">P${v.prio}</span>${ids}</div><h3>${e(v.titre)}</h3>`;
+ const facts=`<dl class="row"><div><dt>Produit / versions</dt><dd>${e(v.produit)}</dd></div><div><dt>Type</dt><dd>${e(v.type)}</dd></div><div><dt>Correctif</dt><dd>${e(v.correctif)}</dd></div></dl>`;
+ if(v.quoi) return `<article class="card p${v.prio}">${head}${chips(v)}<div class="qcp"><div><h4>Quoi ?</h4><p>${e(v.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(v.comment)}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(v.pourquoi)}</p></div></div><div class="act"><div><h4>Détection</h4>${e(v.detection)}</div><div><h4>Remédiation</h4>${e(v.remediation)}</div></div><details><summary>Produit, type et correctif</summary>${facts}</details>${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+ return `<article class="card p${v.prio}">${head}${chips(v)}${facts}${v.resume?`<p class="note" style="margin:6px 0 0">${e(v.resume)}</p>`:''}${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+};
+const conf=n=>n?`<span class="conf" aria-label="confiance ${['','faible','moyenne','élevée'][n]}">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span> ${['','faible','moyenne','élevée'][n]}`:'';
+const mcard=m=>{
+ const full=m.comment||m.pourquoi;
+ const body=full?`<div class="qcp"><div><h4>Quoi ?</h4><p>${e(m.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(m.comment||'N/A')}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(m.pourquoi||'N/A')}</p></div></div>`:`<p style="margin:0">${e(m.quoi)}</p>`;
+ return `<article class="card">${'<h3>'+e(m.titre)+'</h3>'}${body}${m.acteur&&m.acteur!=='N/A'?`<p class="src" style="color:var(--ink)"><b>Attribution :</b> ${e(m.acteur)} · confiance ${conf(m.confiance)}</p>`:''}${m.ttps&&m.ttps.length?`<div class="ttps">${m.ttps.map(t=>`<a href="${ttpUrl(t[0])}" target="_blank" rel="noopener"><span>${e(t[0])}</span> ${e(t[1])}</a>`).join('')}</div>`:''}<div class="src">Sources : ${src(m.sources)}</div></article>`;
+};
+const mini=M.filter(m=>!(m.comment||m.pourquoi)&&!(m.ttps||[]).length);
+const big=M.filter(m=>!mini.includes(m));
+
+const S=[];
+const p1=V.filter(v=>v.quoi),rest=V.filter(v=>!v.quoi);
+S.push(['vulns','Vulnérabilités',`<p class="note">${e(D.alertes||'')}</p>${p1.map(vcard).join('')}${rest.length?`<h3 style="margin-top:22px">Autres vulnérabilités (P2 / P3)</h3>${rest.map(vcard).join('')}`:''}`]);
+S.push(['menaces','Menaces & campagnes',big.map(mcard).join('')+(mini.length?`<div class="list">${mini.map(m=>`<div class="item"><div class="name">${e(m.titre)}</div><div class="sub sub2">${e(m.quoi)}</div><div class="sub">${src(m.sources)}</div></div>`).join('')}</div>`:'')]);
+const rw=D.ransomware||{},gmax=Math.max(1,...(rw.groupes||[]).map(g=>g[1]));
+S.push(['ransomware','Ransomware — France',`<div class="list">${R.map(r=>`<div class="item"><div><div class="name">${e(r.victime)}</div><div class="sub">${e(r.groupe)} · ${e(r.secteur)} · ${e(r.date)}</div></div><div class="sub sub2">${e(r.note)}</div><span class="tag ${r.verif?'':'unv'}">${e(r.statut)}</span></div>`).join('')||'<div class="item">Aucune revendication visant la France.</div>'}</div><p class="note" style="margin-top:16px">${e(rw.tendance||'')} Groupes les plus actifs :</p><div class="bars">${(rw.groupes||[]).map(g=>`<div class="bar"><span>${e(g[0])}</span><i style="width:${g[1]/gmax*100}%"></i><span>${g[1]}</span></div>`).join('')}</div>`]);
+S.push(['fuites','Fuites de données',`<div class="list">${F.map(f=>`<div class="item"><div><div class="name">${e(f.victime)}</div><div class="sub">${e(f.pays)} · ${e(f.volume)}</div></div><div class="sub sub2">${e(f.donnees)}${f.source?' — '+src([f.source]):''}</div><span class="tag ${f.verif?'':'unv'}">${e(f.statut)}</span></div>`).join('')}</div>`]);
+if((D.iocs||[]).length) S.push(['ioc','IOC notables',`<div class="scroll"><table style="width:100%;border-collapse:collapse;background:var(--card)"><thead><tr><th align="left">Type</th><th align="left">Valeur</th><th align="left">Contexte</th><th align="left">Source</th></tr></thead><tbody>${D.iocs.map(i=>`<tr><td>${e(i.type)}</td><td class="cve">${e(i.valeur)}</td><td>${e(i.contexte)}</td><td>${e(i.source)}</td></tr>`).join('')}</tbody></table></div>`]);
+if((D.regl||[]).length) S.push(['regl','Réglementaire & institutionnel',`<div class="card"><ul class="plain">${D.regl.map(r=>`<li>${e(r)}</li>`).join('')}</ul></div>`]);
+if(D.lab) S.push(['lab','À creuser',`<div class="lab"><h4>Concept</h4><p>${e(D.lab.concept)}</p><h4>Piste de lab</h4><p style="margin:0">${e(D.lab.piste)}</p></div>`]);
+
+$('nav').innerHTML=S.map(s=>`<a href="#${s[0]}">${s[1]}</a>`).join('');
+$('main').innerHTML=S.map(s=>`<section id="${s[0]}"><h2 class="sec">${s[1]}</h2>${s[2]}</section>`).join('');
+$('foot').innerHTML=`<p>Bulletin généré automatiquement à partir de sources publiques : vérifier auprès des sources citées avant toute décision. Les revendications de groupes criminels restent « Non vérifiées » tant que la victime ne les a pas confirmées.</p><p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
+}
+</script>
+</body>
+</html>

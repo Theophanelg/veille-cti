@@ -143,475 +143,303 @@ footer{padding:20px 0 40px;font-size:14px;color:var(--mute)}
 <!-- DONNEES DU JOUR : seul ce bloc JSON change d'un bulletin à l'autre -->
 <script id="data" type="application/json">
 {
- "date": "Mardi 24 novembre 2026",
- "periode": "lun. 23/11 06:35 → mar. 24/11 06:35 (heure de Paris)",
+ "date": "Mercredi 25 novembre 2026",
+ "periode": "mar. 24/11 06:35 → mer. 25/11 06:35 (heure de Paris)",
  "niveau": 2,
- "justification": "Deux ajouts KEV (MONAI Label, N-able MailAssure) à échéance du 26/11, une faille Azure API Management exploitée contre l'énergie norvégienne et le CHU de Guadeloupe paralysé par une cyberattaque.",
+ "justification": "Trois ajouts KEV du 24/11 à échéance du 27/11, dont une RCE Drupal core via l'installateur et la chaîne d'approvisionnement Optimizely (OPTIMJACK, 178 organisations) ; collecte automatique du jour absente, couverture partielle.",
  "bluf": [
   {
    "p": 1,
-   "sujet": "MONAI Label et N-able MailAssure au KEV",
-   "texte": "ajoutés le 23/11, échéance CISA au 26/11 ; nouveau : exploitation confirmée. Passer MONAI Label en 0.8.6 et vérifier le build MailAssure/SpamExperts (≥ 20261121.1943)."
+   "sujet": "Drupal core (CVE-2026-132165)",
+   "texte": "RCE via l'installateur install.php, ajoutée au KEV le 24/11 ; passer en 10.6.22 / 11.4.13 et bloquer install.php d'ici le 27/11."
   },
   {
    "p": 1,
-   "sujet": "Azure API Management Classic",
-   "texte": "faille exploitée pour voler les identifiants d'API stockés, liée par la Norvège aux attaques contre Equinor et Skagerak Energi ; faire tourner les secrets stockés dans APIM."
+   "sujet": "Optimizely Web Experimentation (CVE-2026-132224)",
+   "texte": "code JavaScript malveillant injecté dans les scripts projectJS servis par le CDN Optimizely (OPTIMJACK : skimmer et crypto clipper) ; auditer les snippets chargés par vos sites."
   },
   {
-   "p": 2,
-   "sujet": "CHU de Guadeloupe",
-   "texte": "plan blanc depuis le 22/11 après une cyberattaque ; vecteur et acteur non communiqués, s'attendre à du phishing opportuniste visant patients et personnel."
+   "p": 1,
+   "sujet": "Idunno.AntiCsrf (CVE-2026-131914)",
+   "texte": "RCE pré-auth déjà signalée exploitée, désormais au KEV (échéance 27/11) ; sans correctif, retirer la bibliothèque des applications WebForms."
   },
   {
-   "p": 2,
-   "sujet": "binary-parser (npm)",
-   "texte": "injection de code JavaScript (CVSS 4.0 9,2) si l'attaquant contrôle les définitions de parseur ; mettre à jour en 2.3.1."
-  },
-  {
-   "p": 2,
-   "sujet": "Webworm",
-   "texte": "l'acteur aligné sur la Chine utiliserait un SoftEther VPN Bridge modifié, déguisé en outil de supervision, pour un accès persistant ; chasser les binaires SoftEther inattendus."
+   "p": 1,
+   "sujet": "Volans NGFW r5.1 (CVE-2026-135797)",
+   "texte": "injection de commande pré-auth dans le client SSL VPN, CVSS 10, PoC public, éditeur muet ; ne pas exposer l'interface SSL VPN."
   }
  ],
  "vulns": [
   {
    "prio": 1,
    "cves": [
-    "CVE-2026-133968"
+    "CVE-2026-132165"
    ],
-   "titre": "MONAI Label : path traversal menant à une RCE, ajoutée au KEV",
-   "produit": "MONAI Label < 0.8.6",
-   "type": "Path traversal (CWE-24)",
-   "cvss": "9,8",
-   "cvssv": "3.1",
-   "epss": "0,037",
-   "pct": "89,9",
+   "titre": "Drupal core : RCE non authentifiée via l'installateur, ajoutée au KEV",
+   "produit": "Drupal core (versions corrigées : 10.6.22, 11.4.13)",
+   "type": "Prise de contrôle / RCE via install.php",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
    "kev": true,
    "poc": "Inconnu",
-   "exploit": "Oui, depuis septembre 2026",
-   "correctif": "0.8.6",
-   "quoi": "Faille de MONAI Label, serveur d'annotation d'imagerie médicale par IA. Nouveau : ajoutée au KEV le 23/11, échéance fédérale au 26/11.",
-   "comment": "Le paramètre image de l'endpoint PUT /datastore/image permet, sans authentification, d'écrire un fichier hors du datastore, d'où une exécution de code.",
-   "pourquoi": "Exploitée depuis septembre 2026 contre des universités (opération Cairn, agents IA autonomes). Les serveurs de recherche exposés sur Internet sont visés.",
-   "detection": "Requêtes PUT /datastore/image contenant ../ dans le paramètre image ; fichiers Python inattendus (sitecustomize.py) ; processus enfants du service MONAI Label.",
-   "remediation": "Mettre à jour en 0.8.6, retirer l'instance d'Internet ou la placer derrière une authentification. Si exposée depuis septembre : traiter comme compromise.",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "10.6.22 / 11.4.13",
+   "quoi": "Faille critique du site installer de Drupal core permettant une prise de contrôle du site sans authentification.",
+   "comment": "Passe par le script install.php accessible à distance ; mécanisme détaillé N/A dans les sources consultées.",
+   "pourquoi": "La CISA confirme l'exploitation active (ajout KEV le 24/11, échéance 27/11) et Drupal avait prévenu que des exploits arriveraient vite. Les CMS sont exposés à Internet par nature.",
+   "detection": "Requêtes HTTP vers /core/install.php ou /install.php sur des sites déjà installés ; nouveaux comptes administrateurs, modules ou fichiers PHP inattendus.",
+   "remediation": "Mettre à jour vers 10.6.22 ou 11.4.13 ; bloquer l'accès à install.php au niveau du serveur web ; appliquer le triage forensique demandé par la CISA si le site était exposé.",
    "sources": [
     {
-     "t": "CISA KEV",
-     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133968"
+     "t": "BleepingComputer",
+     "u": "https://bleepingcomputer.com/news/security/drupal-patches-critical-rce-flaw-warns-exploits-may-surface-quickly"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-patches-critical-installer-flaw.html"
+    },
+    {
+     "t": "SmartScope",
+     "u": "https://smartscope.blog/en/blog/drupal-exploited-rce-update-10-6-22-11-2026/"
     },
     {
      "t": "NVD",
-     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133968"
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
     }
    ]
   },
   {
    "prio": 1,
    "cves": [
-    "CVE-2026-134624"
+    "CVE-2026-132224"
    ],
-   "titre": "N-able MailAssure / SpamExperts : SSRF ajoutée au KEV",
-   "produit": "MailAssure (SpamExperts) < 20261121.1943",
-   "type": "SSRF (CWE-918)",
-   "cvss": "9,3",
-   "cvssv": "4.0",
+   "titre": "Optimizely Web Experimentation : code injecté dans les scripts CDN (OPTIMJACK), ajoutée au KEV",
+   "produit": "Optimizely Web Experimentation avant le 17/11/2026 (SaaS)",
+   "type": "Contrôle externe de données d'état critiques → injection JavaScript côté client",
+   "cvss": "8,7",
+   "cvssv": "3.1",
    "epss": "0,004",
-   "pct": "29,7",
+   "pct": "35,8",
    "kev": true,
    "poc": "Inconnu",
-   "exploit": "Oui (CISA KEV, 23/11)",
-   "correctif": "Build 20261121.1943",
-   "quoi": "SSRF (le serveur est forcé à émettre des requêtes vers des cibles choisies) dans la vérification de connexion LDAP. Nouveau depuis hier : exploitation confirmée par l'ajout au KEV le 23/11.",
-   "comment": "Un utilisateur API authentifié fait connecter le serveur à des hôtes et ports internes arbitraires, cartographie ceux qui répondent et leur envoie des données forgées.",
-   "pourquoi": "Découverte pendant l'enquête sur l'intrusion du Hosted Cloud de N-able. Service de filtrage mail mutualisé par des MSP : un rebond vers l'interne touche de nombreux clients.",
-   "detection": "Journaux API de configuration de relais/LDAP pointant vers des IP privées ou des ports inhabituels ; connexions sortantes du serveur vers le réseau interne.",
-   "remediation": "Vérifier le build (≥ 20261121.1943) sur Local Cloud, recréer les jetons API/OAuth révoqués et filtrer les flux sortants du serveur vers l'interne.",
+   "exploit": "Oui (KEV, campagne OPTIMJACK)",
+   "correctif": "Corrigé côté éditeur le 17/11",
+   "quoi": "Le flux d'inscription Optimizely laissait un attaquant placer son code dans le champ projectJS d'actifs servis par cdn.optimizely.com.",
+   "comment": "Les sites clients chargeaient ce JavaScript de confiance ; il embarquait un skimmer de cartes et un crypto clipper (malware qui remplace les adresses de portefeuille copiées).",
+   "pourquoi": "Attaque de chaîne d'approvisionnement côté client touchant au moins 178 organisations, dont des sites de grands médias. Ajout KEV le 24/11, échéance 27/11.",
+   "detection": "Inventorier les scripts cdn.optimizely.com chargés par vos pages et comparer le projectJS à la version attendue ; alertes CSP (Content Security Policy) vers des domaines d'exfiltration inconnus.",
+   "remediation": "Vérifier et nettoyer le projectJS de chaque projet, faire tourner les accès Optimizely, imposer une CSP stricte et le SRI (contrôle d'intégrité) quand c'est possible ; notifier les clients si des paiements ont transité.",
    "sources": [
     {
-     "t": "CISA KEV",
-     "u": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-134624"
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-delivers-malware-to-cnn-fox-news-bbc-salesforce-sites/"
+    },
+    {
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
+    },
+    {
+     "t": "Sophos",
+     "u": "https://www.sophos.com/blog/hijacked-optimizely-snippets-served-malicious-code"
     },
     {
      "t": "NVD",
-     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134624"
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132224"
     },
     {
-     "t": "SecurityWeek",
-     "u": "https://www.securityweek.com/n-able-patches-critical-flaw-disclosed-after-mail-assure-cyberattack/"
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
     }
    ]
   },
   {
    "prio": 1,
-   "cves": [],
-   "titre": "Azure API Management Classic : vol des identifiants d'API stockés, exploitée",
-   "produit": "Azure API Management, offres Classic",
-   "type": "N/A",
-   "cvss": "N/A",
-   "cvssv": "N/A",
-   "epss": "N/A",
-   "pct": "",
-   "kev": false,
+   "cves": [
+    "CVE-2026-131914"
+   ],
+   "titre": "Idunno.AntiCsrf (ASP.NET WebForms) : RCE pré-auth, désormais au KEV",
+   "produit": "Idunno.AntiCsrf jusqu'à 0.9.1 Beta (ASP.NET)",
+   "type": "Désérialisation de données non fiables → RCE (CWE-502)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,006",
+   "pct": "50,2",
+   "kev": true,
    "poc": "Inconnu",
-   "exploit": "Oui (Microsoft, autorités norvégiennes)",
-   "correctif": "Corrigé côté Microsoft (service cloud)",
-   "quoi": "Microsoft avertit qu'une faille des offres Classic d'Azure API Management (APIM, passerelle d'API managée) a été exploitée. Identifiant CVE et mécanisme non communiqués.",
-   "comment": "N/A : les attaquants ont récupéré des identifiants d'API stockés dans APIM ; mode opératoire non détaillé.",
-   "pourquoi": "La Norvège relie la faille aux attaques contre Equinor et Skagerak Energi ; d'autres secteurs sont aussi touchés. Les secrets volés ouvrent les backends derrière la passerelle.",
-   "detection": "Journaux d'activité Azure et diagnostics APIM : lecture des named values, clés d'abonnement ou identifiants backend ; appels backend depuis des IP inconnues.",
-   "remediation": "Le correctif est côté Microsoft, mais les secrets déjà volés restent valides : les faire tourner (named values, clés d'abonnement, identifiants backend) et migrer vers Key Vault.",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "Aucun (bibliothèque abandonnée)",
+   "quoi": "Déjà traitée le 23/11 ; élément nouveau : ajout au KEV le 24/11 avec échéance fédérale au 27/11.",
+   "comment": "La validation double-submit cookie / champ de formulaire désérialise des objets fournis par l'attaquant : injection d'objet et exécution de code sans authentification.",
+   "pourquoi": "Bibliothèque anti-CSRF ancienne encore présente dans des applications WebForms exposées ; pas de correctif, donc seule la suppression protège.",
+   "detection": "Cookies ou champs anti-CSRF anormalement longs ou encodés en base64 ; processus enfants (cmd.exe, powershell.exe) lancés par w3wp.exe.",
+   "remediation": "Retirer Idunno.AntiCsrf et le remplacer par la protection anti-CSRF native d'ASP.NET (ViewStateUserKey) ; à défaut, isoler l'application. Échéance KEV : 27/11.",
    "sources": [
     {
-     "t": "BleepingComputer",
-     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-131914"
     },
     {
-     "t": "The Record",
-     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
-    },
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-135797"
+   ],
+   "titre": "Volans NGFW r5.1 : injection de commande pré-auth dans le client SSL VPN, PoC public",
+   "produit": "Volans NGFW Next-Generation Firewall r5.1",
+   "type": "Injection de commande OS (paramètre img de sslvpn/sslvpn_client.php)",
+   "cvss": "10,0",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Oui",
+   "exploit": "Non signalée",
+   "correctif": "Aucun (éditeur sans réponse)",
+   "quoi": "Injection de commande dans la fonction exec de sslvpn/sslvpn_client.php du composant SSL VPN Client.",
+   "comment": "Le paramètre img est passé au système sans filtrage ; l'attaque se fait à distance sans authentification (vecteur AV:N/PR:N, scope changé).",
+   "pourquoi": "CVSS 10 avec exploit public sur une interface VPN exposée à Internet par conception, et éditeur resté muet : P1 selon nos critères.",
+   "detection": "Requêtes vers sslvpn_client.php avec métacaractères shell (;, |, $( ), backticks) dans img ; processus shell lancés par le serveur web du pare-feu.",
+   "remediation": "Pas de correctif : retirer l'interface SSL VPN d'Internet ou la filtrer par IP source, surveiller les logs, envisager le remplacement de l'équipement.",
+   "sources": [
     {
-     "t": "SecurityWeek",
-     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-135797"
     }
    ]
   },
   {
    "prio": 2,
    "cves": [
-    "CVE-2026-134814"
+    "CVE-2026-109618"
    ],
-   "titre": "binary-parser : injection de JavaScript via des définitions de parseur",
-   "produit": "binary-parser (npm) < 2.3.1",
-   "type": "Injection de code (CWE-94)",
-   "cvss": "9,2",
-   "cvssv": "4.0",
-   "epss": "0,006",
-   "pct": "50,1",
+   "titre": "PHP : état mémoire non initialisé après une erreur OOM menant à une RCE",
+   "produit": "PHP (CPE incluant PAN-OS, Panorama et équipements Siemens)",
+   "type": "Utilisation de mémoire non initialisée → RCE",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
    "kev": false,
    "poc": "Inconnu",
-   "exploit": "Non confirmée",
-   "correctif": "2.3.1",
-   "resume": "Des options non validées (length, key, tag, offset, alias namely()) sont injectées dans le code généré à la compilation du parseur : exécution de JavaScript dans le processus Node.js. Exploitable seulement si l'attaquant contrôle la définition.",
+   "exploit": "Non signalée",
+   "correctif": "N/A (voir avis PHP)",
+   "resume": "Signalée par le robot CVE critiques le 24/11 (mise à jour NVD). PHP sort d'une erreur OOM par longjmp() en laissant de la mémoire non initialisée, lue ensuite au nettoyage de la requête. Versions corrigées N/A dans les données.",
    "sources": [
     {
-     "t": "The Hacker News",
-     "u": "https://thehackernews.com/2026/11/critical-binary-parser-flaw-enables.html"
-    },
-    {
      "t": "NVD",
-     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-134814"
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-109618"
     }
    ]
   },
   {
    "prio": 3,
-   "cves": [],
-   "titre": "phpAfterShell : désérialisation de session PHP relançant la voie PHP2Shell",
-   "produit": "PHP (gestion des sessions)",
-   "type": "Désérialisation non sûre",
-   "cvss": "N/A",
-   "cvssv": "N/A",
+   "cves": [
+    "CVE-2026-111497"
+   ],
+   "titre": "Brotli : débordement de tampon du décodeur, enrichissement NVD",
+   "produit": "Google Brotli 1.0.3 → 1.2.0 (Node.js, .NET, Envoy, Istio, Bun, brotlicffi)",
+   "type": "Débordement de tampon (décodeur)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
    "epss": "N/A",
-   "pct": "",
+   "pct": "N/A",
    "kev": false,
    "poc": "Inconnu",
-   "exploit": "Non confirmée",
-   "correctif": "N/A",
-   "resume": "Si l'écriture d'une session est interrompue, un attaquant qui contrôle les nouvelles données peut déclencher une désérialisation et une RCE. CVE, versions et correctif non précisés dans la source.",
+   "exploit": "Non signalée",
+   "correctif": "1.0.10 / 1.1.1 / 1.2.1",
+   "resume": "Faille d'octobre ; élément nouveau : enrichissement NVD le 24/11 (liste de produits CPE). Vérifier que les runtimes et proxys qui décompressent du Brotli non fiable sont à jour.",
    "sources": [
     {
-     "t": "SecurityWeek",
-     "u": "https://www.securityweek.com/phpaftershell-vulnerability-revives-php2shells-attack-path/"
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-111497"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/10/brotli-decoder-flaw-behind-nodejs-rce.html"
     }
    ]
   }
  ],
- "alertes": "Aucune nouvelle alerte CERT-FR dans la fenêtre (dernières : ALE-016 et ALE-017 du 18/11). Le 23/11 : 9 avis (AVI-1599 à AVI-1607) et le bulletin d'actualité ACT-049 ; leurs titres ne figurent pas dans la collecte.",
+ "alertes": "Collecte CERT-FR du jour indisponible : aucune alerte ou avis nouveau n'a pu être vérifié dans la fenêtre. Se reporter directement à cert.ssi.gouv.fr.",
  "menaces": [
   {
-   "titre": "Norvège : la faille Azure APIM exploitée contre Equinor et Skagerak Energi",
-   "quoi": "Les autorités norvégiennes relient l'exploitation d'Azure API Management Classic à des attaques visant des identifiants sensibles chez Equinor et Skagerak Energi.",
-   "comment": "Vol d'identifiants d'API stockés dans le service cloud, puis usage présumé pour atteindre des systèmes internes (détails non publiés).",
-   "pourquoi": "Énergie, secteur critique ; montre que les secrets confiés à un service SaaS restent une cible même quand le fournisseur a corrigé.",
-   "acteur": "N/A (aucune attribution publiée)",
+   "titre": "OPTIMJACK : scripts Optimizely détournés pour voler cartes et cryptomonnaies",
+   "quoi": "Campagne de chaîne d'approvisionnement côté client : au moins 178 organisations ont servi à leurs visiteurs du JavaScript malveillant hébergé par Optimizely.",
+   "comment": "Abus du flux d'inscription (CVE-2026-132224) pour écrire dans le projectJS ; charge utile combinant skimmer de cartes et crypto clipper.",
+   "pourquoi": "Un script tiers de confiance, déjà autorisé par la CSP, contourne la plupart des défenses serveur ; l'ajout KEV du 24/11 confirme la gravité.",
+   "acteur": "N/A",
    "confiance": 1,
    "ttps": [
     [
-     "T1190",
-     "Exploit Public-Facing Application"
+     "T1195.002",
+     "Compromise Software Supply Chain"
     ],
     [
-     "T1552",
-     "Unsecured Credentials"
+     "T1189",
+     "Drive-by Compromise"
     ],
     [
-     "T1078.004",
-     "Cloud Accounts"
+     "T1056.003",
+     "Web Portal Capture"
+    ],
+    [
+     "T1565.002",
+     "Transmitted Data Manipulation"
     ]
    ],
    "sources": [
     {
-     "t": "BleepingComputer",
-     "u": "https://www.bleepingcomputer.com/news/security/microsoft-azure-flaw-exploited-to-steal-customers-api-credentials/"
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
     },
     {
-     "t": "The Record",
-     "u": "https://therecord.media/norway-microsoft-cyberattack-equinor"
+     "t": "ReversingLabs",
+     "u": "https://www.reversinglabs.com/blog/optimjack-when-trusted-javascript-becomes-a-supply-chain-attack"
     },
     {
-     "t": "SecurityWeek",
-     "u": "https://www.securityweek.com/azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms/"
+     "t": "Zscaler",
+     "u": "https://www.zscaler.com/blogs/security-research/attackers-exploit-optimizely-flaw-inject-malicious-javascript"
     }
    ]
   },
   {
-   "titre": "CHU de Guadeloupe paralysé par une cyberattaque",
-   "quoi": "Cyberattaque le 21/11 au soir ; le CHU a déclenché son plan blanc (dispositif de crise hospitalier) le 22/11 et fonctionne en mode dégradé.",
-   "comment": "N/A : vecteur, nature (rançongiciel ou non) et données touchées non communiqués.",
-   "pourquoi": "Deuxième établissement de santé français touché en quelques jours après le CHU de Bordeaux (revendication non vérifiée) ; risque sur la continuité des soins.",
-   "acteur": "N/A (aucune revendication relevée)",
-   "confiance": 0,
-   "ttps": [],
+   "titre": "Check Point : les groupes ransomware se multiplient alors que moins de victimes paient",
+   "quoi": "Rapport du 3e trimestre 2026 relayé le 24/11 : nombre de groupes en hausse, taux de paiement en baisse (chiffres N/A dans les sources consultées).",
    "sources": [
     {
-     "t": "Next",
-     "u": "https://next.ink/brief-article/le-chu-de-guadeloupe-est-paralyse-par-une-cyberattaque/"
-    }
-   ]
-  },
-  {
-   "titre": "Webworm : un SoftEther VPN Bridge modifié pour l'accès distant",
-   "quoi": "Webworm, acteur aligné sur la Chine, utiliserait une version modifiée de SoftEther VPN Bridge (VPN open source), déguisée en logiciel de supervision réseau.",
-   "comment": "Les empreintes reconnaissables de SoftEther sont retirées du binaire, qui maintient un tunnel vers l'infrastructure de l'attaquant : accès distant sans malware classique.",
-   "pourquoi": "Un outil légitime modifié échappe aux signatures ; seules la télémétrie réseau et l'inventaire logiciel le révèlent. Rapid7 évoque des cibles gouvernementales.",
-   "acteur": "Webworm, aligné sur la Chine (soupçon des chercheurs)",
-   "confiance": 2,
-   "ttps": [
-    [
-     "T1572",
-     "Protocol Tunneling"
-    ],
-    [
-     "T1036",
-     "Masquerading"
-    ],
-    [
-     "T1133",
-     "External Remote Services"
-    ]
-   ],
-   "sources": [
-    {
-     "t": "The Hacker News",
-     "u": "https://thehackernews.com/2026/11/webworm-suspected-of-modifying.html"
-    },
-    {
-     "t": "Rapid7",
-     "u": "https://www.rapid7.com/blog/post/tr-spying-on-governments-no-malware-custom-webworms-toolkit-softether-bridge"
-    }
-   ]
-  },
-  {
-   "titre": "BlackHatSect0r : extorsion, phishing bancaire et IA offensive à louer (non confirmé)",
-   "quoi": "Selon ZATAZ, ce groupe revendique des attaques contre des sociétés françaises, dont AAAEP (585 000 personnes potentiellement concernées), et loue une « IA offensive » 500 €.",
-   "comment": "Phishing bancaire, extorsion, destruction des sauvegardes et ciblage d'interfaces industrielles exposées sur Internet.",
-   "pourquoi": "Acteur francophone visant des PME françaises ; la destruction des sauvegardes rend les sauvegardes hors ligne indispensables.",
-   "acteur": "BlackHatSect0r",
-   "confiance": 1,
-   "ttps": [
-    [
-     "T1566",
-     "Phishing"
-    ],
-    [
-     "T1490",
-     "Inhibit System Recovery"
-    ],
-    [
-     "T1657",
-     "Financial Theft"
-    ]
-   ],
-   "sources": [
-    {
-     "t": "ZATAZ",
-     "u": "https://www.zataz.com/blackhatsect0r-phishing-bancaire-extorsion-et-industrie/"
-    },
-    {
-     "t": "ZATAZ",
-     "u": "https://www.zataz.com/blackhat-sector-une-ia-offensive-a-louer-pour-500-e/"
-    }
-   ]
-  },
-  {
-   "titre": "Ransomware : les frameworks offensifs agentiques comme Artex arrivent",
-   "quoi": "LeMagIT relève que des opérateurs de rançongiciels s'appuient désormais sur des frameworks offensifs agentiques (agents IA qui enchaînent les actions), tels qu'Artex.",
-   "sources": [
-    {
-     "t": "LeMagIT",
-     "u": "https://www.lemagit.fr/actualites/366655137/Ransomware-les-frameworks-offensifs-agentiques-sont-entres-dans-la-danse"
-    }
-   ]
-  },
-  {
-   "titre": "Bulgarie : cinq ans de cyberespionnage, 62 millions de pages volées",
-   "quoi": "La Bulgarie révèle une campagne de cyberespionnage de cinq ans et le vol d'au moins 62 millions de pages ; attribution non précisée dans l'extrait.",
-   "sources": [
-    {
-     "t": "ZATAZ",
-     "u": "https://www.zataz.com/cyberespionnage-en-bulgarie-62-millions-de-pages-volees/"
-    }
-   ]
-  },
-  {
-   "titre": "GlobeTopper : 2,5 M$ de pertes après une cyberattaque",
-   "quoi": "Le fournisseur B2B de recharges a subi une interruption estimée à 2,5 M$ de chiffre d'affaires ; l'attaquant a encaissé 70 000 $ de cartes cadeaux.",
-   "sources": [
-    {
-     "t": "BleepingComputer",
-     "u": "https://www.bleepingcomputer.com/news/security/globetopper-loses-25-million-after-hackers-steal-70k-in-gift-cards/"
-    }
-   ]
-  },
-  {
-   "titre": "BadBox 3.0 perturbé",
-   "quoi": "L'opération de fraude publicitaire BadBox 3.0 (40 milliards de requêtes d'enchères par jour) a été perturbée ; des appareils bon marché à porte dérobée servaient aussi de proxys résidentiels.",
-   "sources": [
-    {
-     "t": "SecurityWeek",
-     "u": "https://www.securityweek.com/badbox-3-0-ad-fraud-operation-generating-40-billion-daily-bid-requests-disrupted/"
+     "t": "Help Net Security",
+     "u": "https://www.helpnetsecurity.com/2026/11/24/check-point-ransomware-attacks-q3-2026-report/"
     }
    ]
   }
  ],
  "ransomware": {
-  "victimes": [
-   {
-    "victime": "Ipsos",
-    "groupe": "Qilin",
-    "secteur": "Études et sondages",
-    "date": "23/11",
-    "statut": "Non vérifiée",
-    "verif": false,
-    "note": "Ipsos figure sur Bonjour La Fuite depuis le 16/11 ; lien avec la revendication non établi"
-   },
-   {
-    "victime": "Piment Intérim (Groupe Piment)",
-    "groupe": "SpaceBears",
-    "secteur": "Intérim / RH",
-    "date": "23/11",
-    "statut": "Non vérifiée",
-    "verif": false,
-    "note": "Aucune confirmation publique trouvée"
-   }
-  ],
-  "tendance": "30 revendications mondiales visibles dans la fenêtre sur ransomware.live ; Safepay en tête (9). N0n a publié 27 entrées le 22-23/11, presque toutes avant la fenêtre.",
-  "groupes": [
-   [
-    "Safepay",
-    9
-   ],
-   [
-    "Aurora",
-    3
-   ],
-   [
-    "Anubis",
-    2
-   ],
-   [
-    "Rhysida",
-    2
-   ],
-   [
-    "Qilin",
-    2
-   ]
-  ]
+  "victimes": [],
+  "tendance": "Données ransomware.live du jour indisponibles (collecte absente) : aucune revendication française vérifiable dans la fenêtre.",
+  "groupes": []
  },
- "fuites": [
-  {
-   "victime": "AAAEP (revendiquée par BlackHatSect0r)",
-   "pays": "FR",
-   "volume": "585 000 personnes potentiellement",
-   "donnees": "Données psychotechniques, enregistrements d'appels",
-   "statut": "Non vérifiée",
-   "verif": false,
-   "source": {
-    "t": "ZATAZ",
-    "u": "https://www.zataz.com/cyberattaque-contre-aaaep-585-000-personnes-exposees/"
-   }
-  },
-  {
-   "victime": "KEPCO (Korea Electric Power Corporation)",
-   "pays": "KR",
-   "volume": "1,5 million de personnes",
-   "donnees": "Données de clients, employés et sous-traitants",
-   "statut": "Confirmée",
-   "verif": true,
-   "source": {
-    "t": "BleepingComputer",
-    "u": "https://www.bleepingcomputer.com/news/security/south-koreas-power-giant-kepco-confirms-data-breach-impacting-15-million/"
-   }
-  },
-  {
-   "victime": "LaLiga",
-   "pays": "ES",
-   "volume": "N/A",
-   "donnees": "Données personnelles d'utilisateurs de LaLiga et de clubs affiliés",
-   "statut": "Confirmée",
-   "verif": true,
-   "source": {
-    "t": "BleepingComputer",
-    "u": "https://www.bleepingcomputer.com/news/security/spanish-laliga-confirms-hackers-stole-soccer-fans-personal-data/"
-   }
-  },
-  {
-   "victime": "Ministère autrichien des Affaires étrangères",
-   "pays": "AT",
-   "volume": "N/A",
-   "donnees": "Noms et coordonnées professionnelles des agents (siège et missions diplomatiques)",
-   "statut": "Confirmée",
-   "verif": true,
-   "source": {
-    "t": "The Record",
-    "u": "https://therecord.media/austrian-foreign-ministry-says-website-hacked"
-   }
-  },
-  {
-   "victime": "Bromcom",
-   "pays": "GB",
-   "volume": "355 051 comptes",
-   "donnees": "E-mails d'élèves et de personnels, données d'inscription SSO",
-   "statut": "Confirmée",
-   "verif": true,
-   "source": {
-    "t": "HIBP",
-    "u": "https://haveibeenpwned.com/Breach/Bromcom"
-   }
-  }
- ],
- "iocs": [
-  {
-   "type": "Plage IP",
-   "valeur": "109.160.32[.]0/24",
-   "contexte": "Scans persistants vus par DShield sur 90 jours, toujours actifs (AS198364, BANATSYNC SRL, Roumanie)",
-   "source": "SANS ISC"
-  }
- ],
+ "fuites": [],
+ "iocs": [],
  "regl": [
-  "France : dix personnes mises en examen après le piratage de trois courtiers en métaux précieux dont les clients étaient ensuite démarchés par de faux policiers (ZATAZ).",
-  "États-Unis : un opérateur de centre d'appels péruvien condamné à 8 ans de prison pour une fraude à l'usurpation d'administration visant plus de 30 000 résidents.",
-  "Microsoft : Windows PowerShell 5.1 déprécié depuis le 17/11 ; PowerShell 7 sera intégré à la prochaine version de Windows, scripts d'administration à tester."
+  "CISA : les ajouts KEV du 24/11 renvoient à la directive BOD 26-04 (priorisation des correctifs par le risque) et à des exigences de triage forensique."
  ],
  "lab": {
-  "concept": "La SSRF (CVE-2026-134624) détourne une fonction du serveur, ici un test de connexion LDAP, pour joindre des hôtes internes. Les différences de réponse ou de délai révèlent les ports ouverts : le serveur devient un scanner derrière le pare-feu.",
-  "piste": "Sous Ubuntu avec Docker : une app Flask exposant un « test de connexion » (hôte, port) et un Redis interne non exposé. Scanner le réseau Docker via l'app, puis envoyer des commandes Redis brutes. Côté défense : journaliser les destinations, filtrer la sortie par liste blanche et vérifier le blocage."
+  "concept": "Une attaque de chaîne d'approvisionnement côté client (cas OPTIMJACK) modifie un script tiers chargé par le navigateur : le serveur n'est pas touché, mais chaque visiteur exécute le code de l'attaquant.",
+  "piste": "Sur une VM Ubuntu isolée, servir une page de paiement factice chargeant un script tiers local, puis modifier ce script pour exfiltrer le formulaire vers un second conteneur. Côté défense : ajouter une CSP stricte et un attribut integrity (SRI), observer le blocage dans la console et collecter les rapports CSP avec un petit serveur Python."
  },
- "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, SANS ISC, HIBP, CERT-FR (alertes, avis, actualités, CTI, IOC), CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, recherche web (Rapid7)",
- "indispo": "Flux CERT-FR figé (aucun article dans la fenêtre ; titres des avis du 23/11 absents) ; Bonjour La Fuite sans nouvelle entrée dans la fenêtre ; identifiant CVE de la faille Azure APIM non trouvé"
+ "consultees": "Robot CVE critiques (critique/items.json : NVD, CISA KEV, EPSS), WebSearch : BleepingComputer, The Hacker News, StepSecurity, Sophos, ReversingLabs, Zscaler, SmartScope, Help Net Security",
+ "indispo": "Collecte automatique raw/2026-11-25.json absente après 3 tentatives (15 min) ; raw/2026-11-24.json, le plus récent, couvre la fenêtre précédente déjà traitée. Donc indisponibles : flux presse, CERT-FR, ransomware.live, Bonjour La Fuite, HIBP. Valeurs EPSS 1,000 du robot pour CVE-2026-111497 et CVE-2026-109618 incohérentes (mention KEV contradictoire) : remplacées par N/A."
 }
 </script>
 

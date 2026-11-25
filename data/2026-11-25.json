@@ -1,0 +1,299 @@
+{
+ "date": "Mercredi 25 novembre 2026",
+ "periode": "mar. 24/11 06:35 → mer. 25/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Trois ajouts KEV du 24/11 à échéance du 27/11, dont une RCE Drupal core via l'installateur et la chaîne d'approvisionnement Optimizely (OPTIMJACK, 178 organisations) ; collecte automatique du jour absente, couverture partielle.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "Drupal core (CVE-2026-132165)",
+   "texte": "RCE via l'installateur install.php, ajoutée au KEV le 24/11 ; passer en 10.6.22 / 11.4.13 et bloquer install.php d'ici le 27/11."
+  },
+  {
+   "p": 1,
+   "sujet": "Optimizely Web Experimentation (CVE-2026-132224)",
+   "texte": "code JavaScript malveillant injecté dans les scripts projectJS servis par le CDN Optimizely (OPTIMJACK : skimmer et crypto clipper) ; auditer les snippets chargés par vos sites."
+  },
+  {
+   "p": 1,
+   "sujet": "Idunno.AntiCsrf (CVE-2026-131914)",
+   "texte": "RCE pré-auth déjà signalée exploitée, désormais au KEV (échéance 27/11) ; sans correctif, retirer la bibliothèque des applications WebForms."
+  },
+  {
+   "p": 1,
+   "sujet": "Volans NGFW r5.1 (CVE-2026-135797)",
+   "texte": "injection de commande pré-auth dans le client SSL VPN, CVSS 10, PoC public, éditeur muet ; ne pas exposer l'interface SSL VPN."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132165"
+   ],
+   "titre": "Drupal core : RCE non authentifiée via l'installateur, ajoutée au KEV",
+   "produit": "Drupal core (versions corrigées : 10.6.22, 11.4.13)",
+   "type": "Prise de contrôle / RCE via install.php",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "10.6.22 / 11.4.13",
+   "quoi": "Faille critique du site installer de Drupal core permettant une prise de contrôle du site sans authentification.",
+   "comment": "Passe par le script install.php accessible à distance ; mécanisme détaillé N/A dans les sources consultées.",
+   "pourquoi": "La CISA confirme l'exploitation active (ajout KEV le 24/11, échéance 27/11) et Drupal avait prévenu que des exploits arriveraient vite. Les CMS sont exposés à Internet par nature.",
+   "detection": "Requêtes HTTP vers /core/install.php ou /install.php sur des sites déjà installés ; nouveaux comptes administrateurs, modules ou fichiers PHP inattendus.",
+   "remediation": "Mettre à jour vers 10.6.22 ou 11.4.13 ; bloquer l'accès à install.php au niveau du serveur web ; appliquer le triage forensique demandé par la CISA si le site était exposé.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://bleepingcomputer.com/news/security/drupal-patches-critical-rce-flaw-warns-exploits-may-surface-quickly"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-patches-critical-installer-flaw.html"
+    },
+    {
+     "t": "SmartScope",
+     "u": "https://smartscope.blog/en/blog/drupal-exploited-rce-update-10-6-22-11-2026/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132224"
+   ],
+   "titre": "Optimizely Web Experimentation : code injecté dans les scripts CDN (OPTIMJACK), ajoutée au KEV",
+   "produit": "Optimizely Web Experimentation avant le 17/11/2026 (SaaS)",
+   "type": "Contrôle externe de données d'état critiques → injection JavaScript côté client",
+   "cvss": "8,7",
+   "cvssv": "3.1",
+   "epss": "0,004",
+   "pct": "35,8",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, campagne OPTIMJACK)",
+   "correctif": "Corrigé côté éditeur le 17/11",
+   "quoi": "Le flux d'inscription Optimizely laissait un attaquant placer son code dans le champ projectJS d'actifs servis par cdn.optimizely.com.",
+   "comment": "Les sites clients chargeaient ce JavaScript de confiance ; il embarquait un skimmer de cartes et un crypto clipper (malware qui remplace les adresses de portefeuille copiées).",
+   "pourquoi": "Attaque de chaîne d'approvisionnement côté client touchant au moins 178 organisations, dont des sites de grands médias. Ajout KEV le 24/11, échéance 27/11.",
+   "detection": "Inventorier les scripts cdn.optimizely.com chargés par vos pages et comparer le projectJS à la version attendue ; alertes CSP (Content Security Policy) vers des domaines d'exfiltration inconnus.",
+   "remediation": "Vérifier et nettoyer le projectJS de chaque projet, faire tourner les accès Optimizely, imposer une CSP stricte et le SRI (contrôle d'intégrité) quand c'est possible ; notifier les clients si des paiements ont transité.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-delivers-malware-to-cnn-fox-news-bbc-salesforce-sites/"
+    },
+    {
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
+    },
+    {
+     "t": "Sophos",
+     "u": "https://www.sophos.com/blog/hijacked-optimizely-snippets-served-malicious-code"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132224"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-131914"
+   ],
+   "titre": "Idunno.AntiCsrf (ASP.NET WebForms) : RCE pré-auth, désormais au KEV",
+   "produit": "Idunno.AntiCsrf jusqu'à 0.9.1 Beta (ASP.NET)",
+   "type": "Désérialisation de données non fiables → RCE (CWE-502)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,006",
+   "pct": "50,2",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 24/11)",
+   "correctif": "Aucun (bibliothèque abandonnée)",
+   "quoi": "Déjà traitée le 23/11 ; élément nouveau : ajout au KEV le 24/11 avec échéance fédérale au 27/11.",
+   "comment": "La validation double-submit cookie / champ de formulaire désérialise des objets fournis par l'attaquant : injection d'objet et exécution de code sans authentification.",
+   "pourquoi": "Bibliothèque anti-CSRF ancienne encore présente dans des applications WebForms exposées ; pas de correctif, donc seule la suppression protège.",
+   "detection": "Cookies ou champs anti-CSRF anormalement longs ou encodés en base64 ; processus enfants (cmd.exe, powershell.exe) lancés par w3wp.exe.",
+   "remediation": "Retirer Idunno.AntiCsrf et le remplacer par la protection anti-CSRF native d'ASP.NET (ViewStateUserKey) ; à défaut, isoler l'application. Échéance KEV : 27/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-131914"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-135797"
+   ],
+   "titre": "Volans NGFW r5.1 : injection de commande pré-auth dans le client SSL VPN, PoC public",
+   "produit": "Volans NGFW Next-Generation Firewall r5.1",
+   "type": "Injection de commande OS (paramètre img de sslvpn/sslvpn_client.php)",
+   "cvss": "10,0",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Oui",
+   "exploit": "Non signalée",
+   "correctif": "Aucun (éditeur sans réponse)",
+   "quoi": "Injection de commande dans la fonction exec de sslvpn/sslvpn_client.php du composant SSL VPN Client.",
+   "comment": "Le paramètre img est passé au système sans filtrage ; l'attaque se fait à distance sans authentification (vecteur AV:N/PR:N, scope changé).",
+   "pourquoi": "CVSS 10 avec exploit public sur une interface VPN exposée à Internet par conception, et éditeur resté muet : P1 selon nos critères.",
+   "detection": "Requêtes vers sslvpn_client.php avec métacaractères shell (;, |, $( ), backticks) dans img ; processus shell lancés par le serveur web du pare-feu.",
+   "remediation": "Pas de correctif : retirer l'interface SSL VPN d'Internet ou la filtrer par IP source, surveiller les logs, envisager le remplacement de l'équipement.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-135797"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-109618"
+   ],
+   "titre": "PHP : état mémoire non initialisé après une erreur OOM menant à une RCE",
+   "produit": "PHP (CPE incluant PAN-OS, Panorama et équipements Siemens)",
+   "type": "Utilisation de mémoire non initialisée → RCE",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "N/A (voir avis PHP)",
+   "resume": "Signalée par le robot CVE critiques le 24/11 (mise à jour NVD). PHP sort d'une erreur OOM par longjmp() en laissant de la mémoire non initialisée, lue ensuite au nettoyage de la requête. Versions corrigées N/A dans les données.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-109618"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [
+    "CVE-2026-111497"
+   ],
+   "titre": "Brotli : débordement de tampon du décodeur, enrichissement NVD",
+   "produit": "Google Brotli 1.0.3 → 1.2.0 (Node.js, .NET, Envoy, Istio, Bun, brotlicffi)",
+   "type": "Débordement de tampon (décodeur)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "1.0.10 / 1.1.1 / 1.2.1",
+   "resume": "Faille d'octobre ; élément nouveau : enrichissement NVD le 24/11 (liste de produits CPE). Vérifier que les runtimes et proxys qui décompressent du Brotli non fiable sont à jour.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-111497"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/10/brotli-decoder-flaw-behind-nodejs-rce.html"
+    }
+   ]
+  }
+ ],
+ "alertes": "Collecte CERT-FR du jour indisponible : aucune alerte ou avis nouveau n'a pu être vérifié dans la fenêtre. Se reporter directement à cert.ssi.gouv.fr.",
+ "menaces": [
+  {
+   "titre": "OPTIMJACK : scripts Optimizely détournés pour voler cartes et cryptomonnaies",
+   "quoi": "Campagne de chaîne d'approvisionnement côté client : au moins 178 organisations ont servi à leurs visiteurs du JavaScript malveillant hébergé par Optimizely.",
+   "comment": "Abus du flux d'inscription (CVE-2026-132224) pour écrire dans le projectJS ; charge utile combinant skimmer de cartes et crypto clipper.",
+   "pourquoi": "Un script tiers de confiance, déjà autorisé par la CSP, contourne la plupart des défenses serveur ; l'ajout KEV du 24/11 confirme la gravité.",
+   "acteur": "N/A",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ],
+    [
+     "T1189",
+     "Drive-by Compromise"
+    ],
+    [
+     "T1056.003",
+     "Web Portal Capture"
+    ],
+    [
+     "T1565.002",
+     "Transmitted Data Manipulation"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "StepSecurity",
+     "u": "https://www.stepsecurity.io/blog/optimjack-optimizely-hosted-scripts-crypto-clipper-card-skimmer"
+    },
+    {
+     "t": "ReversingLabs",
+     "u": "https://www.reversinglabs.com/blog/optimjack-when-trusted-javascript-becomes-a-supply-chain-attack"
+    },
+    {
+     "t": "Zscaler",
+     "u": "https://www.zscaler.com/blogs/security-research/attackers-exploit-optimizely-flaw-inject-malicious-javascript"
+    }
+   ]
+  },
+  {
+   "titre": "Check Point : les groupes ransomware se multiplient alors que moins de victimes paient",
+   "quoi": "Rapport du 3e trimestre 2026 relayé le 24/11 : nombre de groupes en hausse, taux de paiement en baisse (chiffres N/A dans les sources consultées).",
+   "sources": [
+    {
+     "t": "Help Net Security",
+     "u": "https://www.helpnetsecurity.com/2026/11/24/check-point-ransomware-attacks-q3-2026-report/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [],
+  "tendance": "Données ransomware.live du jour indisponibles (collecte absente) : aucune revendication française vérifiable dans la fenêtre.",
+  "groupes": []
+ },
+ "fuites": [],
+ "iocs": [],
+ "regl": [
+  "CISA : les ajouts KEV du 24/11 renvoient à la directive BOD 26-04 (priorisation des correctifs par le risque) et à des exigences de triage forensique."
+ ],
+ "lab": {
+  "concept": "Une attaque de chaîne d'approvisionnement côté client (cas OPTIMJACK) modifie un script tiers chargé par le navigateur : le serveur n'est pas touché, mais chaque visiteur exécute le code de l'attaquant.",
+  "piste": "Sur une VM Ubuntu isolée, servir une page de paiement factice chargeant un script tiers local, puis modifier ce script pour exfiltrer le formulaire vers un second conteneur. Côté défense : ajouter une CSP stricte et un attribut integrity (SRI), observer le blocage dans la console et collecter les rapports CSP avec un petit serveur Python."
+ },
+ "consultees": "Robot CVE critiques (critique/items.json : NVD, CISA KEV, EPSS), WebSearch : BleepingComputer, The Hacker News, StepSecurity, Sophos, ReversingLabs, Zscaler, SmartScope, Help Net Security",
+ "indispo": "Collecte automatique raw/2026-11-25.json absente après 3 tentatives (15 min) ; raw/2026-11-24.json, le plus récent, couvre la fenêtre précédente déjà traitée. Donc indisponibles : flux presse, CERT-FR, ransomware.live, Bonjour La Fuite, HIBP. Valeurs EPSS 1,000 du robot pour CVE-2026-111497 et CVE-2026-109618 incohérentes (mention KEV contradictoire) : remplacées par N/A."
+}
