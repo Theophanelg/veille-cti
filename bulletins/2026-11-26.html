@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Bulletin CTI quotidien</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a duty officer's morning sheet, dense but calm
+   IDEA the printed threat placard pinned in a SOC: one scale, one pointer, then the triage list
+   PICTURE a long threat-level scale with the day's pointer, tallies beneath it
+   COLOUR aluminium ground, black ink, orange pointer; red/amber/grey for P1/P2/P3
+   TYPE Geist 600 for titles, Geist for text, Geist Mono for CVE ids and IOC
+   LAYOUT laptop: scale full width, BLUF beside tallies; phone: scale, tallies, BLUF, then cards stacked */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--tint:light-dark(#f4f4f5,#24272b);--acc:#ff4f00;--p1:light-dark(#d1291a,#ff5a47);--p2:light-dark(#b86a00,#f5a524);--p3:light-dark(#6b7079,#9aa0a8)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Geist,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+header{padding:28px 0 8px}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;color:var(--mute);margin-top:10px;font-size:14px}
+.tlp{background:#111214;color:#fff;font-weight:600;padding:2px 8px;border-radius:4px;font-size:13px}
+:root[data-theme=dark] .tlp{background:#fff;color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tlp{background:#fff;color:#111}}
+.scale{margin:26px 0 6px}
+.track{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.seg{height:14px;border-radius:3px;background:var(--rule)}
+.seg.on{background:var(--ink)}
+.seg.cur{background:var(--acc)}
+.labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;font-size:14px;color:var(--mute)}
+.labels .cur{color:var(--ink);font-weight:600}
+.pointer{position:absolute;top:-12px;width:0;height:0;border:8px solid transparent;border-top-color:var(--acc);transform:translateX(-50%)}
+.why{font-size:17px;margin:14px 0 0;max-width:70ch}
+.why b{color:var(--acc)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;margin:22px 0 10px}
+.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start;align-self:start}
+.tally div{background:var(--card);padding:12px 14px}
+.tally strong{display:block;font-size:30px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.tally span{font-size:13px;color:var(--mute)}
+.bluf{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:6px 18px}
+.bluf h2{font-size:15px;margin:10px 0 2px;color:var(--mute);font-weight:500}
+.bluf ul{list-style:none;margin:0;padding:0}
+.bluf li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--rule)}
+.bluf li:first-of-type{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--p3)}
+.dot.p1{background:var(--p1)}.dot.p2{background:var(--p2)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:8px 0}
+nav a{flex:none;text-decoration:none;font-size:14px;padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-color:var(--ink);outline:none}
+@media(min-width:900px){nav{position:sticky;top:0;z-index:5;background:var(--bg)}}
+section{padding:26px 0 8px}
+h2.sec{font-size:26px;line-height:1.1;letter-spacing:-.01em;margin:0 0 14px;font-weight:600}
+.note{color:var(--mute);font-size:14px;margin:0 0 14px;max-width:80ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px;margin-bottom:12px}
+.card.p1{border-left:5px solid var(--p1)}.card.p2{border-left:5px solid var(--p2)}.card.p3{border-left:5px solid var(--p3)}
+.head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.pill{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;background:var(--p3)}
+.pill.p1{background:var(--p1)}.pill.p2{background:var(--p2)}
+:root[data-theme=dark] .pill{color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pill{color:#111}}
+.cve{font:500 14px/1.4 "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+h3{font-size:19px;line-height:1.25;margin:4px 0 10px;font-weight:600;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{font-size:13px;padding:3px 9px;border-radius:999px;background:var(--tint);white-space:nowrap}
+.chip b{font-weight:600}
+.chip.hot{background:var(--acc);color:#fff}
+.chip.dash{background:none;border:1px dashed var(--mute)}
+.qcp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.qcp h4{margin:0 0 4px;font-size:14px;color:var(--mute);font-weight:600}
+.qcp p{margin:0}
+.act{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.act div{background:var(--tint);border-radius:8px;padding:12px 14px;font-size:15px}
+.act h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.src{margin-top:12px;font-size:14px;color:var(--mute)}
+.src a{color:var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:4px 14px;font-size:15px}
+.row dt{color:var(--mute);font-size:13px}
+.row dd{margin:0 0 6px}
+details summary{cursor:pointer;font-size:14px;color:var(--mute);padding:6px 0;min-height:32px}
+.ttps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ttps a{font-size:13px;text-decoration:none;padding:3px 9px;border:1px solid var(--rule);border-radius:4px}
+.ttps a span{font-family:"Geist Mono",monospace;font-weight:500}
+.conf{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.conf i{width:14px;height:6px;border-radius:2px;background:var(--rule)}
+.conf i.on{background:var(--ink)}
+.list{background:var(--card);border:1px solid var(--rule);border-radius:10px}
+.item{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) auto;gap:6px 16px;padding:14px 18px;border-top:1px solid var(--rule);align-items:start}
+.item:first-child{border-top:0}
+.item .name{font-weight:600}
+.item .sub{color:var(--mute);font-size:14px}
+.tag{font-size:13px;padding:2px 8px;border-radius:4px;white-space:nowrap;background:var(--ink);color:var(--bg);justify-self:end}
+.tag.unv{background:none;color:var(--ink);border:1px dashed var(--mute)}
+.bars{margin-top:14px;display:grid;gap:6px;max-width:560px}
+.bar{display:grid;grid-template-columns:8em minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:14px}
+.bar i{display:block;height:12px;border-radius:2px;background:var(--acc)}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.lab{background:var(--ink);color:var(--bg);border-radius:10px;padding:20px}
+.lab h4{margin:0 0 4px;font-size:14px;opacity:.75;font-weight:600}
+.lab p{margin:0 0 12px}
+ul.plain{margin:0;padding-left:18px}
+ul.plain li{margin-bottom:8px}
+footer{padding:20px 0 40px;font-size:14px;color:var(--mute)}
+.scroll{overflow-x:auto}
+@media(max-width:900px){.top{grid-template-columns:minmax(0,1fr)}.qcp{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.act{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.item{grid-template-columns:minmax(0,1fr) auto}.item .sub2{grid-column:1/-1}.labels{font-size:13px}.card{padding:14px}}
+@media(prefers-reduced-motion:no-preference){.pointer{transition:left .6s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="title">Bulletin CTI</h1>
+<div class="meta" id="meta"></div>
+<div class="scale">
+<div class="track" id="track"></div>
+<div class="labels" id="labels"></div>
+</div>
+<p class="why" id="why"></p>
+</header>
+<div class="top">
+<div class="tally" id="tally"></div>
+<div class="bluf"><h2>L'essentiel (BLUF)</h2><ul id="bluf"></ul></div>
+</div>
+<nav id="nav" aria-label="Sections"></nav>
+<div id="main"></div>
+<footer id="foot"></footer>
+</div>
+
+<!-- DONNEES DU JOUR : seul ce bloc JSON change d'un bulletin à l'autre -->
+<script id="data" type="application/json">
+{
+ "date": "Jeudi 26 novembre 2026",
+ "periode": "mer. 25/11 06:35 → jeu. 26/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "10 ajouts KEV le 25/11 (Xen Orchestra, Mitel MiCollab, Juniper Session Smart, Danfoss) avec échéance fédérale au 28/11, exploitation confirmée de Drupal et compromission de serveurs Check Point et Hex.pm.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "Xen Orchestra (CVE-2026-133469)",
+   "texte": "contournement d'authentification pré-auth exploité pour prendre la main sur des hôtes XCP-ng ; passer en 6.9.2 / 6.10.1 et ne pas exposer XO sur Internet."
+  },
+  {
+   "p": 1,
+   "sujet": "Mitel MiCollab (5 CVE au KEV)",
+   "texte": "injection de commande (CVSS 10) et injection XML pré-auth dans le composant AWV jusqu'à 10.3.0.18 ; patcher avant le 28/11 et filtrer l'accès."
+  },
+  {
+   "p": 1,
+   "sujet": "Juniper Session Smart Conductor (CVE-2026-103406)",
+   "texte": "injection de commande root via un ID de minion Salt forgé, ajoutée au KEV ; appliquer le correctif HPE Juniper."
+  },
+  {
+   "p": 1,
+   "sujet": "Drupal core (CVE-2026-132165)",
+   "texte": "nouveau : Drupal confirme l'exploitation depuis jeudi et les détails de l'exploit « Fail2Install » sont publics ; patcher et bloquer install.php sans attendre."
+  },
+  {
+   "p": 2,
+   "sujet": "Check Point Security Management",
+   "texte": "24 serveurs de gestion compromis dans 22 organisations par un acteur inconnu outillé par l'IA ; auditer comptes et politiques poussées depuis le SMS."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133469"
+   ],
+   "titre": "Xen Orchestra : contournement d'authentification REST, exploité activement",
+   "produit": "Vates Xen Orchestra < 6.9.2 et < 6.10.1",
+   "type": "Validation de type d'entrée incorrecte → contournement d'authentification",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,011",
+   "pct": "65,3",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, Vates, ajout 25/11)",
+   "correctif": "6.9.2 / 6.10.1 (VSA-2026-062)",
+   "quoi": "Faille d'authentification de l'API REST de Xen Orchestra, l'interface de gestion et de sauvegarde des infrastructures XCP-ng et XenServer.",
+   "comment": "Le cookie authenticationToken=j:%7B%7D est converti en objet vide {} ; la recherche de jeton n'est alors pas filtrée et renvoie le premier jeton valide, puis /rest/v0/users/me/authentication_tokens livre des jetons réutilisables.",
+   "pourquoi": "Exploitée dans la nature selon la NVD et la CISA. XO pilote toutes les VM et leurs sauvegardes : sa compromission équivaut à celle de l'hyperviseur.",
+   "detection": "Cookies authenticationToken commençant par j: dans les journaux du proxy ou de XO ; appels à /rest/v0/users/me/authentication_tokens depuis des IP inconnues ; nouveaux jetons ou utilisateurs.",
+   "remediation": "Passer en 6.9.2 ou 6.10.1 ; révoquer tous les jetons existants ; restreindre XO à un réseau d'administration. Échéance KEV : 28/11.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploit-critical-xen-orchestra.html"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133469"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133323",
+    "CVE-2026-133303",
+    "CVE-2026-133275",
+    "CVE-2026-133324",
+    "CVE-2026-133311"
+   ],
+   "titre": "Mitel MiCollab : cinq failles pré-auth du composant AWV ajoutées au KEV",
+   "produit": "Mitel MiCollab jusqu'à 10.3 (10.3.0.18)",
+   "type": "Injection de commande, injection XML, upload arbitraire, contournement d'authentification",
+   "cvss": "10,0",
+   "cvssv": "3.1",
+   "epss": "0,025",
+   "pct": "85,7",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Avis Mitel (version corrigée N/A dans les sources)",
+   "quoi": "Cinq vulnérabilités du composant Audio, Web and Video Conferencing (AWV) de MiCollab, la plateforme de communications unifiées de Mitel.",
+   "comment": "Sans authentification : injection de commande aveugle (CVE-2026-133323, CVSS 10), injection XML via du contenu pré-déposé menant à l'exécution de commandes, upload de fichiers arbitraires et contournement d'authentification.",
+   "pourquoi": "Les cinq sont exploitées selon la CISA. Le portail AWV est généralement exposé à Internet pour les conférences externes ; l'enchaînement upload + injection donne une exécution de code.",
+   "detection": "Requêtes inhabituelles vers les URL AWV, fichiers nouveaux dans les répertoires web, processus shell lancés par le serveur web de MiCollab.",
+   "remediation": "Appliquer l'avis Mitel ; à défaut, retirer AWV de l'exposition Internet. Échéance KEV : 28/11 (09/12 pour CVE-2026-133311).",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133323"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133303"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-103406"
+   ],
+   "titre": "Juniper Session Smart Conductor : injection de commande root, ajoutée au KEV",
+   "produit": "HPE Juniper Session Smart Conductor et Session Smart Router",
+   "type": "Injection de commande OS (AutomatedProvisioner)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,009",
+   "pct": "56,0",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Avis Juniper (supportportal.juniper.net)",
+   "quoi": "Injection de commande dans le module AutomatedProvisioner du Session Smart Conductor, qui orchestre les routeurs SD-WAN Session Smart.",
+   "comment": "Un attaquant distant fournit un identifiant de minion Salt (SaltStack, outil de gestion de configuration) spécialement construit, exécuté en root.",
+   "pourquoi": "Exploitation confirmée par la CISA. Le Conductor gère toute la flotte SD-WAN : sa compromission ouvre l'ensemble des sites.",
+   "detection": "Demandes d'enregistrement de minions Salt avec des caractères spéciaux dans l'ID ; processus enfants inattendus du provisioner ; connexions vers le port Salt depuis l'extérieur.",
+   "remediation": "Appliquer le correctif Juniper ; limiter l'accès aux ports Salt et à l'interface du Conductor aux seuls routeurs gérés. Échéance KEV : 28/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-103406"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132165"
+   ],
+   "titre": "Drupal core : exploitation confirmée et détails de l'exploit « Fail2Install » publiés",
+   "produit": "Drupal core (corrigé en 10.6.22 et 11.4.13)",
+   "type": "Prise de contrôle / RCE via install.php",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": true,
+   "poc": "Oui (détails publics)",
+   "exploit": "Oui, depuis jeudi 19/11 selon Drupal",
+   "correctif": "10.6.22 / 11.4.13",
+   "quoi": "Suite du sujet d'hier : l'équipe sécurité Drupal confirme que la faille de l'installateur est exploitée pour détourner des sites non corrigés.",
+   "comment": "Passe par le script install.php accessible à distance ; les détails techniques de l'exploit, baptisé Fail2Install, sont désormais publics.",
+   "pourquoi": "Exploit documenté publiquement = vague d'exploitation opportuniste à attendre. Échéance KEV fixée au 27/11.",
+   "detection": "Requêtes vers /core/install.php ou /install.php sur des sites installés ; nouveaux comptes admin, modules ou fichiers PHP inattendus.",
+   "remediation": "Mettre à jour vers 10.6.22 ou 11.4.13 ; bloquer install.php au niveau du serveur web ; examiner les sites restés exposés depuis le 19/11.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-drupal-rce-flaw-to-hijack-sites/"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-fail2install-exploit-details.html"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/drupal-flaw-found-by-anthropic-scanner-exploited-in-attacks/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2023-25915",
+    "CVE-2023-25914",
+    "CVE-2025-41450"
+   ],
+   "titre": "Danfoss AK-SM 800A : trois failles anciennes ajoutées au KEV",
+   "produit": "Danfoss AK-SM 800A / 8xxA (contrôleurs de froid commercial), < 4.2 pour CVE-2025-41450",
+   "type": "Injection de commande authentifiée, traversée de chemin, authentification faible",
+   "cvss": "9,9",
+   "cvssv": "3.1",
+   "epss": "0,014",
+   "pct": "73,2",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Firmware 4.2+ (Danfoss)",
+   "quoi": "Trois vulnérabilités des contrôleurs de supervision AK-SM 800A, utilisés pour la réfrigération en grande distribution et dans l'industrie.",
+   "comment": "Un attaquant authentifié exécute des commandes (CVE-2023-25915) ou lit des fichiers système via l'interface XML (CVE-2023-25914) ; CVE-2025-41450 affaiblit l'authentification.",
+   "pourquoi": "Nouveau : la CISA confirme l'exploitation de ces équipements OT, souvent laissés accessibles à distance pour la maintenance ; une panne de froid a un impact physique direct.",
+   "detection": "Connexions à l'interface web ou XML des AK-SM depuis Internet ; lectures de fichiers système ou commandes inhabituelles dans les journaux du contrôleur.",
+   "remediation": "Mettre à jour le firmware (4.2+), retirer les contrôleurs d'Internet et imposer un VPN. Échéance KEV : 28/11 (09/12 pour CVE-2025-41450).",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2023-25915"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2025-41450"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [],
+   "titre": "Palo Alto Networks corrige Fragnesia, chaînée à PHP2Shell pour obtenir root",
+   "produit": "Pare-feu Palo Alto Networks (versions N/A)",
+   "type": "Élévation de privilèges locale (Fragnesia) chaînée à une RCE (PHP2Shell)",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui, 25 serveurs touchés",
+   "correctif": "Correctif Palo Alto Networks (référence N/A)",
+   "quoi": "Palo Alto Networks publie un correctif pour Fragnesia, une faille utilisée pour passer root sur ses pare-feu après une première exécution via PHP2Shell.",
+   "comment": "Un groupe lié à la Chine enchaîne PHP2Shell (exécution de code via le serveur web) puis Fragnesia (élévation de privilèges) dans des attaques assistées par IA.",
+   "pourquoi": "Un pare-feu rooté donne une position persistante en bordure du réseau. 25 serveurs touchés ; le CSA de Singapour a émis une alerte sur PHP2Shell.",
+   "detection": "Processus shell lancés par le serveur web de gestion, fichiers PHP inconnus, comptes ou tâches ajoutés sur l'appliance.",
+   "remediation": "Appliquer le correctif Palo Alto ; restreindre l'interface de gestion à un réseau d'administration ; en cas de doute, procédure de réinitialisation de l'éditeur.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/palo-alto-networks-patches-fragnesia-flaw-used-to-root-firewalls/"
+    },
+    {
+     "t": "CSA Singapour",
+     "u": "https://www.csa.gov.sg/alerts-and-advisories/alerts/al-2026-157/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-137090"
+   ],
+   "titre": "build-git-clone (npm) : injection de commande via l'URL du dépôt",
+   "produit": "build-git-clone < 1.0.4 (Node.js)",
+   "type": "Injection de commande OS",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "1.0.4",
+   "resume": "La fonction clone() concatène l'URL dans un sh -c : des métacaractères (; ou $()) exécutent des commandes avec les droits du processus Node. À corriger dans les CI qui clonent des URL fournies par l'utilisateur.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-137090"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [],
+   "titre": "Microsoft : problèmes d'authentification après les mises à jour de novembre",
+   "produit": "Windows (mises à jour de sécurité de novembre)",
+   "type": "Régression fonctionnelle",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "N/A",
+   "exploit": "N/A",
+   "correctif": "N/A",
+   "resume": "Microsoft confirme des échecs d'authentification après les correctifs de novembre qui corrigent une RCE de sévérité haute. Ne pas désinstaller le correctif : suivre les contournements publiés par Microsoft.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-authentication-issues-after-november-updates/"
+    }
+   ]
+  }
+ ],
+ "alertes": "Collecte CERT-FR du jour absente : dernières publications connues au 24/11 (AVI-1609 à AVI-1614), ACT-049 du 23/11. Alertes ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX) du 18/11 toujours ouvertes. Vérifier directement cert.ssi.gouv.fr.",
+ "menaces": [
+  {
+   "titre": "Serveurs Check Point Security Management compromis par un outillage offensif piloté par IA",
+   "quoi": "Un acteur inconnu a compromis 24 serveurs de gestion Check Point appartenant à 22 organisations dans le monde.",
+   "comment": "Campagne présentée comme utilisant des outils offensifs pilotés par IA ; vecteur d'accès initial N/A dans l'extrait.",
+   "pourquoi": "Le serveur de gestion pousse les politiques de tous les pare-feu : le contrôler permet d'ouvrir des flux ou d'utiliser les passerelles contre leurs propriétaires.",
+   "acteur": "Inconnu",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1562.004",
+     "Disable or Modify System Firewall"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-compromise-24-check-point.html"
+    }
+   ]
+  },
+  {
+   "titre": "Hex.pm : faille RCE (CVSS 10) exploitée sur six serveurs du registre Elixir/Erlang",
+   "quoi": "Un attaquant a exécuté des commandes sur six serveurs de production de Hex.pm, le registre de paquets Elixir et Erlang, lundi 23/11.",
+   "comment": "Faille présente dans le code du registre depuis février ; CVE et mécanisme N/A dans l'extrait.",
+   "pourquoi": "Un registre compromis peut servir à altérer des paquets (attaque de la chaîne d'approvisionnement) ; vérifier les dépendances récupérées récemment via mix.lock.",
+   "acteur": "Inconnu",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploited-cvss-100-hexpm-rce.html"
+    }
+   ]
+  },
+  {
+   "titre": "Acteurs de « The Com » : vishing pour détourner des comptes cloud et extorquer",
+   "quoi": "Unit 42 suit depuis août 2026 de nombreuses vagues de vishing (hameçonnage par téléphone) menées par des acteurs liés à The Com, menant au vol de données et à l'extorsion.",
+   "comment": "L'attaquant appelle le support ou les employés pour obtenir un accès aux comptes cloud, puis exfiltre les données.",
+   "pourquoi": "Contourne la MFA classique par ingénierie sociale ; vise directement les données SaaS.",
+   "acteur": "Écosystème The Com (Unit 42)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1566.004",
+     "Spearphishing Voice"
+    ],
+    [
+     "T1078.004",
+     "Cloud Accounts"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/com-affiliated-hackers-hijack-cloud.html"
+    }
+   ]
+  },
+  {
+   "titre": "Six extensions WordPress de WP Connect piégées puis bloquées",
+   "quoi": "WordPress a retiré six extensions de WP Connect backdoorées le 22/11, avant diffusion des versions malveillantes, après une compromission présumée du compte du développeur.",
+   "comment": "Les versions piégées permettaient l'exécution de code arbitraire sur les sites.",
+   "pourquoi": "Rappel du risque de compromission de compte éditeur ; vérifier les extensions WP Connect installées.",
+   "acteur": "Inconnu",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/wordpress-blocks-six-backdoored-wp.html"
+    }
+   ]
+  },
+  {
+   "titre": "Intrusion dans un système d'analyse OSINT de la CIA et de l'ODNI (non confirmé)",
+   "quoi": "Selon le New York Times, une brèche a exposé des informations non classifiées d'un système d'analyse de renseignement en sources ouvertes ; auteurs inconnus.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/hackers-reportedly-breached-cia-intelligence-analysis-system/"
+    },
+    {
+     "t": "Next",
+     "u": "https://next.ink/brief-article/un-systeme-de-la-cia-et-du-renseignement-americain-victime-dune-intrusion/"
+    }
+   ]
+  },
+  {
+   "titre": "Turnitin enquête sur une cyberattaque",
+   "quoi": "L'éditeur du détecteur de plagiat indique que ses systèmes restent opérationnels pendant l'enquête ; nature de l'incident N/A.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/plagiarism-checker-turnitin-investigating-cyberattack/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [
+   {
+    "victime": "CHU de Bordeaux",
+    "groupe": "ScarlettGroup",
+    "secteur": "Santé",
+    "date": "25/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Nouveau : le CHU confirme une intrusion ; la menace de publication de données reste non vérifiée"
+   },
+   {
+    "victime": "SIG Sauer",
+    "groupe": "ScarlettGroup",
+    "secteur": "Armement",
+    "date": "25/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Revendication relayée par ZATAZ, sans confirmation de l'entreprise"
+   }
+  ],
+  "tendance": "Statistiques ransomware.live de la fenêtre indisponibles (collecte du jour absente). Non couvertes hier et hors fenêtre : Groupe Gagneraud revendiqué par The Gentlemen (24/11) et Ipsos par Qilin (23/11), non vérifiées.",
+  "groupes": []
+ },
+ "fuites": [],
+ "iocs": [],
+ "regl": [],
+ "lab": {
+  "concept": "La confusion de type (cas de CVE-2026-133469) : un paramètre attendu comme chaîne arrive sous forme d'objet. Le préfixe j: de cookie-parser (Express) transforme un cookie en JSON, et {} passé à une requête de base devient un filtre vide qui correspond à tout.",
+  "piste": "Sur une VM Ubuntu isolée, écrire une mini-app Express + cookie-parser + MongoDB qui cherche un jeton avec find({token: req.cookies.t}). Envoyer t=j:{} via Burp ou curl et obtenir le premier jeton. Corriger avec un contrôle typeof === 'string', puis écrire une règle Sigma ou Suricata sur les cookies commençant par j:."
+ },
+ "consultees": "The Hacker News, BleepingComputer, SecurityWeek, ZATAZ, Next, CERT-FR, CISA KEV (via critique/), NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, WebSearch (BleepingComputer, The Hacker News, CSA Singapour)",
+ "indispo": "Collecte du jour (raw/2026-11-26.json) absente après 3 essais : utilisation de raw/2026-11-25.json (couvre jusqu'au 25/11 13:45) et des alertes KEV/NVD de critique/ ; la fin de fenêtre (25/11 13:45 → 26/11 06:35) n'est couverte que partiellement. The Record, SANS ISC, LeMagIT : aucun article. HIBP et flux CERT-FR figés. Fuites hors fenêtre non reprises : Decathlon (163 646 fiches) et Go Tronic, recensées par Bonjour La Fuite le 24/11."
+}
+</script>
+
+<script>
+{
+const D=JSON.parse(document.getElementById('data').textContent);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const L=['Faible','Modéré','Élevé','Critique'];
+const okUrl=u=>/^https?:\/\/[^\s"'<>`]+$/i.test(String(u||''));
+const src=a=>(a||[]).map(s=>okUrl(s.u)?`<a href="${e(s.u)}" target="_blank" rel="noopener noreferrer">${e(s.t)}</a>`:e(s.t)).join(' · ');
+const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
+
+document.title='Bulletin CTI — '+D.date;
+$('title').textContent='Bulletin CTI — '+D.date;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>${window.self===window.top?'<a href="/veille-cti/">Toutes les éditions</a>':''}`;
+$('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
+$('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
+$('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;
+
+const V=D.vulns||[],R=(D.ransomware||{}).victimes||[],F=D.fuites||[],M=D.menaces||[];
+const T=[[V.filter(v=>v.prio===1).length,'vulnérabilités P1'],[V.filter(v=>v.kev).length,'au KEV cette période'],[R.length,'revendications ransomware FR'],[F.filter(f=>f.pays==='FR').length+' / '+F.length,'fuites France / total']];
+$('tally').innerHTML=T.map(t=>`<div><strong>${e(t[0])}</strong><span>${e(t[1])}</span></div>`).join('');
+$('bluf').innerHTML=(D.bluf||[]).map(b=>`<li><i class="dot p${b.p}"></i><div><b>${e(b.sujet)} :</b> ${e(b.texte)}</div></li>`).join('');
+
+const chips=v=>`<div class="chips"><span class="chip">CVSS <b>${e(v.cvss)}</b> (${e(v.cvssv)})</span><span class="chip">EPSS <b>${e(v.epss)}</b>${v.pct?' · p'+e(v.pct):''}</span>${v.kev?'<span class="chip hot"><b>KEV</b></span>':''}<span class="chip ${/^oui/i.test(v.exploit)?'hot':'dash'}">Exploitation : ${e(v.exploit)}</span><span class="chip">PoC : ${e(v.poc)}</span></div>`;
+const vcard=v=>{
+ const ids=v.cves.map(c=>`<span class="cve">${e(c)}</span>`).join(', ');
+ const head=`<div class="head"><span class="pill p${v.prio}">P${v.prio}</span>${ids}</div><h3>${e(v.titre)}</h3>`;
+ const facts=`<dl class="row"><div><dt>Produit / versions</dt><dd>${e(v.produit)}</dd></div><div><dt>Type</dt><dd>${e(v.type)}</dd></div><div><dt>Correctif</dt><dd>${e(v.correctif)}</dd></div></dl>`;
+ if(v.quoi) return `<article class="card p${v.prio}">${head}${chips(v)}<div class="qcp"><div><h4>Quoi ?</h4><p>${e(v.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(v.comment)}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(v.pourquoi)}</p></div></div><div class="act"><div><h4>Détection</h4>${e(v.detection)}</div><div><h4>Remédiation</h4>${e(v.remediation)}</div></div><details><summary>Produit, type et correctif</summary>${facts}</details>${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+ return `<article class="card p${v.prio}">${head}${chips(v)}${facts}${v.resume?`<p class="note" style="margin:6px 0 0">${e(v.resume)}</p>`:''}${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+};
+const conf=n=>n?`<span class="conf" aria-label="confiance ${['','faible','moyenne','élevée'][n]}">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span> ${['','faible','moyenne','élevée'][n]}`:'';
+const mcard=m=>{
+ const full=m.comment||m.pourquoi;
+ const body=full?`<div class="qcp"><div><h4>Quoi ?</h4><p>${e(m.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(m.comment||'N/A')}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(m.pourquoi||'N/A')}</p></div></div>`:`<p style="margin:0">${e(m.quoi)}</p>`;
+ return `<article class="card">${'<h3>'+e(m.titre)+'</h3>'}${body}${m.acteur&&m.acteur!=='N/A'?`<p class="src" style="color:var(--ink)"><b>Attribution :</b> ${e(m.acteur)} · confiance ${conf(m.confiance)}</p>`:''}${m.ttps&&m.ttps.length?`<div class="ttps">${m.ttps.map(t=>`<a href="${ttpUrl(t[0])}" target="_blank" rel="noopener"><span>${e(t[0])}</span> ${e(t[1])}</a>`).join('')}</div>`:''}<div class="src">Sources : ${src(m.sources)}</div></article>`;
+};
+const mini=M.filter(m=>!(m.comment||m.pourquoi)&&!(m.ttps||[]).length);
+const big=M.filter(m=>!mini.includes(m));
+
+const S=[];
+const p1=V.filter(v=>v.quoi),rest=V.filter(v=>!v.quoi);
+S.push(['vulns','Vulnérabilités',`<p class="note">${e(D.alertes||'')}</p>${p1.map(vcard).join('')}${rest.length?`<h3 style="margin-top:22px">Autres vulnérabilités (P2 / P3)</h3>${rest.map(vcard).join('')}`:''}`]);
+S.push(['menaces','Menaces & campagnes',big.map(mcard).join('')+(mini.length?`<div class="list">${mini.map(m=>`<div class="item"><div class="name">${e(m.titre)}</div><div class="sub sub2">${e(m.quoi)}</div><div class="sub">${src(m.sources)}</div></div>`).join('')}</div>`:'')]);
+const rw=D.ransomware||{},gmax=Math.max(1,...(rw.groupes||[]).map(g=>g[1]));
+S.push(['ransomware','Ransomware — France',`<div class="list">${R.map(r=>`<div class="item"><div><div class="name">${e(r.victime)}</div><div class="sub">${e(r.groupe)} · ${e(r.secteur)} · ${e(r.date)}</div></div><div class="sub sub2">${e(r.note)}</div><span class="tag ${r.verif?'':'unv'}">${e(r.statut)}</span></div>`).join('')||'<div class="item">Aucune revendication visant la France.</div>'}</div><p class="note" style="margin-top:16px">${e(rw.tendance||'')} Groupes les plus actifs :</p><div class="bars">${(rw.groupes||[]).map(g=>`<div class="bar"><span>${e(g[0])}</span><i style="width:${g[1]/gmax*100}%"></i><span>${g[1]}</span></div>`).join('')}</div>`]);
+S.push(['fuites','Fuites de données',`<div class="list">${F.map(f=>`<div class="item"><div><div class="name">${e(f.victime)}</div><div class="sub">${e(f.pays)} · ${e(f.volume)}</div></div><div class="sub sub2">${e(f.donnees)}${f.source?' — '+src([f.source]):''}</div><span class="tag ${f.verif?'':'unv'}">${e(f.statut)}</span></div>`).join('')}</div>`]);
+if((D.iocs||[]).length) S.push(['ioc','IOC notables',`<div class="scroll"><table style="width:100%;border-collapse:collapse;background:var(--card)"><thead><tr><th align="left">Type</th><th align="left">Valeur</th><th align="left">Contexte</th><th align="left">Source</th></tr></thead><tbody>${D.iocs.map(i=>`<tr><td>${e(i.type)}</td><td class="cve">${e(i.valeur)}</td><td>${e(i.contexte)}</td><td>${e(i.source)}</td></tr>`).join('')}</tbody></table></div>`]);
+if((D.regl||[]).length) S.push(['regl','Réglementaire & institutionnel',`<div class="card"><ul class="plain">${D.regl.map(r=>`<li>${e(r)}</li>`).join('')}</ul></div>`]);
+if(D.lab) S.push(['lab','À creuser',`<div class="lab"><h4>Concept</h4><p>${e(D.lab.concept)}</p><h4>Piste de lab</h4><p style="margin:0">${e(D.lab.piste)}</p></div>`]);
+
+$('nav').innerHTML=S.map(s=>`<a href="#${s[0]}">${s[1]}</a>`).join('');
+$('main').innerHTML=S.map(s=>`<section id="${s[0]}"><h2 class="sec">${s[1]}</h2>${s[2]}</section>`).join('');
+$('foot').innerHTML=`<p>Bulletin généré automatiquement à partir de sources publiques : vérifier auprès des sources citées avant toute décision. Les revendications de groupes criminels restent « Non vérifiées » tant que la victime ne les a pas confirmées.</p><p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
+}
+</script>
+</body>
+</html>

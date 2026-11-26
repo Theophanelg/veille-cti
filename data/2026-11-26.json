@@ -1,0 +1,453 @@
+{
+ "date": "Jeudi 26 novembre 2026",
+ "periode": "mer. 25/11 06:35 → jeu. 26/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "10 ajouts KEV le 25/11 (Xen Orchestra, Mitel MiCollab, Juniper Session Smart, Danfoss) avec échéance fédérale au 28/11, exploitation confirmée de Drupal et compromission de serveurs Check Point et Hex.pm.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "Xen Orchestra (CVE-2026-133469)",
+   "texte": "contournement d'authentification pré-auth exploité pour prendre la main sur des hôtes XCP-ng ; passer en 6.9.2 / 6.10.1 et ne pas exposer XO sur Internet."
+  },
+  {
+   "p": 1,
+   "sujet": "Mitel MiCollab (5 CVE au KEV)",
+   "texte": "injection de commande (CVSS 10) et injection XML pré-auth dans le composant AWV jusqu'à 10.3.0.18 ; patcher avant le 28/11 et filtrer l'accès."
+  },
+  {
+   "p": 1,
+   "sujet": "Juniper Session Smart Conductor (CVE-2026-103406)",
+   "texte": "injection de commande root via un ID de minion Salt forgé, ajoutée au KEV ; appliquer le correctif HPE Juniper."
+  },
+  {
+   "p": 1,
+   "sujet": "Drupal core (CVE-2026-132165)",
+   "texte": "nouveau : Drupal confirme l'exploitation depuis jeudi et les détails de l'exploit « Fail2Install » sont publics ; patcher et bloquer install.php sans attendre."
+  },
+  {
+   "p": 2,
+   "sujet": "Check Point Security Management",
+   "texte": "24 serveurs de gestion compromis dans 22 organisations par un acteur inconnu outillé par l'IA ; auditer comptes et politiques poussées depuis le SMS."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133469"
+   ],
+   "titre": "Xen Orchestra : contournement d'authentification REST, exploité activement",
+   "produit": "Vates Xen Orchestra < 6.9.2 et < 6.10.1",
+   "type": "Validation de type d'entrée incorrecte → contournement d'authentification",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,011",
+   "pct": "65,3",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, Vates, ajout 25/11)",
+   "correctif": "6.9.2 / 6.10.1 (VSA-2026-062)",
+   "quoi": "Faille d'authentification de l'API REST de Xen Orchestra, l'interface de gestion et de sauvegarde des infrastructures XCP-ng et XenServer.",
+   "comment": "Le cookie authenticationToken=j:%7B%7D est converti en objet vide {} ; la recherche de jeton n'est alors pas filtrée et renvoie le premier jeton valide, puis /rest/v0/users/me/authentication_tokens livre des jetons réutilisables.",
+   "pourquoi": "Exploitée dans la nature selon la NVD et la CISA. XO pilote toutes les VM et leurs sauvegardes : sa compromission équivaut à celle de l'hyperviseur.",
+   "detection": "Cookies authenticationToken commençant par j: dans les journaux du proxy ou de XO ; appels à /rest/v0/users/me/authentication_tokens depuis des IP inconnues ; nouveaux jetons ou utilisateurs.",
+   "remediation": "Passer en 6.9.2 ou 6.10.1 ; révoquer tous les jetons existants ; restreindre XO à un réseau d'administration. Échéance KEV : 28/11.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://bleepingcomputer.com/news/security/critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-servers"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploit-critical-xen-orchestra.html"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133469"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-133323",
+    "CVE-2026-133303",
+    "CVE-2026-133275",
+    "CVE-2026-133324",
+    "CVE-2026-133311"
+   ],
+   "titre": "Mitel MiCollab : cinq failles pré-auth du composant AWV ajoutées au KEV",
+   "produit": "Mitel MiCollab jusqu'à 10.3 (10.3.0.18)",
+   "type": "Injection de commande, injection XML, upload arbitraire, contournement d'authentification",
+   "cvss": "10,0",
+   "cvssv": "3.1",
+   "epss": "0,025",
+   "pct": "85,7",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Avis Mitel (version corrigée N/A dans les sources)",
+   "quoi": "Cinq vulnérabilités du composant Audio, Web and Video Conferencing (AWV) de MiCollab, la plateforme de communications unifiées de Mitel.",
+   "comment": "Sans authentification : injection de commande aveugle (CVE-2026-133323, CVSS 10), injection XML via du contenu pré-déposé menant à l'exécution de commandes, upload de fichiers arbitraires et contournement d'authentification.",
+   "pourquoi": "Les cinq sont exploitées selon la CISA. Le portail AWV est généralement exposé à Internet pour les conférences externes ; l'enchaînement upload + injection donne une exécution de code.",
+   "detection": "Requêtes inhabituelles vers les URL AWV, fichiers nouveaux dans les répertoires web, processus shell lancés par le serveur web de MiCollab.",
+   "remediation": "Appliquer l'avis Mitel ; à défaut, retirer AWV de l'exposition Internet. Échéance KEV : 28/11 (09/12 pour CVE-2026-133311).",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133323"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-133303"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-103406"
+   ],
+   "titre": "Juniper Session Smart Conductor : injection de commande root, ajoutée au KEV",
+   "produit": "HPE Juniper Session Smart Conductor et Session Smart Router",
+   "type": "Injection de commande OS (AutomatedProvisioner)",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,009",
+   "pct": "56,0",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Avis Juniper (supportportal.juniper.net)",
+   "quoi": "Injection de commande dans le module AutomatedProvisioner du Session Smart Conductor, qui orchestre les routeurs SD-WAN Session Smart.",
+   "comment": "Un attaquant distant fournit un identifiant de minion Salt (SaltStack, outil de gestion de configuration) spécialement construit, exécuté en root.",
+   "pourquoi": "Exploitation confirmée par la CISA. Le Conductor gère toute la flotte SD-WAN : sa compromission ouvre l'ensemble des sites.",
+   "detection": "Demandes d'enregistrement de minions Salt avec des caractères spéciaux dans l'ID ; processus enfants inattendus du provisioner ; connexions vers le port Salt depuis l'extérieur.",
+   "remediation": "Appliquer le correctif Juniper ; limiter l'accès aux ports Salt et à l'interface du Conductor aux seuls routeurs gérés. Échéance KEV : 28/11.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-103406"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-132165"
+   ],
+   "titre": "Drupal core : exploitation confirmée et détails de l'exploit « Fail2Install » publiés",
+   "produit": "Drupal core (corrigé en 10.6.22 et 11.4.13)",
+   "type": "Prise de contrôle / RCE via install.php",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": true,
+   "poc": "Oui (détails publics)",
+   "exploit": "Oui, depuis jeudi 19/11 selon Drupal",
+   "correctif": "10.6.22 / 11.4.13",
+   "quoi": "Suite du sujet d'hier : l'équipe sécurité Drupal confirme que la faille de l'installateur est exploitée pour détourner des sites non corrigés.",
+   "comment": "Passe par le script install.php accessible à distance ; les détails techniques de l'exploit, baptisé Fail2Install, sont désormais publics.",
+   "pourquoi": "Exploit documenté publiquement = vague d'exploitation opportuniste à attendre. Échéance KEV fixée au 27/11.",
+   "detection": "Requêtes vers /core/install.php ou /install.php sur des sites installés ; nouveaux comptes admin, modules ou fichiers PHP inattendus.",
+   "remediation": "Mettre à jour vers 10.6.22 ou 11.4.13 ; bloquer install.php au niveau du serveur web ; examiner les sites restés exposés depuis le 19/11.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-drupal-rce-flaw-to-hijack-sites/"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-fail2install-exploit-details.html"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/drupal-flaw-found-by-anthropic-scanner-exploited-in-attacks/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2023-25915",
+    "CVE-2023-25914",
+    "CVE-2025-41450"
+   ],
+   "titre": "Danfoss AK-SM 800A : trois failles anciennes ajoutées au KEV",
+   "produit": "Danfoss AK-SM 800A / 8xxA (contrôleurs de froid commercial), < 4.2 pour CVE-2025-41450",
+   "type": "Injection de commande authentifiée, traversée de chemin, authentification faible",
+   "cvss": "9,9",
+   "cvssv": "3.1",
+   "epss": "0,014",
+   "pct": "73,2",
+   "kev": true,
+   "poc": "Inconnu",
+   "exploit": "Oui (KEV, ajout 25/11)",
+   "correctif": "Firmware 4.2+ (Danfoss)",
+   "quoi": "Trois vulnérabilités des contrôleurs de supervision AK-SM 800A, utilisés pour la réfrigération en grande distribution et dans l'industrie.",
+   "comment": "Un attaquant authentifié exécute des commandes (CVE-2023-25915) ou lit des fichiers système via l'interface XML (CVE-2023-25914) ; CVE-2025-41450 affaiblit l'authentification.",
+   "pourquoi": "Nouveau : la CISA confirme l'exploitation de ces équipements OT, souvent laissés accessibles à distance pour la maintenance ; une panne de froid a un impact physique direct.",
+   "detection": "Connexions à l'interface web ou XML des AK-SM depuis Internet ; lectures de fichiers système ou commandes inhabituelles dans les journaux du contrôleur.",
+   "remediation": "Mettre à jour le firmware (4.2+), retirer les contrôleurs d'Internet et imposer un VPN. Échéance KEV : 28/11 (09/12 pour CVE-2025-41450).",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2023-25915"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2025-41450"
+    },
+    {
+     "t": "CISA KEV",
+     "u": "https://github.com/cisagov/kev-data"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [],
+   "titre": "Palo Alto Networks corrige Fragnesia, chaînée à PHP2Shell pour obtenir root",
+   "produit": "Pare-feu Palo Alto Networks (versions N/A)",
+   "type": "Élévation de privilèges locale (Fragnesia) chaînée à une RCE (PHP2Shell)",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui, 25 serveurs touchés",
+   "correctif": "Correctif Palo Alto Networks (référence N/A)",
+   "quoi": "Palo Alto Networks publie un correctif pour Fragnesia, une faille utilisée pour passer root sur ses pare-feu après une première exécution via PHP2Shell.",
+   "comment": "Un groupe lié à la Chine enchaîne PHP2Shell (exécution de code via le serveur web) puis Fragnesia (élévation de privilèges) dans des attaques assistées par IA.",
+   "pourquoi": "Un pare-feu rooté donne une position persistante en bordure du réseau. 25 serveurs touchés ; le CSA de Singapour a émis une alerte sur PHP2Shell.",
+   "detection": "Processus shell lancés par le serveur web de gestion, fichiers PHP inconnus, comptes ou tâches ajoutés sur l'appliance.",
+   "remediation": "Appliquer le correctif Palo Alto ; restreindre l'interface de gestion à un réseau d'administration ; en cas de doute, procédure de réinitialisation de l'éditeur.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/palo-alto-networks-patches-fragnesia-flaw-used-to-root-firewalls/"
+    },
+    {
+     "t": "CSA Singapour",
+     "u": "https://www.csa.gov.sg/alerts-and-advisories/alerts/al-2026-157/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-137090"
+   ],
+   "titre": "build-git-clone (npm) : injection de commande via l'URL du dépôt",
+   "produit": "build-git-clone < 1.0.4 (Node.js)",
+   "type": "Injection de commande OS",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non confirmée",
+   "correctif": "1.0.4",
+   "resume": "La fonction clone() concatène l'URL dans un sh -c : des métacaractères (; ou $()) exécutent des commandes avec les droits du processus Node. À corriger dans les CI qui clonent des URL fournies par l'utilisateur.",
+   "sources": [
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-137090"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [],
+   "titre": "Microsoft : problèmes d'authentification après les mises à jour de novembre",
+   "produit": "Windows (mises à jour de sécurité de novembre)",
+   "type": "Régression fonctionnelle",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "N/A",
+   "exploit": "N/A",
+   "correctif": "N/A",
+   "resume": "Microsoft confirme des échecs d'authentification après les correctifs de novembre qui corrigent une RCE de sévérité haute. Ne pas désinstaller le correctif : suivre les contournements publiés par Microsoft.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-authentication-issues-after-november-updates/"
+    }
+   ]
+  }
+ ],
+ "alertes": "Collecte CERT-FR du jour absente : dernières publications connues au 24/11 (AVI-1609 à AVI-1614), ACT-049 du 23/11. Alertes ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX) du 18/11 toujours ouvertes. Vérifier directement cert.ssi.gouv.fr.",
+ "menaces": [
+  {
+   "titre": "Serveurs Check Point Security Management compromis par un outillage offensif piloté par IA",
+   "quoi": "Un acteur inconnu a compromis 24 serveurs de gestion Check Point appartenant à 22 organisations dans le monde.",
+   "comment": "Campagne présentée comme utilisant des outils offensifs pilotés par IA ; vecteur d'accès initial N/A dans l'extrait.",
+   "pourquoi": "Le serveur de gestion pousse les politiques de tous les pare-feu : le contrôler permet d'ouvrir des flux ou d'utiliser les passerelles contre leurs propriétaires.",
+   "acteur": "Inconnu",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1562.004",
+     "Disable or Modify System Firewall"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-compromise-24-check-point.html"
+    }
+   ]
+  },
+  {
+   "titre": "Hex.pm : faille RCE (CVSS 10) exploitée sur six serveurs du registre Elixir/Erlang",
+   "quoi": "Un attaquant a exécuté des commandes sur six serveurs de production de Hex.pm, le registre de paquets Elixir et Erlang, lundi 23/11.",
+   "comment": "Faille présente dans le code du registre depuis février ; CVE et mécanisme N/A dans l'extrait.",
+   "pourquoi": "Un registre compromis peut servir à altérer des paquets (attaque de la chaîne d'approvisionnement) ; vérifier les dépendances récupérées récemment via mix.lock.",
+   "acteur": "Inconnu",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploited-cvss-100-hexpm-rce.html"
+    }
+   ]
+  },
+  {
+   "titre": "Acteurs de « The Com » : vishing pour détourner des comptes cloud et extorquer",
+   "quoi": "Unit 42 suit depuis août 2026 de nombreuses vagues de vishing (hameçonnage par téléphone) menées par des acteurs liés à The Com, menant au vol de données et à l'extorsion.",
+   "comment": "L'attaquant appelle le support ou les employés pour obtenir un accès aux comptes cloud, puis exfiltre les données.",
+   "pourquoi": "Contourne la MFA classique par ingénierie sociale ; vise directement les données SaaS.",
+   "acteur": "Écosystème The Com (Unit 42)",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1566.004",
+     "Spearphishing Voice"
+    ],
+    [
+     "T1078.004",
+     "Cloud Accounts"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/com-affiliated-hackers-hijack-cloud.html"
+    }
+   ]
+  },
+  {
+   "titre": "Six extensions WordPress de WP Connect piégées puis bloquées",
+   "quoi": "WordPress a retiré six extensions de WP Connect backdoorées le 22/11, avant diffusion des versions malveillantes, après une compromission présumée du compte du développeur.",
+   "comment": "Les versions piégées permettaient l'exécution de code arbitraire sur les sites.",
+   "pourquoi": "Rappel du risque de compromission de compte éditeur ; vérifier les extensions WP Connect installées.",
+   "acteur": "Inconnu",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/wordpress-blocks-six-backdoored-wp.html"
+    }
+   ]
+  },
+  {
+   "titre": "Intrusion dans un système d'analyse OSINT de la CIA et de l'ODNI (non confirmé)",
+   "quoi": "Selon le New York Times, une brèche a exposé des informations non classifiées d'un système d'analyse de renseignement en sources ouvertes ; auteurs inconnus.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/hackers-reportedly-breached-cia-intelligence-analysis-system/"
+    },
+    {
+     "t": "Next",
+     "u": "https://next.ink/brief-article/un-systeme-de-la-cia-et-du-renseignement-americain-victime-dune-intrusion/"
+    }
+   ]
+  },
+  {
+   "titre": "Turnitin enquête sur une cyberattaque",
+   "quoi": "L'éditeur du détecteur de plagiat indique que ses systèmes restent opérationnels pendant l'enquête ; nature de l'incident N/A.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/plagiarism-checker-turnitin-investigating-cyberattack/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [
+   {
+    "victime": "CHU de Bordeaux",
+    "groupe": "ScarlettGroup",
+    "secteur": "Santé",
+    "date": "25/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Nouveau : le CHU confirme une intrusion ; la menace de publication de données reste non vérifiée"
+   },
+   {
+    "victime": "SIG Sauer",
+    "groupe": "ScarlettGroup",
+    "secteur": "Armement",
+    "date": "25/11",
+    "statut": "Non vérifiée",
+    "verif": false,
+    "note": "Revendication relayée par ZATAZ, sans confirmation de l'entreprise"
+   }
+  ],
+  "tendance": "Statistiques ransomware.live de la fenêtre indisponibles (collecte du jour absente). Non couvertes hier et hors fenêtre : Groupe Gagneraud revendiqué par The Gentlemen (24/11) et Ipsos par Qilin (23/11), non vérifiées.",
+  "groupes": []
+ },
+ "fuites": [],
+ "iocs": [],
+ "regl": [],
+ "lab": {
+  "concept": "La confusion de type (cas de CVE-2026-133469) : un paramètre attendu comme chaîne arrive sous forme d'objet. Le préfixe j: de cookie-parser (Express) transforme un cookie en JSON, et {} passé à une requête de base devient un filtre vide qui correspond à tout.",
+  "piste": "Sur une VM Ubuntu isolée, écrire une mini-app Express + cookie-parser + MongoDB qui cherche un jeton avec find({token: req.cookies.t}). Envoyer t=j:{} via Burp ou curl et obtenir le premier jeton. Corriger avec un contrôle typeof === 'string', puis écrire une règle Sigma ou Suricata sur les cookies commençant par j:."
+ },
+ "consultees": "The Hacker News, BleepingComputer, SecurityWeek, ZATAZ, Next, CERT-FR, CISA KEV (via critique/), NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, WebSearch (BleepingComputer, The Hacker News, CSA Singapour)",
+ "indispo": "Collecte du jour (raw/2026-11-26.json) absente après 3 essais : utilisation de raw/2026-11-25.json (couvre jusqu'au 25/11 13:45) et des alertes KEV/NVD de critique/ ; la fin de fenêtre (25/11 13:45 → 26/11 06:35) n'est couverte que partiellement. The Record, SANS ISC, LeMagIT : aucun article. HIBP et flux CERT-FR figés. Fuites hors fenêtre non reprises : Decathlon (163 646 fiches) et Go Tronic, recensées par Bonjour La Fuite le 24/11."
+}
