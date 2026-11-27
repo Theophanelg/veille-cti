@@ -6,7 +6,99 @@
 <atom:link href="https://theophanelg.github.io/veille-cti/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Bulletin de veille cybersécurité quotidien : vulnérabilités exploitées, menaces, ransomware, fuites de données.</description>
 <language>fr-fr</language>
-<lastBuildDate>Thu, 26 Nov 2026 06:53:41 +0100</lastBuildDate>
+<lastBuildDate>Fri, 27 Nov 2026 06:55:00 +0100</lastBuildDate>
+<item>
+<title>🟠 Élevé · ven. 27 nov. — Drupal core, Palo Alto PAN-OS, 1Password</title>
+<link>https://theophanelg.github.io/veille-cti/#2026-11-27</link>
+<guid isPermaLink="true">https://theophanelg.github.io/veille-cti/#2026-11-27</guid>
+<pubDate>Fri, 27 Nov 2026 06:35:00 +0100</pubDate>
+<description>Niveau Élevé — Nouvelle faille Drupal core exploitée deux jours après Fail2Install, exploitation de Fragnesia confirmée par Palo Alto, brèche chez 1Password et GeoServer attaqué ; collecte du jour absente, couverture partielle.</description>
+<content:encoded><![CDATA[<p><strong>🟠 Niveau Élevé</strong> — Nouvelle faille Drupal core exploitée deux jours après Fail2Install, exploitation de Fragnesia confirmée par Palo Alto, brèche chez 1Password et GeoServer attaqué ; collecte du jour absente, couverture partielle.</p>
+<p><small>TLP:CLEAR · jeu. 26/11 06:35 → ven. 27/11 06:35 (heure de Paris)<br><a href="https://theophanelg.github.io/veille-cti/#2026-11-27">Ouvrir dans l'interface →</a></small></p>
+<h2>L'essentiel</h2><ul>
+<li>🔴  <strong>Drupal core (CVE-2026-136716)</strong> — nouvelle faille « highly critical » exploitée : le correctif Fail2Install laissait des états d&#x27;installation vulnérables ; mettre à jour au-delà de 10.6.23 / 11.3.23 / 11.4.14.</li>
+<li>🔴  <strong>Palo Alto PAN-OS (Fragnesia)</strong> — l&#x27;éditeur confirme l&#x27;exploitation en chaîne avec PHP2Shell contre les interfaces de gestion exposées ; appliquer le correctif et retirer l&#x27;interface d&#x27;Internet.</li>
+<li>🟠  <strong>1Password</strong> — compte GitHub d&#x27;un employé piraté, code malveillant déployé en backend, données clients et code source volés, coffres non touchés ; anticiper du phishing ciblé.</li>
+<li>🟠  <strong>GeoServer (CVE-2026-120705, CVE-2026-129243)</strong> — exploitation observée par watchTowr, chaînables vers une RCE sans authentification ; patcher les instances exposées.</li>
+<li>🟠  <strong>Mitel MiCollab</strong> — selon Accenture, les failles AWV ajoutées au KEV le 25/11 étaient exploitées en 0-day avant l&#x27;avis, probablement avec l&#x27;aide d&#x27;IA, dans une campagne d&#x27;extorsion.</li>
+</ul>
+<hr><h2>Vulnérabilités</h2>
+<p><em>Aucune nouvelle alerte CERT-FR repérée. ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX), du 18/11, restent ouvertes. Le 25/11 : 8 avis (AVI-1615 à 1622, contenu N/A). Publications du 26/11 non collectées.</em></p>
+<h3>🔴 P1 · Drupal core : nouvelle faille d&#x27;installation exploitée, reliquat de Fail2Install</h3>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-136716">CVE-2026-136716</a><br><strong>CVSS</strong> N/A · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : oui · <strong>PoC</strong> : Inconnu</p>
+<p><strong>Quoi.</strong> Faille « highly critical » de Drupal core, publiée le 26/11, qui corrige des états d&#x27;installation restés vulnérables après le correctif de CVE-2026-132165 (Fail2Install).</p>
+<p><strong>Comment.</strong> Mécanisme détaillé N/A. La NVD la classe en « forceful browsing » : accès direct à des pages d&#x27;installation qui auraient dû être verrouillées.</p>
+<p><strong>Pourquoi c'est important.</strong> Drupal confirme l&#x27;exploitation ; les sites déjà patchés pour Fail2Install peuvent rester vulnérables. Fail2Install est au KEV (échéance 27/11).</p>
+<blockquote><p><strong>Détecter :</strong> Requêtes vers /core/install.php ou les pages d&#x27;installation sur un site en production ; nouveaux comptes administrateurs ; modules ou fichiers PHP ajoutés récemment.</p><p><strong>Corriger :</strong> Mettre à jour Drupal core au-delà des versions 10.6.23, 11.3.23 et 11.4.14 ; bloquer l&#x27;accès web à install.php ; auditer les comptes admin si le site était exposé.</p></blockquote>
+<p><small><strong>Produit :</strong> Drupal core ≤ 10.6.23, 11.0 → 11.3.23, 11.4.0 → 11.4.14 (NVD)<br><strong>Correctif :</strong> Versions postérieures à 10.6.23 / 11.3.23 / 11.4.14<br>Sources : <a href="https://thehackernews.com/2026/11/drupal-warns-of-new-highly-critical.html">The Hacker News</a> · <a href="https://www.securityweek.com/drupal-installer-patch-left-a-gap-attackers-are-already-exploiting/">SecurityWeek</a> · <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-136716">NVD</a></small></p>
+<h3>🔴 P1 · Palo Alto Networks confirme l&#x27;exploitation de Fragnesia sur PAN-OS (mise à jour)</h3>
+<p>Pas de CVE<br><strong>CVSS</strong> N/A · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : oui · <strong>PoC</strong> : Inconnu</p>
+<p><strong>Quoi.</strong> Nouveau depuis le bulletin d&#x27;hier : Palo Alto Networks publie lui-même un avertissement d&#x27;exploitation de Fragnesia dans des attaques contre PAN-OS.</p>
+<p><strong>Comment.</strong> Les attaquants enchaînent PHP2Shell (exécution de code via le serveur web de gestion) puis Fragnesia pour passer root, sur des équipements dont l&#x27;interface de gestion est accessible depuis Internet.</p>
+<p><strong>Pourquoi c'est important.</strong> Un pare-feu compromis en root donne une position persistante en bordure de réseau. SecurityWeek parle de 25 serveurs touchés par un groupe lié à la Chine.</p>
+<blockquote><p><strong>Détecter :</strong> Connexions à l&#x27;interface de gestion depuis des IP externes ; processus shell lancés par le serveur web ; fichiers PHP inconnus ou comptes ajoutés sur l&#x27;appliance.</p><p><strong>Corriger :</strong> Appliquer le correctif de l&#x27;éditeur ; restreindre l&#x27;interface de gestion à un réseau d&#x27;administration dédié ; si exposée, mener une analyse de compromission.</p></blockquote>
+<p><small><strong>Produit :</strong> PAN-OS avec interface de gestion exposée (versions N/A)<br><strong>Correctif :</strong> Correctif Palo Alto (référence N/A)<br>Sources : <a href="https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/">BleepingComputer</a> · <a href="https://www.securityweek.com/palo-alto-networks-patches-fragnesia-flaw-used-to-root-firewalls/">SecurityWeek</a></small></p>
+<h3>🟠 P2 · GeoServer : deux failles récemment corrigées sous attaque</h3>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-120705">CVE-2026-120705</a>, <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-129243">CVE-2026-129243</a><br><strong>CVSS</strong> 8,6 · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : oui · <strong>PoC</strong> : Inconnu</p>
+<p>La lecture de fichiers permet d&#x27;accéder aux fichiers texte lisibles par le processus GeoServer ; chaînée à d&#x27;autres bugs, elle mène à une RCE sans authentification.</p>
+<p><small><strong>Produit :</strong> GeoServer (versions N/A)<br><strong>Correctif :</strong> Versions corrigées GeoServer (N/A)<br>Sources : <a href="https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html">The Hacker News</a> · <a href="https://www.securityweek.com/two-newly-disclosed-geoserver-vulnerabilities-under-attack/">SecurityWeek</a> · <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-120705">NVD</a> · <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-129243">NVD</a></small></p>
+<h3>🟠 P2 · NGINX2Root : exploitation signalée (non confirmé)</h3>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-123007">CVE-2026-123007</a><br><strong>CVSS</strong> N/A · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : Signalée le 27/11 par une source unique · <strong>PoC</strong> : Inconnu</p>
+<p>Cinq failles NGINX corrigées le 18/11 ; un agrégateur rapporte désormais une exploitation, sans détail ni confirmation de F5 ou de la CISA.</p>
+<p><small><strong>Produit :</strong> NGINX avec HTTP/2 (versions N/A)<br><strong>Correctif :</strong> Correctifs F5 NGINX du 18/11 (CERTFR-2026-ALE-017)<br>Sources : <a href="https://www.sourcecodester.com/blog/18965/nginx-exploited-odoo-sql-injection-cacti-zero-day-dev-news-nov-27-2026.html">SourceCodester</a> · <a href="https://www.tenable.com/blog/nginx2root-cve-2026-123007-frequently-asked-questions-about-five-critical-nginx">Tenable</a> · <a href="https://cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-017/">CERT-FR</a></small></p>
+<h3>🟠 P2 · Odoo : injection SQL attaquée (non confirmé)</h3>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-130028">CVE-2026-130028</a>, <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-130029">CVE-2026-130029</a><br><strong>CVSS</strong> N/A · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : Signalée le 27/11 par une source unique · <strong>PoC</strong> : Inconnu</p>
+<p>La validation de la spécification groupby de read_group manquait ; l&#x27;ERP contient données clients, factures et RH.</p>
+<p><small><strong>Produit :</strong> Odoo 13.0 → 16.0 (injection SQL)<br><strong>Correctif :</strong> Avis de sécurité Odoo du 24/11<br>Sources : <a href="https://odotify.com/blog/odoo-security-advisory-november-2026/">Odotify</a> · <a href="https://www.sourcecodester.com/blog/18965/nginx-exploited-odoo-sql-injection-cacti-zero-day-dev-news-nov-27-2026.html">SourceCodester</a></small></p>
+<h3>⚪ P3 · Cacti « 4HTTP2ROOT » : 0-day RCE sans authentification, PoC publié</h3>
+<p>Pas de CVE<br><strong>CVSS</strong> N/A · <strong>EPSS</strong> N/A · <strong>KEV</strong> non<br><strong>Exploitée</strong> : Non signalée · <strong>PoC</strong> : Oui</p>
+<p>Outil de supervision réseau souvent installé sur Linux avec accès SNMP au parc : ne pas l&#x27;exposer à Internet en attendant un correctif.</p>
+<p><small><strong>Produit :</strong> Cacti (versions N/A)<br><strong>Correctif :</strong> N/A<br>Sources : <a href="https://securityonline.info/cacti-zero-day-rce-4http2root-poc/">SecurityOnline</a> · <a href="https://cybersecuritynews.com/cacti-4http2root-zero-day/">Cyber Security News</a></small></p>
+<hr><h2>Menaces &amp; campagnes</h2>
+<h3>1Password : données clients et code source volés via un compte GitHub d&#x27;employé</h3>
+<p><strong>Quoi.</strong> Brèche révélée le 25/11 : des données clients et du code source interne ont été volés. Les coffres de mots de passe n&#x27;ont pas été consultés selon l&#x27;éditeur.</p>
+<p><strong>Comment.</strong> Le compte GitHub professionnel d&#x27;un employé, compromis, a servi à pousser du code malveillant vers des services backend qui collectaient des données clients. Enquête ouverte le 19/11.</p>
+<p><strong>Pourquoi c'est important.</strong> Les clients d&#x27;un gestionnaire de mots de passe sont une cible de phishing de choix. Le cas montre aussi qu&#x27;un compte de développeur suffit à atteindre la production.</p>
+<p><small><strong>TTPs :</strong> <a href="https://attack.mitre.org/techniques/T1078/">T1078</a> Valid Accounts, <a href="https://attack.mitre.org/techniques/T1213/003/">T1213.003</a> Code Repositories, <a href="https://attack.mitre.org/techniques/T1565/">T1565</a> Data Manipulation<br>Sources : <a href="https://www.bleepingcomputer.com/news/security/1password-customer-data-stolen-after-employee-github-account-breach/">BleepingComputer</a> · <a href="https://thehackernews.com/2026/11/1password-hacked-customer-data-and.html">The Hacker News</a> · <a href="https://next.ink/brief-article/un-compte-github-compromis-chez-1password-expose-des-donnees-clients/">Next</a></small></p>
+<h3>Mitel MiCollab : exploitées en 0-day avant l&#x27;avis, probablement avec l&#x27;aide d&#x27;IA</h3>
+<p><strong>Quoi.</strong> Nouveau : Accenture indique que les failles AWV de MiCollab, ajoutées au KEV le 25/11, étaient exploitées avant la publication de l&#x27;avis Mitel, dans une campagne d&#x27;extorsion présumée.</p>
+<p><strong>Comment.</strong> Failles du composant AWV sans authentification (injection de commande CVE-2026-133323, CVSS 10, injection XML, upload de fichiers). Usage d&#x27;IA présumé par Accenture.</p>
+<p><strong>Pourquoi c'est important.</strong> MiCollab est exposé sur Internet pour la collaboration ; l&#x27;exploitation précédant l&#x27;avis signifie que des instances patchées tardivement peuvent déjà être compromises.</p>
+<p><small><strong>Attribution :</strong> N/A (campagne d&#x27;extorsion présumée) (confiance faible)<br><strong>TTPs :</strong> <a href="https://attack.mitre.org/techniques/T1190/">T1190</a> Exploit Public-Facing Application, <a href="https://attack.mitre.org/techniques/T1657/">T1657</a> Financial Theft<br>Sources : <a href="https://www.securityweek.com/mitel-micollab-zero-days-exploited-in-suspected-ai-assisted-attacks/">SecurityWeek</a> · <a href="https://thehackernews.com/2026/11/hackers-exploit-10-vulnerabilities.html">The Hacker News</a></small></p>
+<h3>SYS010 : l&#x27;infostealer inscrit les navigateurs en gestion d&#x27;entreprise pour lire Gmail et Outlook</h3>
+<p><strong>Quoi.</strong> Nouvelle version de l&#x27;infostealer SYS01, diffusée par des publicités Meta.</p>
+<p><strong>Comment.</strong> Le malware place le navigateur sous gestion de type entreprise (politiques) pour forcer l&#x27;installation d&#x27;une extension qui vole notamment les e-mails Gmail et Outlook.</p>
+<p><strong>Pourquoi c'est important.</strong> Une extension imposée par politique ne peut pas être désinstallée par l&#x27;utilisateur et survit au nettoyage classique.</p>
+<p><small><strong>TTPs :</strong> <a href="https://attack.mitre.org/techniques/T1583/008/">T1583.008</a> Malvertising, <a href="https://attack.mitre.org/techniques/T1176/">T1176</a> Browser Extensions, <a href="https://attack.mitre.org/techniques/T1114/">T1114</a> Email Collection<br>Sources : <a href="https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/">BleepingComputer</a></small></p>
+<h3>13 paquets NuGet malveillants déguisés en tests d&#x27;embauche .NET</h3>
+<p><strong>Quoi.</strong> Socket a repéré 13 paquets se faisant passer pour des contrôles de boutons WinUI 3 et WPF, proposés dans de faux exercices de recrutement.</p>
+<p><strong>Comment.</strong> Compiler ou exécuter le projet suffit à déclencher la charge malveillante (détails N/A).</p>
+<p><strong>Pourquoi c'est important.</strong> Cible directement les postes de développeurs, qui détiennent souvent des secrets et des accès au code.</p>
+<p><small><strong>TTPs :</strong> <a href="https://attack.mitre.org/techniques/T1195/001/">T1195.001</a> Compromise Software Dependencies and Development Tools, <a href="https://attack.mitre.org/techniques/T1204/">T1204</a> User Execution<br>Sources : <a href="https://thehackernews.com/2026/11/13-malicious-nuget-packages-turn-fake.html">The Hacker News</a></small></p>
+<h3>Microsoft : Salt Typhoon intègre l&#x27;outil IA Artex</h3>
+<p>Selon Microsoft, l&#x27;outil IA Artex, déjà lié à plusieurs brèches, est rapidement adopté par des groupes chinois (dont Salt Typhoon) et nord-coréens.</p>
+<p><small><strong>Attribution :</strong> Salt Typhoon (Chine) (confiance moyenne)<br>Sources : <a href="https://therecord.media/microsoft-china-salt-typhoon-using-artex-ai-tool">The Record</a></small></p>
+<h3>Italie et Suisse alertent sur des attaques autonomes pilotées par IA</h3>
+<p>Les agences cyber suisse et italienne signalent des attaques automatisées par agents IA contre des infrastructures critiques.</p>
+<p><small>Sources : <a href="https://www.bleepingcomputer.com/news/security/italy-and-switzerland-warn-of-autonomous-ai-driven-cyberattacks/">BleepingComputer</a></small></p>
+<h3>FinCEN (Trésor américain) déconnecte des systèmes après une intrusion</h3>
+<p>Accès non autorisé à une partie limitée des systèmes de l&#x27;agence qui reçoit les déclarations de soupçon des banques ; délais de dépôt prolongés.</p>
+<p><small>Sources : <a href="https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html">The Hacker News</a> · <a href="https://www.securityweek.com/us-treasurys-fincen-disconnects-systems-following-cyber-incident/">SecurityWeek</a></small></p>
+<h3>ShinyHunters annonce son retour ; Okta voit des liens avec le groupe Inception (non confirmé)</h3>
+<p>Un compte lié à ShinyHunters revendique le retour du groupe ; Inception rejette les liens évoqués par Okta.</p>
+<p><small><strong>Attribution :</strong> ShinyHunters / Inception (confiance faible)<br>Sources : <a href="https://www.securityweek.com/shinyhunters-claims-comeback-new-inception-group-rejects-alleged-ties/">SecurityWeek</a></small></p>
+<hr><h2>Ransomware — France</h2>
+<p>Aucune revendication visant la France.</p>
+<p><small>Fenêtre du jour non couverte (collecte absente). Sur le 25/11 06:35 → 26/11 13:20 : 80 revendications mondiales, 26 aux États-Unis, 21 sans pays ; aucune nouvelle victime française après Groupe Gagneraud (24/11, déjà cité). Plus actifs : N0n (21), SilentRansomGroup (11), The Gentlemen (10), Aurora (6), SilentVault (6).</small></p>
+<hr><h2>Fuites de données</h2><ul>
+<li><strong>Todoist</strong> (N/A) — 6 % des utilisateurs. E-mails, mots de passe hachés en SHA1, dates de création, jetons API et d&#x27;intégration Slack. <em>Confirmée (incident de novembre)</em> · <a href="https://www.todoist.com/fr/help/todoist/get-started/security-incident-in-november-2026-cG0EIACNU">Bonjour La Fuite</a></li>
+<li><strong>1Password</strong> (N/A) — N/A. Données clients (détail N/A) et code source interne ; coffres non touchés. <em>Confirmée</em> · <a href="https://www.securityweek.com/1password-breach-exposes-customer-data-internal-source-code/">SecurityWeek</a></li>
+<li><strong>FIFA</strong> (CH) — N/A. Ensemble limité d&#x27;informations personnelles et professionnelles. <em>Confirmée</em> · <a href="https://therecord.media/fifa-data-breach-limited">The Record</a></li>
+</ul>
+<hr><h2>Réglementaire</h2><ul><li>États-Unis : le PDG d&#x27;une société floridienne de récupération après ransomware inculpé pour avoir menti sur ses services et payé des rançons aux criminels.</li><li>Royaume-Uni : le National Cyber Action Plan, prévu mi-novembre, est repoussé au 9 décembre.</li><li>Australie : adoption du Digital Duty of Care Act, devoir de vigilance imposé aux grandes plateformes, proche du DSA européen.</li></ul>
+<hr><h2>À creuser</h2><p><strong>Concept.</strong> Les politiques de navigateur (cas de SYS010) : sous Linux, Chrome lit des fichiers JSON dans /etc/opt/chrome/policies/managed ; la clé ExtensionInstallForcelist installe une extension que l&#x27;utilisateur ne peut pas retirer.</p><blockquote><p><strong>Piste de lab :</strong> Sur une VM Ubuntu isolée, créer une politique forçant une extension de test, puis l&#x27;observer dans chrome://policy. Côté défense : règle auditd sur /etc/opt/chrome/policies et /etc/chromium/policies, et script listant les extensions forcées du parc.</p></blockquote>
+<hr><p><small>Bulletin généré automatiquement à partir de sources publiques ; les revendications non confirmées sont signalées « Non vérifiée ».<br>Sources consultées : BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, CERT-FR, CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, recherches web ponctuelles.<br>Indisponibles : raw/2026-11-27.json absent après 3 essais (le robot Collecte tourne vers 12:20 UTC) : utilisation de raw/2026-11-26.json (25/11 06:35 → 26/11 13:20), d&#x27;où l&#x27;inclusion de sujets du 25/11 après-midi non couverts hier. 26/11 13:20 → 27/11 06:35 couvert seulement par des recherches web sans extraits. KEV arrêté au 25/11 19:48 UTC. SANS ISC, HIBP, flux CERT-FR figés..</small></p>]]></content:encoded>
+</item>
 <item>
 <title>🟠 Élevé · jeu. 26 nov. — Xen Orchestra, Mitel MiCollab, Juniper Session Smart Conductor</title>
 <link>https://theophanelg.github.io/veille-cti/#2026-11-26</link>

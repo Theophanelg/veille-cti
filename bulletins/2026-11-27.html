@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Bulletin CTI quotidien</title>
+<link rel="manifest" href="/veille-cti/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/veille-cti/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/veille-cti/icons/icon-192.png">
+<meta name="theme-color" content="#141517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bulletin CTI">
+<link rel="alternate" type="application/rss+xml" title="Bulletin CTI quotidien" href="/veille-cti/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a duty officer's morning sheet, dense but calm
+   IDEA the printed threat placard pinned in a SOC: one scale, one pointer, then the triage list
+   PICTURE a long threat-level scale with the day's pointer, tallies beneath it
+   COLOUR aluminium ground, black ink, orange pointer; red/amber/grey for P1/P2/P3
+   TYPE Geist 600 for titles, Geist for text, Geist Mono for CVE ids and IOC
+   LAYOUT laptop: scale full width, BLUF beside tallies; phone: scale, tallies, BLUF, then cards stacked */
+:root{color-scheme:light dark;--bg:light-dark(#e9eaec,#141517);--card:light-dark(#fff,#1d1f22);--ink:light-dark(#111214,#ececed);--mute:light-dark(#5b5f66,#a2a6ad);--rule:light-dark(#d3d5d9,#2d3034);--tint:light-dark(#f4f4f5,#24272b);--acc:#ff4f00;--p1:light-dark(#d1291a,#ff5a47);--p2:light-dark(#b86a00,#f5a524);--p3:light-dark(#6b7079,#9aa0a8)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Geist,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--acc);text-underline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+header{padding:28px 0 8px}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:600;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;color:var(--mute);margin-top:10px;font-size:14px}
+.tlp{background:#111214;color:#fff;font-weight:600;padding:2px 8px;border-radius:4px;font-size:13px}
+:root[data-theme=dark] .tlp{background:#fff;color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tlp{background:#fff;color:#111}}
+.scale{margin:26px 0 6px}
+.track{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.seg{height:14px;border-radius:3px;background:var(--rule)}
+.seg.on{background:var(--ink)}
+.seg.cur{background:var(--acc)}
+.labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;font-size:14px;color:var(--mute)}
+.labels .cur{color:var(--ink);font-weight:600}
+.pointer{position:absolute;top:-12px;width:0;height:0;border:8px solid transparent;border-top-color:var(--acc);transform:translateX(-50%)}
+.why{font-size:17px;margin:14px 0 0;max-width:70ch}
+.why b{color:var(--acc)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;margin:22px 0 10px}
+.tally{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;align-content:start;align-self:start}
+.tally div{background:var(--card);padding:12px 14px}
+.tally strong{display:block;font-size:30px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.tally span{font-size:13px;color:var(--mute)}
+.bluf{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:6px 18px}
+.bluf h2{font-size:15px;margin:10px 0 2px;color:var(--mute);font-weight:500}
+.bluf ul{list-style:none;margin:0;padding:0}
+.bluf li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--rule)}
+.bluf li:first-of-type{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--p3)}
+.dot.p1{background:var(--p1)}.dot.p2{background:var(--p2)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:8px 0}
+nav a{flex:none;text-decoration:none;font-size:14px;padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-color:var(--ink);outline:none}
+@media(min-width:900px){nav{position:sticky;top:0;z-index:5;background:var(--bg)}}
+section{padding:26px 0 8px}
+h2.sec{font-size:26px;line-height:1.1;letter-spacing:-.01em;margin:0 0 14px;font-weight:600}
+.note{color:var(--mute);font-size:14px;margin:0 0 14px;max-width:80ch}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px;margin-bottom:12px}
+.card.p1{border-left:5px solid var(--p1)}.card.p2{border-left:5px solid var(--p2)}.card.p3{border-left:5px solid var(--p3)}
+.head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.pill{font-size:13px;font-weight:600;padding:2px 8px;border-radius:4px;color:#fff;background:var(--p3)}
+.pill.p1{background:var(--p1)}.pill.p2{background:var(--p2)}
+:root[data-theme=dark] .pill{color:#111}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .pill{color:#111}}
+.cve{font:500 14px/1.4 "Geist Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+h3{font-size:19px;line-height:1.25;margin:4px 0 10px;font-weight:600;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{font-size:13px;padding:3px 9px;border-radius:999px;background:var(--tint);white-space:nowrap}
+.chip b{font-weight:600}
+.chip.hot{background:var(--acc);color:#fff}
+.chip.dash{background:none;border:1px dashed var(--mute)}
+.qcp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.qcp h4{margin:0 0 4px;font-size:14px;color:var(--mute);font-weight:600}
+.qcp p{margin:0}
+.act{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.act div{background:var(--tint);border-radius:8px;padding:12px 14px;font-size:15px}
+.act h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.src{margin-top:12px;font-size:14px;color:var(--mute)}
+.src a{color:var(--ink)}
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:4px 14px;font-size:15px}
+.row dt{color:var(--mute);font-size:13px}
+.row dd{margin:0 0 6px}
+details summary{cursor:pointer;font-size:14px;color:var(--mute);padding:6px 0;min-height:32px}
+.ttps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ttps a{font-size:13px;text-decoration:none;padding:3px 9px;border:1px solid var(--rule);border-radius:4px}
+.ttps a span{font-family:"Geist Mono",monospace;font-weight:500}
+.conf{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.conf i{width:14px;height:6px;border-radius:2px;background:var(--rule)}
+.conf i.on{background:var(--ink)}
+.list{background:var(--card);border:1px solid var(--rule);border-radius:10px}
+.item{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) auto;gap:6px 16px;padding:14px 18px;border-top:1px solid var(--rule);align-items:start}
+.item:first-child{border-top:0}
+.item .name{font-weight:600}
+.item .sub{color:var(--mute);font-size:14px}
+.tag{font-size:13px;padding:2px 8px;border-radius:4px;white-space:nowrap;background:var(--ink);color:var(--bg);justify-self:end}
+.tag.unv{background:none;color:var(--ink);border:1px dashed var(--mute)}
+.bars{margin-top:14px;display:grid;gap:6px;max-width:560px}
+.bar{display:grid;grid-template-columns:8em minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:14px}
+.bar i{display:block;height:12px;border-radius:2px;background:var(--acc)}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.lab{background:var(--ink);color:var(--bg);border-radius:10px;padding:20px}
+.lab h4{margin:0 0 4px;font-size:14px;opacity:.75;font-weight:600}
+.lab p{margin:0 0 12px}
+ul.plain{margin:0;padding-left:18px}
+ul.plain li{margin-bottom:8px}
+footer{padding:20px 0 40px;font-size:14px;color:var(--mute)}
+.scroll{overflow-x:auto}
+@media(max-width:900px){.top{grid-template-columns:minmax(0,1fr)}.qcp{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.act{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.item{grid-template-columns:minmax(0,1fr) auto}.item .sub2{grid-column:1/-1}.labels{font-size:13px}.card{padding:14px}}
+@media(prefers-reduced-motion:no-preference){.pointer{transition:left .6s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="title">Bulletin CTI</h1>
+<div class="meta" id="meta"></div>
+<div class="scale">
+<div class="track" id="track"></div>
+<div class="labels" id="labels"></div>
+</div>
+<p class="why" id="why"></p>
+</header>
+<div class="top">
+<div class="tally" id="tally"></div>
+<div class="bluf"><h2>L'essentiel (BLUF)</h2><ul id="bluf"></ul></div>
+</div>
+<nav id="nav" aria-label="Sections"></nav>
+<div id="main"></div>
+<footer id="foot"></footer>
+</div>
+
+<!-- DONNEES DU JOUR : seul ce bloc JSON change d'un bulletin à l'autre -->
+<script id="data" type="application/json">
+{
+ "date": "Vendredi 27 novembre 2026",
+ "periode": "jeu. 26/11 06:35 → ven. 27/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Nouvelle faille Drupal core exploitée deux jours après Fail2Install, exploitation de Fragnesia confirmée par Palo Alto, brèche chez 1Password et GeoServer attaqué ; collecte du jour absente, couverture partielle.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "Drupal core (CVE-2026-136716)",
+   "texte": "nouvelle faille « highly critical » exploitée : le correctif Fail2Install laissait des états d'installation vulnérables ; mettre à jour au-delà de 10.6.23 / 11.3.23 / 11.4.14."
+  },
+  {
+   "p": 1,
+   "sujet": "Palo Alto PAN-OS (Fragnesia)",
+   "texte": "l'éditeur confirme l'exploitation en chaîne avec PHP2Shell contre les interfaces de gestion exposées ; appliquer le correctif et retirer l'interface d'Internet."
+  },
+  {
+   "p": 2,
+   "sujet": "1Password",
+   "texte": "compte GitHub d'un employé piraté, code malveillant déployé en backend, données clients et code source volés, coffres non touchés ; anticiper du phishing ciblé."
+  },
+  {
+   "p": 2,
+   "sujet": "GeoServer (CVE-2026-120705, CVE-2026-129243)",
+   "texte": "exploitation observée par watchTowr, chaînables vers une RCE sans authentification ; patcher les instances exposées."
+  },
+  {
+   "p": 2,
+   "sujet": "Mitel MiCollab",
+   "texte": "selon Accenture, les failles AWV ajoutées au KEV le 25/11 étaient exploitées en 0-day avant l'avis, probablement avec l'aide d'IA, dans une campagne d'extorsion."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 1,
+   "cves": [
+    "CVE-2026-136716"
+   ],
+   "titre": "Drupal core : nouvelle faille d'installation exploitée, reliquat de Fail2Install",
+   "produit": "Drupal core ≤ 10.6.23, 11.0 → 11.3.23, 11.4.0 → 11.4.14 (NVD)",
+   "type": "Vérification incorrecte de conditions exceptionnelles → prise de contrôle (CWE-754)",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui (équipe sécurité Drupal)",
+   "correctif": "Versions postérieures à 10.6.23 / 11.3.23 / 11.4.14",
+   "quoi": "Faille « highly critical » de Drupal core, publiée le 26/11, qui corrige des états d'installation restés vulnérables après le correctif de CVE-2026-132165 (Fail2Install).",
+   "comment": "Mécanisme détaillé N/A. La NVD la classe en « forceful browsing » : accès direct à des pages d'installation qui auraient dû être verrouillées.",
+   "pourquoi": "Drupal confirme l'exploitation ; les sites déjà patchés pour Fail2Install peuvent rester vulnérables. Fail2Install est au KEV (échéance 27/11).",
+   "detection": "Requêtes vers /core/install.php ou les pages d'installation sur un site en production ; nouveaux comptes administrateurs ; modules ou fichiers PHP ajoutés récemment.",
+   "remediation": "Mettre à jour Drupal core au-delà des versions 10.6.23, 11.3.23 et 11.4.14 ; bloquer l'accès web à install.php ; auditer les comptes admin si le site était exposé.",
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/drupal-warns-of-new-highly-critical.html"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/drupal-installer-patch-left-a-gap-attackers-are-already-exploiting/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-136716"
+    }
+   ]
+  },
+  {
+   "prio": 1,
+   "cves": [],
+   "titre": "Palo Alto Networks confirme l'exploitation de Fragnesia sur PAN-OS (mise à jour)",
+   "produit": "PAN-OS avec interface de gestion exposée (versions N/A)",
+   "type": "Élévation de privilèges (Fragnesia) chaînée à PHP2Shell",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui (Palo Alto Networks)",
+   "correctif": "Correctif Palo Alto (référence N/A)",
+   "quoi": "Nouveau depuis le bulletin d'hier : Palo Alto Networks publie lui-même un avertissement d'exploitation de Fragnesia dans des attaques contre PAN-OS.",
+   "comment": "Les attaquants enchaînent PHP2Shell (exécution de code via le serveur web de gestion) puis Fragnesia pour passer root, sur des équipements dont l'interface de gestion est accessible depuis Internet.",
+   "pourquoi": "Un pare-feu compromis en root donne une position persistante en bordure de réseau. SecurityWeek parle de 25 serveurs touchés par un groupe lié à la Chine.",
+   "detection": "Connexions à l'interface de gestion depuis des IP externes ; processus shell lancés par le serveur web ; fichiers PHP inconnus ou comptes ajoutés sur l'appliance.",
+   "remediation": "Appliquer le correctif de l'éditeur ; restreindre l'interface de gestion à un réseau d'administration dédié ; si exposée, mener une analyse de compromission.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/palo-alto-networks-patches-fragnesia-flaw-used-to-root-firewalls/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-120705",
+    "CVE-2026-129243"
+   ],
+   "titre": "GeoServer : deux failles récemment corrigées sous attaque",
+   "produit": "GeoServer (versions N/A)",
+   "type": "Lecture arbitraire de fichiers (CVE-2026-120705) et seconde faille N/A, chaînables vers une RCE",
+   "cvss": "8,6",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Oui selon watchTowr (non confirmé par l'éditeur)",
+   "correctif": "Versions corrigées GeoServer (N/A)",
+   "resume": "La lecture de fichiers permet d'accéder aux fichiers texte lisibles par le processus GeoServer ; chaînée à d'autres bugs, elle mène à une RCE sans authentification.",
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/two-newly-disclosed-geoserver-vulnerabilities-under-attack/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-120705"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-129243"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-123007"
+   ],
+   "titre": "NGINX2Root : exploitation signalée (non confirmé)",
+   "produit": "NGINX avec HTTP/2 (versions N/A)",
+   "type": "Faille HTTP/2 → exécution de code sans authentification",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Signalée le 27/11 par une source unique",
+   "correctif": "Correctifs F5 NGINX du 18/11 (CERTFR-2026-ALE-017)",
+   "resume": "Cinq failles NGINX corrigées le 18/11 ; un agrégateur rapporte désormais une exploitation, sans détail ni confirmation de F5 ou de la CISA.",
+   "sources": [
+    {
+     "t": "SourceCodester",
+     "u": "https://www.sourcecodester.com/blog/18965/nginx-exploited-odoo-sql-injection-cacti-zero-day-dev-news-nov-27-2026.html"
+    },
+    {
+     "t": "Tenable",
+     "u": "https://www.tenable.com/blog/nginx2root-cve-2026-123007-frequently-asked-questions-about-five-critical-nginx"
+    },
+    {
+     "t": "CERT-FR",
+     "u": "https://cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-017/"
+    }
+   ]
+  },
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-130028",
+    "CVE-2026-130029"
+   ],
+   "titre": "Odoo : injection SQL attaquée (non confirmé)",
+   "produit": "Odoo 13.0 → 16.0 (injection SQL)",
+   "type": "Injection SQL dans read_group (groupby) et XSS stockée",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Signalée le 27/11 par une source unique",
+   "correctif": "Avis de sécurité Odoo du 24/11",
+   "resume": "La validation de la spécification groupby de read_group manquait ; l'ERP contient données clients, factures et RH.",
+   "sources": [
+    {
+     "t": "Odotify",
+     "u": "https://odotify.com/blog/odoo-security-advisory-november-2026/"
+    },
+    {
+     "t": "SourceCodester",
+     "u": "https://www.sourcecodester.com/blog/18965/nginx-exploited-odoo-sql-injection-cacti-zero-day-dev-news-nov-27-2026.html"
+    }
+   ]
+  },
+  {
+   "prio": 3,
+   "cves": [],
+   "titre": "Cacti « 4HTTP2ROOT » : 0-day RCE sans authentification, PoC publié",
+   "produit": "Cacti (versions N/A)",
+   "type": "Exécution de commandes sans authentification",
+   "cvss": "N/A",
+   "cvssv": "N/A",
+   "epss": "N/A",
+   "pct": "N/A",
+   "kev": false,
+   "poc": "Oui",
+   "exploit": "Non signalée",
+   "correctif": "N/A",
+   "resume": "Outil de supervision réseau souvent installé sur Linux avec accès SNMP au parc : ne pas l'exposer à Internet en attendant un correctif.",
+   "sources": [
+    {
+     "t": "SecurityOnline",
+     "u": "https://securityonline.info/cacti-zero-day-rce-4http2root-poc/"
+    },
+    {
+     "t": "Cyber Security News",
+     "u": "https://cybersecuritynews.com/cacti-4http2root-zero-day/"
+    }
+   ]
+  }
+ ],
+ "alertes": "Aucune nouvelle alerte CERT-FR repérée. ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX), du 18/11, restent ouvertes. Le 25/11 : 8 avis (AVI-1615 à 1622, contenu N/A). Publications du 26/11 non collectées.",
+ "menaces": [
+  {
+   "titre": "1Password : données clients et code source volés via un compte GitHub d'employé",
+   "quoi": "Brèche révélée le 25/11 : des données clients et du code source interne ont été volés. Les coffres de mots de passe n'ont pas été consultés selon l'éditeur.",
+   "comment": "Le compte GitHub professionnel d'un employé, compromis, a servi à pousser du code malveillant vers des services backend qui collectaient des données clients. Enquête ouverte le 19/11.",
+   "pourquoi": "Les clients d'un gestionnaire de mots de passe sont une cible de phishing de choix. Le cas montre aussi qu'un compte de développeur suffit à atteindre la production.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [
+    [
+     "T1078",
+     "Valid Accounts"
+    ],
+    [
+     "T1213.003",
+     "Code Repositories"
+    ],
+    [
+     "T1565",
+     "Data Manipulation"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/1password-customer-data-stolen-after-employee-github-account-breach/"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/1password-hacked-customer-data-and.html"
+    },
+    {
+     "t": "Next",
+     "u": "https://next.ink/brief-article/un-compte-github-compromis-chez-1password-expose-des-donnees-clients/"
+    }
+   ]
+  },
+  {
+   "titre": "Mitel MiCollab : exploitées en 0-day avant l'avis, probablement avec l'aide d'IA",
+   "quoi": "Nouveau : Accenture indique que les failles AWV de MiCollab, ajoutées au KEV le 25/11, étaient exploitées avant la publication de l'avis Mitel, dans une campagne d'extorsion présumée.",
+   "comment": "Failles du composant AWV sans authentification (injection de commande CVE-2026-133323, CVSS 10, injection XML, upload de fichiers). Usage d'IA présumé par Accenture.",
+   "pourquoi": "MiCollab est exposé sur Internet pour la collaboration ; l'exploitation précédant l'avis signifie que des instances patchées tardivement peuvent déjà être compromises.",
+   "acteur": "N/A (campagne d'extorsion présumée)",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1190",
+     "Exploit Public-Facing Application"
+    ],
+    [
+     "T1657",
+     "Financial Theft"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/mitel-micollab-zero-days-exploited-in-suspected-ai-assisted-attacks/"
+    },
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-exploit-10-vulnerabilities.html"
+    }
+   ]
+  },
+  {
+   "titre": "SYS010 : l'infostealer inscrit les navigateurs en gestion d'entreprise pour lire Gmail et Outlook",
+   "quoi": "Nouvelle version de l'infostealer SYS01, diffusée par des publicités Meta.",
+   "comment": "Le malware place le navigateur sous gestion de type entreprise (politiques) pour forcer l'installation d'une extension qui vole notamment les e-mails Gmail et Outlook.",
+   "pourquoi": "Une extension imposée par politique ne peut pas être désinstallée par l'utilisateur et survit au nettoyage classique.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [
+    [
+     "T1583.008",
+     "Malvertising"
+    ],
+    [
+     "T1176",
+     "Browser Extensions"
+    ],
+    [
+     "T1114",
+     "Email Collection"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/"
+    }
+   ]
+  },
+  {
+   "titre": "13 paquets NuGet malveillants déguisés en tests d'embauche .NET",
+   "quoi": "Socket a repéré 13 paquets se faisant passer pour des contrôles de boutons WinUI 3 et WPF, proposés dans de faux exercices de recrutement.",
+   "comment": "Compiler ou exécuter le projet suffit à déclencher la charge malveillante (détails N/A).",
+   "pourquoi": "Cible directement les postes de développeurs, qui détiennent souvent des secrets et des accès au code.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [
+    [
+     "T1195.001",
+     "Compromise Software Dependencies and Development Tools"
+    ],
+    [
+     "T1204",
+     "User Execution"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/13-malicious-nuget-packages-turn-fake.html"
+    }
+   ]
+  },
+  {
+   "titre": "Microsoft : Salt Typhoon intègre l'outil IA Artex",
+   "quoi": "Selon Microsoft, l'outil IA Artex, déjà lié à plusieurs brèches, est rapidement adopté par des groupes chinois (dont Salt Typhoon) et nord-coréens.",
+   "acteur": "Salt Typhoon (Chine)",
+   "confiance": 2,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/microsoft-china-salt-typhoon-using-artex-ai-tool"
+    }
+   ]
+  },
+  {
+   "titre": "Italie et Suisse alertent sur des attaques autonomes pilotées par IA",
+   "quoi": "Les agences cyber suisse et italienne signalent des attaques automatisées par agents IA contre des infrastructures critiques.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/italy-and-switzerland-warn-of-autonomous-ai-driven-cyberattacks/"
+    }
+   ]
+  },
+  {
+   "titre": "FinCEN (Trésor américain) déconnecte des systèmes après une intrusion",
+   "quoi": "Accès non autorisé à une partie limitée des systèmes de l'agence qui reçoit les déclarations de soupçon des banques ; délais de dépôt prolongés.",
+   "acteur": "N/A",
+   "confiance": 0,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/us-treasurys-fincen-disconnects-systems-following-cyber-incident/"
+    }
+   ]
+  },
+  {
+   "titre": "ShinyHunters annonce son retour ; Okta voit des liens avec le groupe Inception (non confirmé)",
+   "quoi": "Un compte lié à ShinyHunters revendique le retour du groupe ; Inception rejette les liens évoqués par Okta.",
+   "acteur": "ShinyHunters / Inception",
+   "confiance": 1,
+   "ttps": [],
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/shinyhunters-claims-comeback-new-inception-group-rejects-alleged-ties/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [],
+  "tendance": "Fenêtre du jour non couverte (collecte absente). Sur le 25/11 06:35 → 26/11 13:20 : 80 revendications mondiales, 26 aux États-Unis, 21 sans pays ; aucune nouvelle victime française après Groupe Gagneraud (24/11, déjà cité).",
+  "groupes": [
+   [
+    "N0n",
+    21
+   ],
+   [
+    "SilentRansomGroup",
+    11
+   ],
+   [
+    "The Gentlemen",
+    10
+   ],
+   [
+    "Aurora",
+    6
+   ],
+   [
+    "SilentVault",
+    6
+   ]
+  ]
+ },
+ "fuites": [
+  {
+   "victime": "Todoist",
+   "pays": "N/A",
+   "volume": "6 % des utilisateurs",
+   "donnees": "E-mails, mots de passe hachés en SHA1, dates de création, jetons API et d'intégration Slack",
+   "statut": "Confirmée (incident de novembre)",
+   "verif": true,
+   "source": {
+    "t": "Bonjour La Fuite",
+    "u": "https://www.todoist.com/fr/help/todoist/get-started/security-incident-in-november-2026-cG0EIACNU"
+   }
+  },
+  {
+   "victime": "1Password",
+   "pays": "N/A",
+   "volume": "N/A",
+   "donnees": "Données clients (détail N/A) et code source interne ; coffres non touchés",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "SecurityWeek",
+    "u": "https://www.securityweek.com/1password-breach-exposes-customer-data-internal-source-code/"
+   }
+  },
+  {
+   "victime": "FIFA",
+   "pays": "CH",
+   "volume": "N/A",
+   "donnees": "Ensemble limité d'informations personnelles et professionnelles",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "The Record",
+    "u": "https://therecord.media/fifa-data-breach-limited"
+   }
+  }
+ ],
+ "iocs": [],
+ "regl": [
+  "États-Unis : le PDG d'une société floridienne de récupération après ransomware inculpé pour avoir menti sur ses services et payé des rançons aux criminels.",
+  "Royaume-Uni : le National Cyber Action Plan, prévu mi-novembre, est repoussé au 9 décembre.",
+  "Australie : adoption du Digital Duty of Care Act, devoir de vigilance imposé aux grandes plateformes, proche du DSA européen."
+ ],
+ "lab": {
+  "concept": "Les politiques de navigateur (cas de SYS010) : sous Linux, Chrome lit des fichiers JSON dans /etc/opt/chrome/policies/managed ; la clé ExtensionInstallForcelist installe une extension que l'utilisateur ne peut pas retirer.",
+  "piste": "Sur une VM Ubuntu isolée, créer une politique forçant une extension de test, puis l'observer dans chrome://policy. Côté défense : règle auditd sur /etc/opt/chrome/policies et /etc/chromium/policies, et script listant les extensions forcées du parc."
+ },
+ "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, CERT-FR, CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite, recherches web ponctuelles",
+ "indispo": "raw/2026-11-27.json absent après 3 essais (le robot Collecte tourne vers 12:20 UTC) : utilisation de raw/2026-11-26.json (25/11 06:35 → 26/11 13:20), d'où l'inclusion de sujets du 25/11 après-midi non couverts hier. 26/11 13:20 → 27/11 06:35 couvert seulement par des recherches web sans extraits. KEV arrêté au 25/11 19:48 UTC. SANS ISC, HIBP, flux CERT-FR figés."
+}
+</script>
+
+<script>
+{
+const D=JSON.parse(document.getElementById('data').textContent);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const L=['Faible','Modéré','Élevé','Critique'];
+const okUrl=u=>/^https?:\/\/[^\s"'<>`]+$/i.test(String(u||''));
+const src=a=>(a||[]).map(s=>okUrl(s.u)?`<a href="${e(s.u)}" target="_blank" rel="noopener noreferrer">${e(s.t)}</a>`:e(s.t)).join(' · ');
+const ttpUrl=id=>'https://attack.mitre.org/techniques/'+id.replace('.','/')+'/';
+
+document.title='Bulletin CTI — '+D.date;
+$('title').textContent='Bulletin CTI — '+D.date;
+$('meta').innerHTML=`<span class="tlp">TLP:CLEAR</span><span>${e(D.periode)}</span>${window.self===window.top?'<a href="/veille-cti/">Toutes les éditions</a>':''}`;
+$('track').innerHTML=L.map((l,i)=>`<div class="seg ${i<D.niveau?'on':''} ${i===D.niveau?'cur':''}"></div>`).join('')+`<div class="pointer" style="left:${(D.niveau+.5)*25}%"></div>`;
+$('labels').innerHTML=L.map((l,i)=>`<span class="${i===D.niveau?'cur':''}">${l}</span>`).join('');
+$('why').innerHTML=`Niveau de menace : <b>${L[D.niveau]}</b>. ${e(D.justification)}`;
+
+const V=D.vulns||[],R=(D.ransomware||{}).victimes||[],F=D.fuites||[],M=D.menaces||[];
+const T=[[V.filter(v=>v.prio===1).length,'vulnérabilités P1'],[V.filter(v=>v.kev).length,'au KEV cette période'],[R.length,'revendications ransomware FR'],[F.filter(f=>f.pays==='FR').length+' / '+F.length,'fuites France / total']];
+$('tally').innerHTML=T.map(t=>`<div><strong>${e(t[0])}</strong><span>${e(t[1])}</span></div>`).join('');
+$('bluf').innerHTML=(D.bluf||[]).map(b=>`<li><i class="dot p${b.p}"></i><div><b>${e(b.sujet)} :</b> ${e(b.texte)}</div></li>`).join('');
+
+const chips=v=>`<div class="chips"><span class="chip">CVSS <b>${e(v.cvss)}</b> (${e(v.cvssv)})</span><span class="chip">EPSS <b>${e(v.epss)}</b>${v.pct?' · p'+e(v.pct):''}</span>${v.kev?'<span class="chip hot"><b>KEV</b></span>':''}<span class="chip ${/^oui/i.test(v.exploit)?'hot':'dash'}">Exploitation : ${e(v.exploit)}</span><span class="chip">PoC : ${e(v.poc)}</span></div>`;
+const vcard=v=>{
+ const ids=v.cves.map(c=>`<span class="cve">${e(c)}</span>`).join(', ');
+ const head=`<div class="head"><span class="pill p${v.prio}">P${v.prio}</span>${ids}</div><h3>${e(v.titre)}</h3>`;
+ const facts=`<dl class="row"><div><dt>Produit / versions</dt><dd>${e(v.produit)}</dd></div><div><dt>Type</dt><dd>${e(v.type)}</dd></div><div><dt>Correctif</dt><dd>${e(v.correctif)}</dd></div></dl>`;
+ if(v.quoi) return `<article class="card p${v.prio}">${head}${chips(v)}<div class="qcp"><div><h4>Quoi ?</h4><p>${e(v.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(v.comment)}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(v.pourquoi)}</p></div></div><div class="act"><div><h4>Détection</h4>${e(v.detection)}</div><div><h4>Remédiation</h4>${e(v.remediation)}</div></div><details><summary>Produit, type et correctif</summary>${facts}</details>${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+ return `<article class="card p${v.prio}">${head}${chips(v)}${facts}${v.resume?`<p class="note" style="margin:6px 0 0">${e(v.resume)}</p>`:''}${v.sources?`<div class="src">Sources : ${src(v.sources)}</div>`:''}</article>`;
+};
+const conf=n=>n?`<span class="conf" aria-label="confiance ${['','faible','moyenne','élevée'][n]}">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span> ${['','faible','moyenne','élevée'][n]}`:'';
+const mcard=m=>{
+ const full=m.comment||m.pourquoi;
+ const body=full?`<div class="qcp"><div><h4>Quoi ?</h4><p>${e(m.quoi)}</p></div><div><h4>Comment ?</h4><p>${e(m.comment||'N/A')}</p></div><div><h4>Pourquoi c'est important ?</h4><p>${e(m.pourquoi||'N/A')}</p></div></div>`:`<p style="margin:0">${e(m.quoi)}</p>`;
+ return `<article class="card">${'<h3>'+e(m.titre)+'</h3>'}${body}${m.acteur&&m.acteur!=='N/A'?`<p class="src" style="color:var(--ink)"><b>Attribution :</b> ${e(m.acteur)} · confiance ${conf(m.confiance)}</p>`:''}${m.ttps&&m.ttps.length?`<div class="ttps">${m.ttps.map(t=>`<a href="${ttpUrl(t[0])}" target="_blank" rel="noopener"><span>${e(t[0])}</span> ${e(t[1])}</a>`).join('')}</div>`:''}<div class="src">Sources : ${src(m.sources)}</div></article>`;
+};
+const mini=M.filter(m=>!(m.comment||m.pourquoi)&&!(m.ttps||[]).length);
+const big=M.filter(m=>!mini.includes(m));
+
+const S=[];
+const p1=V.filter(v=>v.quoi),rest=V.filter(v=>!v.quoi);
+S.push(['vulns','Vulnérabilités',`<p class="note">${e(D.alertes||'')}</p>${p1.map(vcard).join('')}${rest.length?`<h3 style="margin-top:22px">Autres vulnérabilités (P2 / P3)</h3>${rest.map(vcard).join('')}`:''}`]);
+S.push(['menaces','Menaces & campagnes',big.map(mcard).join('')+(mini.length?`<div class="list">${mini.map(m=>`<div class="item"><div class="name">${e(m.titre)}</div><div class="sub sub2">${e(m.quoi)}</div><div class="sub">${src(m.sources)}</div></div>`).join('')}</div>`:'')]);
+const rw=D.ransomware||{},gmax=Math.max(1,...(rw.groupes||[]).map(g=>g[1]));
+S.push(['ransomware','Ransomware — France',`<div class="list">${R.map(r=>`<div class="item"><div><div class="name">${e(r.victime)}</div><div class="sub">${e(r.groupe)} · ${e(r.secteur)} · ${e(r.date)}</div></div><div class="sub sub2">${e(r.note)}</div><span class="tag ${r.verif?'':'unv'}">${e(r.statut)}</span></div>`).join('')||'<div class="item">Aucune revendication visant la France.</div>'}</div><p class="note" style="margin-top:16px">${e(rw.tendance||'')} Groupes les plus actifs :</p><div class="bars">${(rw.groupes||[]).map(g=>`<div class="bar"><span>${e(g[0])}</span><i style="width:${g[1]/gmax*100}%"></i><span>${g[1]}</span></div>`).join('')}</div>`]);
+S.push(['fuites','Fuites de données',`<div class="list">${F.map(f=>`<div class="item"><div><div class="name">${e(f.victime)}</div><div class="sub">${e(f.pays)} · ${e(f.volume)}</div></div><div class="sub sub2">${e(f.donnees)}${f.source?' — '+src([f.source]):''}</div><span class="tag ${f.verif?'':'unv'}">${e(f.statut)}</span></div>`).join('')}</div>`]);
+if((D.iocs||[]).length) S.push(['ioc','IOC notables',`<div class="scroll"><table style="width:100%;border-collapse:collapse;background:var(--card)"><thead><tr><th align="left">Type</th><th align="left">Valeur</th><th align="left">Contexte</th><th align="left">Source</th></tr></thead><tbody>${D.iocs.map(i=>`<tr><td>${e(i.type)}</td><td class="cve">${e(i.valeur)}</td><td>${e(i.contexte)}</td><td>${e(i.source)}</td></tr>`).join('')}</tbody></table></div>`]);
+if((D.regl||[]).length) S.push(['regl','Réglementaire & institutionnel',`<div class="card"><ul class="plain">${D.regl.map(r=>`<li>${e(r)}</li>`).join('')}</ul></div>`]);
+if(D.lab) S.push(['lab','À creuser',`<div class="lab"><h4>Concept</h4><p>${e(D.lab.concept)}</p><h4>Piste de lab</h4><p style="margin:0">${e(D.lab.piste)}</p></div>`]);
+
+$('nav').innerHTML=S.map(s=>`<a href="#${s[0]}">${s[1]}</a>`).join('');
+$('main').innerHTML=S.map(s=>`<section id="${s[0]}"><h2 class="sec">${s[1]}</h2>${s[2]}</section>`).join('');
+$('foot').innerHTML=`<p>Bulletin généré automatiquement à partir de sources publiques : vérifier auprès des sources citées avant toute décision. Les revendications de groupes criminels restent « Non vérifiées » tant que la victime ne les a pas confirmées.</p><p>Sources consultées : ${e(D.consultees)}.</p><p>Indisponibles : ${e(D.indispo||'aucune')}.</p>${D.remarque?`<p>${e(D.remarque)}</p>`:''}`;
+}
+</script>
+</body>
+</html>
