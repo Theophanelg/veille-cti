@@ -1,0 +1,278 @@
+{
+ "date": "Samedi 28 novembre 2026",
+ "periode": "ven. 27/11 06:35 → sam. 28/11 06:35 (heure de Paris)",
+ "niveau": 2,
+ "justification": "Trois ajouts au CISA KEV le 27/11 (détail non collecté), RCE root sans authentification dans le serveur NFS du noyau Linux (CVSS 9,8), intrusion chez SAP sur GitHub et logiciels officiels Q-Dir/DesktopOK piégés.",
+ "bluf": [
+  {
+   "p": 1,
+   "sujet": "CISA KEV (27/11)",
+   "texte": "trois vulnérabilités exploitées ajoutées au catalogue ; liste exacte non collectée (une source secondaire cite GeoServer et Drupal, non confirmé). Vérifier le catalogue et patcher en priorité."
+  },
+  {
+   "p": 2,
+   "sujet": "NFS2ROOT (CVE-2026-99362)",
+   "texte": "faille de 12 ans du serveur NFS du noyau Linux : tout client atteignant le port 2049 écrit dans la mémoire noyau sans authentification. Corrigée le 19/11 ; mettre à jour le noyau et filtrer le port 2049."
+  },
+  {
+   "p": 2,
+   "sujet": "SAP",
+   "texte": "incident confirmé après activité suspecte sur GitHub ; des jetons d'employés volés auraient servi à copier et modifier du code source. Surveiller les avis SAP et l'intégrité des composants récupérés depuis ses dépôts."
+  },
+  {
+   "p": 2,
+   "sujet": "Q-Dir et DesktopOK",
+   "texte": "installateurs et mises à jour officiels de SoftwareOK piégés avec un malware d'accès à distance ; vérifier les postes qui ont installé ou mis à jour ces outils récemment."
+  },
+  {
+   "p": 3,
+   "sujet": "AFP",
+   "texte": "cyberattaque le 26/11 ayant mis hors ligne une plateforme de distribution de dépêches ; nature de l'attaque N/A. Rester vigilant face aux faux contenus ou phishing se réclamant de l'agence."
+  }
+ ],
+ "vulns": [
+  {
+   "prio": 2,
+   "cves": [
+    "CVE-2026-99362"
+   ],
+   "titre": "NFS2ROOT : écriture mémoire noyau sans authentification dans le serveur NFS Linux",
+   "produit": "Noyau Linux, serveur NFS (nfsd), NFSv4.1+ ; versions N/A (faille présente depuis 12 ans)",
+   "type": "Corruption mémoire noyau → élévation à root à distance",
+   "cvss": "9,8",
+   "cvssv": "3.1",
+   "epss": "0,008",
+   "pct": "51,4",
+   "kev": false,
+   "poc": "Inconnu",
+   "exploit": "Non signalée",
+   "correctif": "Correctif noyau du 19/11 (« nfsd: preflight SEQUENCE replies ») ; versions N/A",
+   "resume": "Repérée par un chercheur de l'ANSSI. Un client qui négocie une taille de réponse en cache minimale (ca_maxresponsesize_cached) fait déborder le tampon de réponse SEQUENCE. NAS et nœuds Kubernetes servant du NFS sont concernés : appliquer les noyaux des distributions et restreindre le port 2049.",
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/new-nfs2root-linux-flaw-can-let-attackers-gain-root-privileges/"
+    },
+    {
+     "t": "Next",
+     "u": "https://next.ink/270556/la-faille-nfs2root-permet-de-prendre-le-controle-de-nas-et-noeuds-kubernetes/"
+    },
+    {
+     "t": "NVD",
+     "u": "https://nvd.nist.gov/vuln/detail/CVE-2026-99362"
+    }
+   ]
+  }
+ ],
+ "alertes": "Aucune nouvelle alerte CERT-FR repérée ; ALE-016 (Oracle Java SE) et ALE-017 (F5 NGINX), du 18/11, restent ouvertes. Le 26/11 : 7 avis (AVI-1623 à 1629, contenu N/A). CISA : trois ajouts au KEV le 27/11 (CVE N/A dans la collecte). Microsoft : hotpatch d'urgence hors cycle pour les plantages de Windows Server 2025 causés par la mise à jour KB5131077.",
+ "menaces": [
+  {
+   "titre": "SAP confirme un incident de sécurité lié à GitHub",
+   "quoi": "SAP a détecté une activité suspecte dans son environnement et dit avoir agi en urgence pour protéger ses clients. Périmètre exact et données touchées N/A.",
+   "comment": "Selon SecurityWeek, des attaquants auraient utilisé des jetons d'employés volés pour copier et modifier du code source sur GitHub (non confirmé par SAP).",
+   "pourquoi": "Du code modifié chez un éditeur aussi central peut se propager chez les clients (chaîne d'approvisionnement). Même schéma que l'incident 1Password de cette semaine.",
+   "acteur": "N/A",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1078",
+     "Valid Accounts"
+    ],
+    [
+     "T1213.003",
+     "Code Repositories"
+    ],
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/"
+    },
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/sap-confirms-cyberattack-source-code-reportedly-compromised/"
+    }
+   ]
+  },
+  {
+   "titre": "Q-Dir et DesktopOK : téléchargements officiels piégés",
+   "quoi": "Les installateurs de Q-Dir et DesktopOK, utilitaires Windows distribués par le site officiel SoftwareOK, ont été modifiés pour livrer un malware d'accès à distance.",
+   "comment": "Les fichiers malveillants étaient servis depuis la page de téléchargement officielle et aussi lors de la mise à jour de versions déjà installées. Nom du malware et IOC N/A.",
+   "pourquoi": "Le canal de mise à jour légitime contourne la vigilance de l'utilisateur : même une installation ancienne et saine a pu être compromise.",
+   "acteur": "N/A",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1195.002",
+     "Compromise Software Supply Chain"
+    ],
+    [
+     "T1219",
+     "Remote Access Software"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/hackers-trojanize-official-q-dir-and.html"
+    }
+   ]
+  },
+  {
+   "titre": "PolinRider : plus de 7 600 dépôts GitHub empoisonnés",
+   "quoi": "La campagne PolinRider a compromis plus de 7 600 dépôts GitHub, dont 86 % appartiennent à de vrais développeurs, avec une activité qui remonterait à février 2025.",
+   "comment": "Dans certains dépôts, un chargeur Python est implanté pour télécharger des charges de second niveau.",
+   "pourquoi": "Cloner ou exécuter un projet compromis suffit à infecter un poste de développeur et ses secrets (jetons, clés SSH).",
+   "acteur": "Lié à la Corée du Nord (selon The Hacker News)",
+   "confiance": 1,
+   "ttps": [
+    [
+     "T1195.001",
+     "Compromise Software Dependencies and Development Tools"
+    ],
+    [
+     "T1059.006",
+     "Python"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "The Hacker News",
+     "u": "https://thehackernews.com/2026/11/north-korea-linked-polinrider-poisons.html"
+    }
+   ]
+  },
+  {
+   "titre": "Remus : l'infostealer lit Gmail via une fausse extension Google Sheets",
+   "quoi": "L'infostealer Remus vole des messages Gmail grâce à une extension Chrome malveillante déguisée en outil Google Sheets ; ses opérateurs la vendaient comme un « 0-day Gmail ».",
+   "comment": "L'extension s'exécute dans la session déjà ouverte de la victime et lit ses e-mails, sans exploiter de faille de Google.",
+   "pourquoi": "Contourne la MFA puisque la session est déjà authentifiée ; les e-mails donnent accès aux réinitialisations de mot de passe.",
+   "acteur": "Opérateurs du MaaS Remus",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1176",
+     "Software Extensions"
+    ],
+    [
+     "T1114",
+     "Email Collection"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/security/remus-malware-steals-gmail-messages-via-fake-google-sheets-extension/"
+    }
+   ]
+  },
+  {
+   "titre": "« GoodGuys » : fausses interviews d'experts rémunérées pour voler des identifiants Google et Okta",
+   "quoi": "Campagne de phishing en cours usurpant Google, Nvidia, Accenture ou SpaceX avec de fausses invitations à des interviews d'experts payées et à des webinaires.",
+   "comment": "Les liens mènent à des pages qui récupèrent les identifiants Google et Okta professionnels.",
+   "pourquoi": "Vise les comptes SSO d'entreprise : un seul compte Okta ouvre l'accès à toutes les applications fédérées.",
+   "acteur": "N/A",
+   "confiance": 2,
+   "ttps": [
+    [
+     "T1566.002",
+     "Spearphishing Link"
+    ],
+    [
+     "T1656",
+     "Impersonation"
+    ]
+   ],
+   "sources": [
+    {
+     "t": "BleepingComputer",
+     "u": "https://www.bleepingcomputer.com/news/apple/fake-paid-expert-interviews-impersonate-brands-to-steal-google-logins/"
+    }
+   ]
+  },
+  {
+   "titre": "AFP : une cyberattaque coupe une plateforme de distribution de dépêches",
+   "quoi": "L'Agence France-Presse a été touchée le 26/11 et a mis hors ligne l'une de ses principales plateformes de diffusion vers les médias du monde entier. Type d'attaque et revendication N/A.",
+   "sources": [
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/france-afp-hit-by-cyberattack"
+    }
+   ]
+  },
+  {
+   "titre": "Royaume-Uni : le DWP coupe des services après un « cyber incident »",
+   "quoi": "Le ministère britannique du Travail et des Retraites a annoncé vendredi un incident cyber ; plusieurs services ont été arrêtés par précaution. Nature et impact N/A.",
+   "sources": [
+    {
+     "t": "The Record",
+     "u": "https://therecord.media/uk-department-work-pensions-cyber-incident"
+    }
+   ]
+  },
+  {
+   "titre": "Radware piraté, systèmes de paiement de l'USDA compromis (non confirmé)",
+   "quoi": "Brèves de SecurityWeek sans détail : l'éditeur de sécurité Radware aurait été piraté et des systèmes de paiement du ministère américain de l'Agriculture compromis.",
+   "sources": [
+    {
+     "t": "SecurityWeek",
+     "u": "https://www.securityweek.com/in-other-news-tanker-cyberattacks-eu-quantum-act-new-virustotal-capabilities/"
+    }
+   ]
+  }
+ ],
+ "ransomware": {
+  "victimes": [],
+  "tendance": "Aucune revendication française collectée. Sur 26/11 13:20 → 27/11 13:07 : 30 revendications mondiales, dont 13 aux États-Unis et une en Guadeloupe (Rhysida, agroalimentaire, 26/11). Seulement 3 après le 27/11 06:35 (Puppeteer 2, Qilin 1) ; la suite de la fenêtre n'est pas couverte.",
+  "groupes": [
+   [
+    "PixelLeaks",
+    5
+   ],
+   [
+    "Inception",
+    5
+   ],
+   [
+    "Orova",
+    5
+   ],
+   [
+    "Qilin",
+    2
+   ],
+   [
+    "Rhysida",
+    2
+   ]
+  ]
+ },
+ "fuites": [
+  {
+   "victime": "myColorado (application d'identité numérique de l'État du Colorado)",
+   "pays": "US",
+   "volume": "100 000 personnes potentiellement concernées",
+   "donnees": "Données et documents téléversés par les utilisateurs (détail N/A)",
+   "statut": "Confirmée",
+   "verif": true,
+   "source": {
+    "t": "SecurityWeek",
+    "u": "https://www.securityweek.com/100000-potentially-impacted-by-colorado-data-breach/"
+   }
+  }
+ ],
+ "iocs": [],
+ "regl": [
+  "Microsoft annonce le retrait du rôle serveur WSUS dans Windows Server 2028 : les parcs qui en dépendent pour leurs mises à jour doivent prévoir une migration."
+ ],
+ "lab": {
+  "concept": "NFS2ROOT rappelle que nfsd tourne dans le noyau : une faille dans le serveur NFS donne directement root, sans passer par un service utilisateur à compromettre.",
+  "piste": "Sur Ubuntu : vérifier l'exposition avec ss -ltnu | grep 2049 et systemctl status nfs-server, comparer uname -r au noyau corrigé de la distribution, puis limiter le port avec ufw allow from <réseau> to any port 2049. Côté détection : journaliser les connexions sur 2049 venant d'hôtes inattendus."
+ },
+ "consultees": "BleepingComputer, The Hacker News, The Record, SecurityWeek, ZATAZ, LeMagIT, Next, SANS ISC, HIBP, CERT-FR, CISA KEV, NVD, FIRST EPSS, ransomware.live, Bonjour La Fuite (via raw/2026-11-27.json), recherches web ponctuelles",
+ "indispo": "raw/2026-11-28.json absent après 3 essais (le robot Collecte tourne vers 12:20 UTC) : utilisation de raw/2026-11-27.json (26/11 06:35 → 27/11 13:07). Sujets du 26/11 après-midi non couverts hier (AFP, PolinRider, Remus, GoodGuys) inclus. 27/11 13:07 → 28/11 06:35 couvert seulement par des recherches web sans extraits. KEV collecté arrêté au 25/11 19:48 UTC : CVE des 3 ajouts du 27/11 N/A. ZATAZ, SANS ISC, HIBP et flux CERT-FR figés."
+}
