@@ -7,7 +7,44 @@
 <description>Alertes quasi temps réel : ajouts CISA KEV, alertes CERT-FR, CVE CVSS ≥ 9 réseau sans authentification sur produits surveillés.</description>
 <language>fr-fr</language>
 <ttl>20</ttl>
-<lastBuildDate>Fri, 27 Nov 2026 19:04:49 +0000</lastBuildDate>
+<lastBuildDate>Sat, 28 Nov 2026 02:03:28 +0000</lastBuildDate>
+<item>
+<title>🚨 CVE-2026-136716 — Drupal Core · KEV · CVSS 9,8</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-136716</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-136716</guid>
+<pubDate>Sat, 28 Nov 2026 02:03:28 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>Drupal Core Improper Check for Unusual or Exceptional Conditions Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-136716">CVE-2026-136716</a><br><strong>CVSS</strong> 9,8 (v3.1)<br><strong>EPSS</strong> 0,012 · p68,4<br><strong>KEV</strong> oui, ajout le 2026-11-27</p>
+<p><small>Vecteur : <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code></small></p>
+<blockquote><p>Improper Check for Unusual or Exceptional Conditions vulnerability in Drupal Drupal core allows Forceful Browsing. This issue affects Drupal core versions: from 0.0.0 to 10.6.23, from 11.0.0 to 11.3.23, from 11.4.0 to 11.4.14.</p></blockquote>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-30<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>
+<p><small>Produits (CPE) : drupal drupal</small></p>
+<p><small>Références : <a href="https://www.drupal.org/sa-core-2026-019">www.drupal.org</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-136716">www.cisa.gov</a></small></p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-129243 — OSGeo GeoServer · KEV</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-129243</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-129243</guid>
+<pubDate>Sat, 28 Nov 2026 02:03:28 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>OSGeo GeoServer Incorrect Authorization Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-129243">CVE-2026-129243</a><br><strong>CVSS</strong> N/A<br><strong>EPSS</strong> N/A<br><strong>KEV</strong> oui, ajout le 2026-11-27</p>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-30<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>]]></content:encoded>
+</item>
+<item>
+<title>🚨 CVE-2026-120705 — OSGeo GeoServer · KEV</title>
+<link>https://nvd.nist.gov/vuln/detail/CVE-2026-120705</link>
+<guid isPermaLink="false">critique-KEV:CVE-2026-120705</guid>
+<pubDate>Sat, 28 Nov 2026 02:03:28 +0000</pubDate>
+<category>KEV</category>
+<content:encoded><![CDATA[<p><strong>Pourquoi cette alerte :</strong> ajoutée au catalogue KEV de la CISA : exploitation active confirmée.</p>
+<p><strong>OSGeo GeoServer XML Injection Vulnerability</strong></p>
+<p><a href="https://nvd.nist.gov/vuln/detail/CVE-2026-120705">CVE-2026-120705</a><br><strong>CVSS</strong> N/A<br><strong>EPSS</strong> N/A<br><strong>KEV</strong> oui, ajout le 2026-11-27</p>
+<p><strong>Action requise (CISA) :</strong> Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset&#x27;s internet exposure and ensuring adherence to BOD 26-04 patching guidelines.<br><strong>Échéance fédérale :</strong> 2026-11-30<br><strong>Utilisée par des ransomwares :</strong> Unknown</p>]]></content:encoded>
+</item>
 <item>
 <title>🚨 CVE-2026-137964 — Github · CVSS 9,8</title>
 <link>https://nvd.nist.gov/vuln/detail/CVE-2026-137964</link>
